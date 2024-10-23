@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "813107115564",
+    "project_id": "proyeksregep",
+    "storage_bucket": "proyeksregep.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:813107115564:android:2e62bc75a7dd58e97b0389",
+        "android_client_info": {
+          "package_name": "com.example.proyeksregep"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDWZ713sQPWBuxuMUdNaymQMK8rBEGeqEY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:813107115564:android:fbf9ea591680d8eb7b0389",
+        "android_client_info": {
+          "package_name": "com.sregep.kelo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDWZ713sQPWBuxuMUdNaymQMK8rBEGeqEY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
