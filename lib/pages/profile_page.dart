@@ -35,132 +35,139 @@ class _ProfilePageState extends State<ProfilePage> {
       // If the profile document exists, fill in the form fields
       if (doc.exists) {
         userProfile = UserProfile.fromMap(doc.data() as Map<String, dynamic>);
-        nameController.text = userProfile!.name;
-        ageController.text = userProfile!.age.toString();
-        dobController.text = userProfile!.dateOfBirth;
-        setState(() {}); // Update UI after data retrieval
+        // Kosongkan inputan jika ingin hanya menampilkan data setelah "Lihat Profil"
       }
     }
   }
 
   // Function to show alert when data is incomplete
-  void _showIncompleteDataAlert() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Profile Belum diisi'),
-          content: Text('Silahkan isi profil Anda terlebih dahulu.'),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close alert dialog
-              },
-              child: Text('OK'),
-            ),
-          ],
-        );
-      },
+void _showIncompleteDataAlert() {
+  String errorMessage = '';
+  
+  // Check which fields are empty and create the error message
+  if (nameController.text.isEmpty) {
+    errorMessage += 'Nama tidak boleh kosong.\n';
+  }
+  if (ageController.text.isEmpty) {
+    errorMessage += 'Usia tidak boleh kosong.\n';
+  }
+  if (dobController.text.isEmpty) {
+    errorMessage += 'Tanggal lahir tidak boleh kosong.\n';
+  }
+
+  // Show alert if there are incomplete fields
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Data Tidak Lengkap'),
+        content: Text(errorMessage.trim()), // Trim the error message
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Close alert dialog
+            },
+            child: Text('OK'),
+          ),
+        ],
+      );
+    },
+  );
+}
+  // Function to save profile to Firestore
+  Future<void> _saveProfile() async {
+    User? user = _auth.currentUser;
+
+    // Check if all fields are filled
+    if (_areFieldsEmpty()) {
+      _showIncompleteDataAlert(); // Show alert if any field is empty
+      return; // Exit the function if there are empty fields
+    }
+
+    if (user != null) {
+      // Check if profile already exists
+      DocumentSnapshot doc = await FirebaseFirestore.instance
+          .collection('profiles')
+          .doc(user.uid) // Get document based on user UID
+          .get();
+
+      if (doc.exists) {
+        // If the profile already exists, show alert
+        _showAlert("Profile sudah ada", "Anda tidak dapat menyimpan profil Anda lagi.");
+      } else {
+        // Create a UserProfile object from input data
+        UserProfile profile = _createUserProfile(user.uid);
+
+        // Save data to Firestore with user UID as document key
+        await _saveProfileToFirestore(user.uid, profile);
+
+        // Show notification that data has been saved
+        _showSuccessSnackbar('Profil berhasil disimpan!');
+
+        // Clear input fields after saving
+        _clearInputFields();
+
+        // Navigate to detail page
+        _navigateToProfileDetailPage(profile, user.uid);
+      }
+    }
+  }
+
+  // Check if any fields are empty
+  bool _areFieldsEmpty() {
+    return nameController.text.isEmpty || ageController.text.isEmpty || dobController.text.isEmpty;
+  }
+
+  // Create a UserProfile object from input data
+  UserProfile _createUserProfile(String userId) {
+    return UserProfile(
+      id: userId,
+      name: nameController.text,
+      age: int.parse(ageController.text),
+      dateOfBirth: dobController.text,
     );
   }
 
-  // Function to save profile to Firestore
-  Future<void> _saveProfile() async {
-  User? user = _auth.currentUser;
-
-  // Check if all fields are filled
-  if (_areFieldsEmpty()) {
-    _showIncompleteDataAlert(); // Show alert if any field is empty
-    return; // Exit the function if there are empty fields
-  }
-
-  if (user != null) {
-    // Check if profile already exists
-    DocumentSnapshot doc = await FirebaseFirestore.instance
+  // Save profile data to Firestore
+  Future<void> _saveProfileToFirestore(String userId, UserProfile profile) async {
+    await FirebaseFirestore.instance
         .collection('profiles')
-        .doc(user.uid) // Get document based on user UID
-        .get();
-
-    if (doc.exists) {
-      // If the profile already exists, show alert
-      _showAlert("Profile sudah ada", "Anda tidak dapat menyimpan profil Anda lagi.");
-    } else {
-      // Create a UserProfile object from input data
-      UserProfile profile = _createUserProfile(user.uid);
-
-      // Save data to Firestore with user UID as document key
-      await _saveProfileToFirestore(user.uid, profile);
-
-      // Show notification that data has been saved
-      _showSuccessSnackbar('Profil berhasil disimpan!');
-
-      // Clear input fields after saving
-      _clearInputFields();
-
-      // Update UI
-      setState(() {});
-
-      // Navigate to detail page
-      _navigateToProfileDetailPage(profile, user.uid);
-    }
+        .doc(userId)
+        .set(profile.toMap());
   }
-}
 
-// Check if any fields are empty
-bool _areFieldsEmpty() {
-  return nameController.text.isEmpty || ageController.text.isEmpty || dobController.text.isEmpty;
-}
+  // Show a success snackbar
+  void _showSuccessSnackbar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+  }
 
-// Create a UserProfile object from input data
-UserProfile _createUserProfile(String userId) {
-  return UserProfile(
-    id: userId,
-    name: nameController.text,
-    age: int.parse(ageController.text),
-    dateOfBirth: dobController.text,
-  );
-}
+  // Clear input fields
+  void _clearInputFields() {
+    nameController.clear();
+    ageController.clear();
+    dobController.clear();
+  }
 
-// Save profile data to Firestore
-Future<void> _saveProfileToFirestore(String userId, UserProfile profile) async {
-  await FirebaseFirestore.instance
-      .collection('profiles')
-      .doc(userId)
-      .set(profile.toMap());
-}
-
-// Show a success snackbar
-void _showSuccessSnackbar(String message) {
-  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
-}
-
-// Clear input fields
-void _clearInputFields() {
-  nameController.clear();
-  ageController.clear();
-  dobController.clear();
-}
-
-// Navigate to ProfileDetailPage
-void _navigateToProfileDetailPage(UserProfile profile, String userId) {
-  Navigator.pushReplacement(
-    context,
-    MaterialPageRoute(
-      builder: (context) => ProfileDetailPage(
-        userProfile: profile,
-        onEdit: (updatedProfile) {
-          // Handle the updated profile if needed
-          Navigator.pop(context); // Go back to profile page for editing
-        },
-        onClear: () async {
-          // Delete data from Firestore
-          await FirebaseFirestore.instance.collection('profiles').doc(userId).delete();
-          Navigator.pop(context); // Go back to profile page
-        },
+  // Navigate to ProfileDetailPage
+  void _navigateToProfileDetailPage(UserProfile profile, String userId) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ProfileDetailPage(
+          userProfile: profile,
+          onEdit: (updatedProfile) {
+            // Handle the updated profile if needed
+            Navigator.pop(context); // Go back to profile page for editing
+          },
+          onClear: () async {
+            // Delete data from Firestore
+            await FirebaseFirestore.instance.collection('profiles').doc(userId).delete();
+            Navigator.pop(context); // Go back to profile page
+          },
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   // Function to show alert
   void _showAlert(String title, String message) {
@@ -222,34 +229,33 @@ void _navigateToProfileDetailPage(UserProfile profile, String userId) {
 
   // Function to view profile details
   void _viewProfile() {
-  User? user = _auth.currentUser;
-  if (user != null) {
-    if (userProfile != null) {
-      // If profile exists, navigate to detail page
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ProfileDetailPage(
-            userProfile: userProfile!,
-            onEdit: (updatedProfile) {
-              // Handle editing if needed
-              Navigator.pop(context); // Go back to profile page for editing
-            },
-            onClear: () async {
-              // Delete data from Firestore
-              await FirebaseFirestore.instance.collection('profiles').doc(user.uid).delete();
-              Navigator.pop(context); // Go back to profile page
-            },
+    User? user = _auth.currentUser;
+    if (user != null) {
+      if (userProfile != null) {
+        // If profile exists, navigate to detail page
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ProfileDetailPage(
+              userProfile: userProfile!,
+              onEdit: (updatedProfile) {
+                // Handle editing if needed
+                Navigator.pop(context); // Go back to profile page for editing
+              },
+              onClear: () async {
+                // Delete data from Firestore
+                await FirebaseFirestore.instance.collection('profiles').doc(user.uid).delete();
+                Navigator.pop(context); // Go back to profile page
+              },
+            ),
           ),
-        ),
-      );
-    } else {
-      // If profile is not inputted, show alert
-      _showProfileNotFoundAlert();
+        );
+      } else {
+        // If profile is not inputted, show alert
+        _showProfileNotFoundAlert();
+      }
     }
   }
-}
-
 
   @override
   Widget build(BuildContext context) {

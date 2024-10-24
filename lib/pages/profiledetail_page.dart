@@ -4,10 +4,10 @@ import 'editprofile_page.dart'; // Import the EditProfilePage
 import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore for data handling
 import 'home_page.dart'; // Import HomePage for navigation
 
-class ProfileDetailPage extends StatelessWidget {
+class ProfileDetailPage extends StatefulWidget {
   final UserProfile userProfile;
-  final Function(UserProfile) onEdit; // Change to accept UserProfile as parameter
-  final Function() onClear;
+  final Function(UserProfile) onEdit; // Function to handle editing
+  final Function() onClear; // Function to handle clearing profile
 
   ProfileDetailPage({
     required this.userProfile,
@@ -15,6 +15,11 @@ class ProfileDetailPage extends StatelessWidget {
     required this.onClear,
   });
 
+  @override
+  _ProfileDetailPageState createState() => _ProfileDetailPageState();
+}
+
+class _ProfileDetailPageState extends State<ProfileDetailPage> {
   // Function to show confirmation dialog
   void _showDeleteConfirmationDialog(BuildContext context) {
     showDialog(
@@ -33,7 +38,7 @@ class ProfileDetailPage extends StatelessWidget {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(); // Close dialog
-                onClear(); // Call onClear function if user confirms
+                widget.onClear(); // Call onClear function if user confirms
               },
               child: Text("Yes"),
             ),
@@ -52,24 +57,27 @@ class ProfileDetailPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Name: ${userProfile.name}", style: TextStyle(fontSize: 18)),
+            Text("Name: ${widget.userProfile.name}", style: TextStyle(fontSize: 18)),
             SizedBox(height: 10),
-            Text("Age: ${userProfile.age}", style: TextStyle(fontSize: 18)),
+            Text("Age: ${widget.userProfile.age}", style: TextStyle(fontSize: 18)),
             SizedBox(height: 10),
-            Text("Date of Birth: ${userProfile.dateOfBirth}", style: TextStyle(fontSize: 18)),
+            Text("Date of Birth: ${widget.userProfile.dateOfBirth}", style: TextStyle(fontSize: 18)),
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                // Navigasi ke halaman EditProfilePage
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => EditProfilePage(userProfile: userProfile),
+                    builder: (context) => EditProfilePage(userProfile: widget.userProfile),
                   ),
                 ).then((updatedUserProfile) {
                   if (updatedUserProfile != null) {
-                    // Update userProfile dengan data yang diperbarui jika ada
-                    onEdit(updatedUserProfile); // Pass the updated user profile
+                    // Menggunakan setState untuk memperbarui data yang ditampilkan
+                    setState(() {
+                      widget.userProfile.name = updatedUserProfile.name;
+                      widget.userProfile.age = updatedUserProfile.age;
+                      widget.userProfile.dateOfBirth = updatedUserProfile.dateOfBirth;
+                    });
                   }
                 });
               },

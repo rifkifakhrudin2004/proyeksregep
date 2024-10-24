@@ -30,31 +30,40 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   // Function to save updated profile
   Future<void> _saveUpdatedProfile() async {
+  if (nameController.text.isEmpty || ageController.text.isEmpty || dobController.text.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Please fill in all fields.')));
+    return;
+  }
+
+  try {
+    int age = int.parse(ageController.text);
+
     User? user = _auth.currentUser;
 
     if (user != null) {
       UserProfile updatedProfile = UserProfile(
         id: user.uid,
         name: nameController.text,
-        age: int.parse(ageController.text),
+        age: age,
         dateOfBirth: dobController.text,
       );
 
-      // Update Firestore with new data
+      // Simpan data ke Firestore
       await FirebaseFirestore.instance
           .collection('profiles')
           .doc(user.uid)
           .set(updatedProfile.toMap());
 
-      // Show success message
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Profile updated!')));
 
-      // Navigate back to ProfileDetailPage with updated profile
-      Navigator.pop(context, updatedProfile); // Kembali ke halaman profil dengan data yang diperbarui
+      // Navigasi kembali ke ProfileDetailPage dengan data terbaru
+      Navigator.pop(context, updatedProfile); // Kirimkan profil yang diperbarui kembali
     }
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Invalid age input.')));
   }
-
+}
   @override
   Widget build(BuildContext context) {
     return Scaffold(

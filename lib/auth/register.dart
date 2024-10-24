@@ -7,28 +7,47 @@ class RegisterScreen extends StatelessWidget {
   final TextEditingController confirmPasswordController = TextEditingController();
 
   Future<void> _register(BuildContext context) async {
-    if (passwordController.text != confirmPasswordController.text) {
-      print("Passwords do not match");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Passwords do not match")),
-      );
-      return;
-    }
-    try {
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: emailController.text,
-        password: passwordController.text,
-      );
-      // Berhasil register, arahkan ke halaman login
-      Navigator.pushReplacementNamed(context, '/'); // Mengarahkan ke halaman login
-    } catch (e) {
-      print("Register failed: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Registration failed: ${e.toString()}')),
-      );
-    }
+  // Validasi email
+  if (!emailController.text.contains('@')) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Email harus mengandung '@' dan domain")),
+    );
+    return;
   }
 
+  // Validasi password
+  final password = passwordController.text;
+  final passwordRegex = RegExp(r'^(?=.*[a-zA-Z])(?=.*\d).+$'); // Regex untuk kombinasi huruf dan angka
+  if (!passwordRegex.hasMatch(password)) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Password harus kombinasi huruf dan angka")),
+    );
+    return;
+  }
+
+  // Validasi konfirmasi password
+  if (password != confirmPasswordController.text) {
+    print("Passwords do not match");
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Passwords do not match")),
+    );
+    return;
+  }
+
+  try {
+    await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      email: emailController.text,
+      password: password,
+    );
+    // Berhasil register, arahkan ke halaman login
+    Navigator.pushReplacementNamed(context, '/'); // Mengarahkan ke halaman login
+  } catch (e) {
+    print("Register failed: $e");
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Registration failed: ${e.toString()}')),
+    );
+  }
+}
   @override
   Widget build(BuildContext context) {
     return Scaffold(

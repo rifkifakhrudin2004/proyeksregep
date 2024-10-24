@@ -40,7 +40,7 @@ class MyApp extends StatelessWidget {
             }),
         '/register': (context) => RegisterScreen(),
         '/home': (context) => HomePage(),
-        '/camera': (context) => CameraPage(imageList: imageList), // Mengirimkan imageList
+        '/camera': (context) => CameraScreen(), // Mengirimkan imageList
         '/storage': (context) => StoragePage(imageList: imageList), // Mengirimkan imageList
         '/profile': (context) => ProfilePage(),
       },
