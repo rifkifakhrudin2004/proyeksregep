@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-import 'auth/login.dart';
 import 'auth/register.dart';
 import 'models/ImagesData.dart';
 import 'camera/camera_screen.dart';
 import 'pages/home_page.dart';
 import 'pages/storage_page.dart';
-import 'pages/landing_page.dart'; // Import LandingPage
+import 'auth/landing_page.dart'; // Import LandingPage
 import 'pages/profile_page.dart';
 
 void main() async {
@@ -34,10 +33,6 @@ class MyApp extends StatelessWidget {
       initialRoute: '/', // Set landing sebagai route awal
       routes: {
         '/': (context) => LandingPage(), // Halaman awal
-        '/login': (context) => LoginScreen(onLoginSuccess: () {
-              // Jika login berhasil, alihkan ke home
-              Navigator.pushReplacementNamed(context, '/home');
-            }),
         '/register': (context) => RegisterScreen(),
         '/home': (context) => HomePage(),
         '/camera': (context) => CameraScreen(), // Mengirimkan imageList
