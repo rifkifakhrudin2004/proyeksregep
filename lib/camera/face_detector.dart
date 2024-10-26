@@ -1,27 +1,37 @@
 import 'package:camera/camera.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:flutter/material.dart';
-
+import 'dart:typed_data';
 Future<List<Face>> detectFaces(CameraImage image) async {
   final faceDetector = GoogleMlKit.vision.faceDetector();
-  
-  // Buat metadata untuk gambar
+  try {
+    final inputImage = await _getInputImage(image);
+    return await faceDetector.processImage(inputImage);
+  } catch (e) {
+    print('Error during face detection: $e');
+    return [];
+  } finally {
+    faceDetector.close();
+  }
+}
+
+Future<InputImage> _getInputImage(CameraImage image) async {
+  // Menggabungkan data dari setiap plane (YUV420) menjadi satu buffer byte
+  final allBytes = <int>[];
+  for (final Plane plane in image.planes) {
+    allBytes.addAll(plane.bytes);
+  }
+  final bytes = Uint8List.fromList(allBytes);
+  // Metadata untuk input image
   final metadata = InputImageMetadata(
     size: Size(image.width.toDouble(), image.height.toDouble()),
-    rotation: InputImageRotation.rotation0deg, // Sesuaikan dengan orientasi kamera
-    format: InputImageFormat.nv21, // Langsung set format gambar ke NV21
-    bytesPerRow: image.planes[0].bytesPerRow, // Set bytesPerRow sesuai dengan image
+    rotation: InputImageRotation.rotation90deg,
+    format: InputImageFormat.yuv420,
+    bytesPerRow: image.planes[0].bytesPerRow,
   );
 
-  // Gunakan metadata dalam InputImage
-  final inputImage = InputImage.fromBytes(
-    bytes: image.planes[0].bytes, // Menggunakan byte dari plane pertama
-    metadata: metadata, // Masukkan metadata yang sudah ditetapkan
+  return InputImage.fromBytes(
+    bytes: bytes,
+    metadata: metadata,
   );
-
-  // Deteksi wajah
-  final List<Face> faces = await faceDetector.processImage(inputImage);
-  faceDetector.close();
-  
-  return faces;
 }
