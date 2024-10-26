@@ -4,7 +4,7 @@ import 'firebase_options.dart';
 import 'auth/login.dart';
 import 'auth/register.dart';
 import 'models/ImagesData.dart';
-import 'pages/camera_page.dart';
+import 'camera/camera_screen.dart';
 import 'pages/home_page.dart';
 import 'pages/storage_page.dart';
 import 'pages/landing_page.dart'; // Import LandingPage
