@@ -19,10 +19,14 @@ class _CameraScreenState extends State<CameraScreen> {
   bool isFrontCamera = true;
   XFile? imageFile;
   bool isDetectingFaces = false;
+  bool isFaceDetected = false;
+
+  late FaceDetectorService _faceDetectorService;
 
   @override
   void initState() {
     super.initState();
+    _faceDetectorService = FaceDetectorService();
     _initializeCamera();
   }
 
@@ -30,7 +34,7 @@ class _CameraScreenState extends State<CameraScreen> {
     cameras = await availableCameras();
     _controller = CameraController(
       cameras![isFrontCamera ? 1 : 0],
-      ResolutionPreset.veryHigh,
+      ResolutionPreset.high,
       imageFormatGroup: ImageFormatGroup.bgra8888,
       enableAudio: false,
     );
@@ -54,12 +58,13 @@ class _CameraScreenState extends State<CameraScreen> {
   }
 
   Future<void> _processCameraImage(CameraImage image) async {
-    if (faces.isNotEmpty) return; // Don't process if faces are already detected
     try {
-      final List<Face> detectedFaces = await detectFaces(image);
+      final List<Face> detectedFaces = await _faceDetectorService.detectFaces(image);
       if (mounted) {
         setState(() {
           faces = detectedFaces;
+          //perbarui status deteksi wajah
+          isFaceDetected = detectedFaces.isNotEmpty;
         });
       }
     } catch (e) {
@@ -139,6 +144,8 @@ class _CameraScreenState extends State<CameraScreen> {
   @override
   void dispose() {
     _controller?.dispose();
+    _faceDetectorService.close(); // Tutup layanan saat tidak lagi diperlukan
+    _controller?.dispose(); // Tutup controller kamera
     super.dispose();
   }
 
@@ -178,7 +185,7 @@ class _CameraScreenState extends State<CameraScreen> {
                 color: Colors.transparent,
                 shape: BoxShape.rectangle, // Change the shape to rectangle
                 border: Border.all(
-                  color: faces.isNotEmpty ? Colors.green : Colors.redAccent,
+                  color: isFaceDetected ? Colors.green : Colors.redAccent,
                   width: 2,
                 ),
                 borderRadius: BorderRadius.circular(15), // Use a smaller radius
