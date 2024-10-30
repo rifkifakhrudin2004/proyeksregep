@@ -1,8 +1,12 @@
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:proyeksregep/models/Userprofile.dart'; // Model UserProfile
 import 'package:proyeksregep/pages/profiledetail_page.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:flutter/cupertino.dart';
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -14,8 +18,10 @@ class _ProfilePageState extends State<ProfilePage> {
   final TextEditingController ageController = TextEditingController();
   final TextEditingController dobController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final ImagePicker _picker = ImagePicker();
 
   UserProfile? userProfile;
+  String? _photourl;
 
   @override
   void initState() {
@@ -35,90 +41,136 @@ class _ProfilePageState extends State<ProfilePage> {
       // If the profile document exists, fill in the form fields
       if (doc.exists) {
         userProfile = UserProfile.fromMap(doc.data() as Map<String, dynamic>);
-        // Kosongkan inputan jika ingin hanya menampilkan data setelah "Lihat Profil"
+        _photourl = userProfile?.photoUrl; // Load the existing photo URL
       }
     }
   }
 
   // Function to show alert when data is incomplete
-void _showIncompleteDataAlert() {
-  String errorMessage = '';
-  
-  // Check which fields are empty and create the error message
-  if (nameController.text.isEmpty) {
-    errorMessage += 'Nama tidak boleh kosong.\n';
-  }
-  if (ageController.text.isEmpty) {
-    errorMessage += 'Usia tidak boleh kosong.\n';
-  }
-  if (dobController.text.isEmpty) {
-    errorMessage += 'Tanggal lahir tidak boleh kosong.\n';
-  }
+  void _showIncompleteDataAlert() {
+    String errorMessage = '';
+    
+    // Check which fields are empty and create the error message
+    if (nameController.text.isEmpty) {
+      errorMessage += 'Nama tidak boleh kosong.\n';
+    }
+    if (ageController.text.isEmpty) {
+      errorMessage += 'Usia tidak boleh kosong.\n';
+    }
+    if (dobController.text.isEmpty) {
+      errorMessage += 'Tanggal lahir tidak boleh kosong.\n';
+    }
 
-  // Show alert if there are incomplete fields
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: Text('Data Tidak Lengkap'),
-        content: Text(errorMessage.trim()), // Trim the error message
-        actions: <Widget>[
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(); // Close alert dialog
-            },
-            child: Text('OK'),
-          ),
-        ],
-      );
-    },
-  );
-}
-  // Function to save profile to Firestore
-  Future<void> _saveProfile() async {
-  User? user = _auth.currentUser;
-
-  // Check if all fields are filled
-  if (_areFieldsEmpty()) {
-    _showIncompleteDataAlert(); // Show alert if any field is empty
-    return; // Exit the function if there are empty fields
+    // Show alert if there are incomplete fields
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Data Tidak Lengkap'),
+          content: Text(errorMessage.trim()), // Trim the error message
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close alert dialog
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
-  // Check if the age field contains a valid integer
-  if (int.tryParse(ageController.text) == null) {
-    _showAlert("Input Error", "Usia harus berupa angka.");
-    return; // Exit the function if the input is not a valid integer
+  // Show a dialog for selecting image source
+  void _showImageSourceDialog() {
+    // Check if a photo has already been uploaded
+    if (_photourl != null) {
+      // If a photo is already uploaded, show a dialog indicating that
+      _showAlert("Informasi", "Anda sudah mengunggah foto profil. Anda tidak bisa mengunggah lagi.");
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Pilih Sumber Foto'),
+          content: Text('Apakah ingin mengambil foto dari kamera atau galeri?'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Kamera'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _pickAndUploadImage(ImageSource.camera);
+              },
+            ),
+            TextButton(
+              child: Text('Galeri'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _pickAndUploadImage(ImageSource.gallery);
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
-  if (user != null) {
-    // Check if profile already exists
-    DocumentSnapshot doc = await FirebaseFirestore.instance
-        .collection('profiles')
-        .doc(user.uid) // Get document based on user UID
-        .get();
+  // Function to pick and upload profile image
+  Future<void> _pickAndUploadImage(ImageSource source) async {
+    final XFile? image = await _picker.pickImage(source: source);
 
-    if (doc.exists) {
-      // If the profile already exists, show alert
-      _showAlert("Profile sudah ada", "Anda tidak dapat menyimpan profil Anda lagi.");
-    } else {
-      // Create a UserProfile object from input data
-      UserProfile profile = _createUserProfile(user.uid);
+    if (image != null) {
+      String fileName = 'profile_photos/${_auth.currentUser!.uid}.jpg';
+      Reference storageRef = FirebaseStorage.instance.ref().child(fileName);
 
-      // Save data to Firestore with user UID as document key
-      await _saveProfileToFirestore(user.uid, profile);
+      // Upload image to Firebase Storage
+      await storageRef.putFile(File(image.path));
+      // Get the download URL for the uploaded image
+      _photourl = await storageRef.getDownloadURL();
 
-      // Show notification that data has been saved
-      _showSuccessSnackbar('Profil berhasil disimpan!');
-
-      // Clear input fields after saving
-      _clearInputFields();
-
-      // Navigate to detail page
-      _navigateToProfileDetailPage(profile, user.uid);
+      setState(() {}); // Update UI with new photo
     }
   }
-}
 
+  Future<void> _saveProfile() async {
+    User? user = _auth.currentUser;
+
+    if (_areFieldsEmpty()) {
+      _showIncompleteDataAlert();
+      return;
+    }
+
+    if (int.tryParse(ageController.text) == null) {
+      _showAlert("Input Error", "Usia harus berupa angka.");
+      return;
+    }
+
+    if (user != null) {
+      DocumentSnapshot doc = await FirebaseFirestore.instance
+          .collection('profiles')
+          .doc(user.uid)
+          .get();
+
+      if (doc.exists) {
+        _showAlert("Profile sudah ada", "Anda tidak dapat menyimpan profil Anda lagi.");
+      } else {
+        UserProfile profile = UserProfile(
+          id: user.uid,
+          name: nameController.text,
+          age: int.parse(ageController.text),
+          dateOfBirth: dobController.text,
+          photoUrl: _photourl, // Set the photo URL
+        );
+
+        await _saveProfileToFirestore(user.uid, profile);
+        _showSuccessSnackbar('Profil berhasil disimpan!');
+        _clearInputFields();
+        _navigateToProfileDetailPage(profile, user.uid);
+      }
+    }
+  }
 
   // Check if any fields are empty
   bool _areFieldsEmpty() {
@@ -246,20 +298,17 @@ void _showIncompleteDataAlert() {
             builder: (context) => ProfileDetailPage(
               userProfile: userProfile!,
               onEdit: (updatedProfile) {
-                // Handle editing if needed
-                Navigator.pop(context); // Go back to profile page for editing
+                // Handle profile update if needed
               },
               onClear: () async {
-                // Delete data from Firestore
+                // Delete profile from Firestore
                 await FirebaseFirestore.instance.collection('profiles').doc(user.uid).delete();
-                Navigator.pop(context); // Go back to profile page
               },
             ),
           ),
         );
       } else {
-        // If profile is not inputted, show alert
-        _showProfileNotFoundAlert();
+        _showProfileNotFoundAlert(); // Show alert if profile not found
       }
     }
   }
@@ -267,42 +316,48 @@ void _showIncompleteDataAlert() {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Profile')),
+      appBar: AppBar(
+        title: Text('Profile Page'),
+      ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(16.0),
         child: Column(
-          children: [
+          children: <Widget>[
+            GestureDetector(
+              onTap: _showImageSourceDialog, // Open dialog on image tap
+              child: CircleAvatar(
+                radius: 60.0,
+                backgroundImage: _photourl != null ? NetworkImage(_photourl!) : null,
+                child: _photourl == null
+                    ? Icon(Icons.camera_alt, size: 60.0)
+                    : null,
+              ),
+            ),
+            SizedBox(height: 16.0),
             TextField(
               controller: nameController,
-              decoration: InputDecoration(labelText: "Nama"),
+              decoration: InputDecoration(labelText: 'Nama'),
             ),
             TextField(
               controller: ageController,
-              decoration: InputDecoration(labelText: "Usia"),
-              keyboardType: TextInputType.number, // Input only numbers
+              decoration: InputDecoration(labelText: 'Usia'),
+              keyboardType: TextInputType.number,
             ),
-            GestureDetector(
-              onTap: () => _selectDate(context), // Call date picker
-              child: AbsorbPointer(
-                child: TextField(
-                  controller: dobController,
-                  decoration: InputDecoration(labelText: "Tanggal Lahir (YYYY-MM-DD)"),
-                ),
-              ),
+            TextField(
+              controller: dobController,
+              decoration: InputDecoration(labelText: 'Tanggal Lahir'),
+              onTap: () => _selectDate(context),
+              readOnly: true,
             ),
-            SizedBox(height: 20),
-            Row( // Change to Row to place buttons side by side
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                ElevatedButton(
-                  onPressed: _saveProfile, // Call function to save data
-                  child: Text("Simpan Profil"),
-                ),
-                ElevatedButton(
-                  onPressed: _viewProfile, // Call function to view profile
-                  child: Text("Lihat Profil"),
-                ),
-              ],
+            SizedBox(height: 20.0),
+            ElevatedButton(
+              onPressed: _saveProfile,
+              child: Text('Simpan Profil'),
+            ),
+            SizedBox(height: 20.0),
+            ElevatedButton(
+              onPressed: _viewProfile,
+              child: Text('Lihat Profil'),
             ),
           ],
         ),

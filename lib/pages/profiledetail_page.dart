@@ -48,6 +48,31 @@ class _ProfileDetailPageState extends State<ProfileDetailPage> {
     );
   }
 
+  // Function to show the larger profile image
+  void _showProfileImage() {
+    showDialog(
+      context: context,
+      barrierDismissible: true, // Allow dismissing by tapping outside
+      builder: (BuildContext context) {
+        return GestureDetector(
+          onTap: () {
+            Navigator.of(context).pop(); // Close dialog on tap
+          },
+          child: Center(
+            child: ClipOval(
+              child: Image.network(
+                widget.userProfile.photoUrl ?? '',
+                fit: BoxFit.cover,
+                height: 300, // Height of the circular image
+                width: 300,  // Width of the circular image
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,6 +82,20 @@ class _ProfileDetailPageState extends State<ProfileDetailPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Display profile picture
+            GestureDetector(
+              onTap: _showProfileImage, // Show larger image on tap
+              child: CircleAvatar(
+                radius: 50,
+                backgroundImage: (widget.userProfile.photoUrl?.isNotEmpty ?? false)
+                    ? NetworkImage(widget.userProfile.photoUrl!) // Display image from URL
+                    : null, // Show default image if no URL
+                child: (widget.userProfile.photoUrl?.isEmpty ?? true)
+                    ? Icon(Icons.camera_alt, size: 50) // Default icon when no image
+                    : null,
+              ),
+            ),
+            SizedBox(height: 20),
             Text("Name: ${widget.userProfile.name}", style: TextStyle(fontSize: 18)),
             SizedBox(height: 10),
             Text("Age: ${widget.userProfile.age}", style: TextStyle(fontSize: 18)),
@@ -72,11 +111,12 @@ class _ProfileDetailPageState extends State<ProfileDetailPage> {
                   ),
                 ).then((updatedUserProfile) {
                   if (updatedUserProfile != null) {
-                    // Menggunakan setState untuk memperbarui data yang ditampilkan
+                    // Update displayed data using setState
                     setState(() {
                       widget.userProfile.name = updatedUserProfile.name;
                       widget.userProfile.age = updatedUserProfile.age;
                       widget.userProfile.dateOfBirth = updatedUserProfile.dateOfBirth;
+                      widget.userProfile.photoUrl = updatedUserProfile.photoUrl; // Update photo URL
                     });
                   }
                 });

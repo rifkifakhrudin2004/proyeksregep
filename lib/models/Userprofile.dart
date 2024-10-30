@@ -3,8 +3,15 @@ class UserProfile {
   String name;
   int age;
   String dateOfBirth;
+  String? photoUrl; // New field for profile photo URL
 
-  UserProfile({required this.id, required this.name, required this.age, required this.dateOfBirth});
+  UserProfile({
+    required this.id,
+    required this.name,
+    required this.age,
+    required this.dateOfBirth,
+    this.photoUrl,
+  });
 
   Map<String, dynamic> toMap() {
     return {
@@ -12,6 +19,7 @@ class UserProfile {
       'name': name,
       'age': age,
       'dateOfBirth': dateOfBirth,
+      'photoUrl': photoUrl, // Include photoUrl in map
     };
   }
 
@@ -19,5 +27,6 @@ class UserProfile {
       : id = map['id'],
         name = map['name'],
         age = map['age'],
-        dateOfBirth = map['dateOfBirth'];
+        dateOfBirth = map['dateOfBirth'],
+        photoUrl = map['photoUrl']; // Initialize photoUrl
 }

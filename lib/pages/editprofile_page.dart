@@ -1,6 +1,10 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:proyeksregep/models/Userprofile.dart';
 import 'package:proyeksregep/pages/profiledetail_page.dart';
 
@@ -18,6 +22,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   final TextEditingController ageController = TextEditingController();
   final TextEditingController dobController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  String? _photoUrl; // Variable to store the photo URL
 
   @override
   void initState() {
@@ -26,6 +31,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     nameController.text = widget.userProfile.name;
     ageController.text = widget.userProfile.age.toString();
     dobController.text = widget.userProfile.dateOfBirth;
+    _photoUrl = widget.userProfile.photoUrl; // Get current photo URL
   }
 
   // Function to save updated profile
@@ -37,7 +43,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
     try {
       int age = int.parse(ageController.text);
-
       User? user = _auth.currentUser;
 
       if (user != null) {
@@ -46,6 +51,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
           name: nameController.text,
           age: age,
           dateOfBirth: dobController.text,
+          photoUrl: _photoUrl, // Include photo URL
         );
 
         // Save data to Firestore
@@ -66,6 +72,29 @@ class _EditProfilePageState extends State<EditProfilePage> {
     }
   }
 
+  // Function to select a new profile photo
+  Future<void> _selectProfilePhoto() async {
+    final ImagePicker _picker = ImagePicker();
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+
+    if (image != null) {
+      // Upload photo to Firebase Storage
+      String filePath = 'profile_photos/${_auth.currentUser!.uid}.png'; // Set file path for the image
+      File file = File(image.path);
+      try {
+        await FirebaseStorage.instance.ref(filePath).putFile(file); // Upload the image
+
+        // Get the download URL
+        String downloadUrl = await FirebaseStorage.instance.ref(filePath).getDownloadURL();
+        setState(() {
+          _photoUrl = downloadUrl; // Update photo URL in state
+        });
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to upload photo.')));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -74,6 +103,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
+            GestureDetector(
+              onTap: _selectProfilePhoto, // Call function to select a photo
+              child: CircleAvatar(
+                radius: 60.0,
+                backgroundImage: _photoUrl != null ? NetworkImage(_photoUrl!) : null,
+                child: _photoUrl == null ? Icon(Icons.camera_alt, size: 60.0) : null,
+              ),
+            ),
+            SizedBox(height: 16.0),
             TextField(
               controller: nameController,
               decoration: InputDecoration(labelText: "Name"),
