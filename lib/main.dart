@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'auth/register.dart';
+import 'auth/landing_page.dart'; // Import LandingPage
 import 'models/ImagesData.dart';
 import 'camera/camera_screen.dart';
 import 'pages/home_page.dart';
 import 'pages/storage_page.dart';
-import 'auth/landing_page.dart'; // Import LandingPage
 import 'pages/profile_page.dart';
 
 void main() async {

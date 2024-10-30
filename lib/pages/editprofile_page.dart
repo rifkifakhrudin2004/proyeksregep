@@ -30,40 +30,42 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   // Function to save updated profile
   Future<void> _saveUpdatedProfile() async {
-  if (nameController.text.isEmpty || ageController.text.isEmpty || dobController.text.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Please fill in all fields.')));
-    return;
-  }
-
-  try {
-    int age = int.parse(ageController.text);
-
-    User? user = _auth.currentUser;
-
-    if (user != null) {
-      UserProfile updatedProfile = UserProfile(
-        id: user.uid,
-        name: nameController.text,
-        age: age,
-        dateOfBirth: dobController.text,
-      );
-
-      // Simpan data ke Firestore
-      await FirebaseFirestore.instance
-          .collection('profiles')
-          .doc(user.uid)
-          .set(updatedProfile.toMap());
-
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Profile updated!')));
-
-      // Navigasi kembali ke ProfileDetailPage dengan data terbaru
-      Navigator.pop(context, updatedProfile); // Kirimkan profil yang diperbarui kembali
+    if (nameController.text.isEmpty || ageController.text.isEmpty || dobController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Please fill in all fields.')));
+      return;
     }
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Invalid age input.')));
+
+    try {
+      int age = int.parse(ageController.text);
+
+      User? user = _auth.currentUser;
+
+      if (user != null) {
+        UserProfile updatedProfile = UserProfile(
+          id: user.uid,
+          name: nameController.text,
+          age: age,
+          dateOfBirth: dobController.text,
+        );
+
+        // Save data to Firestore
+        await FirebaseFirestore.instance
+            .collection('profiles')
+            .doc(user.uid)
+            .set(updatedProfile.toMap());
+
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Profile updated!')));
+
+        // Navigate back to ProfileDetailPage with updated data
+        Navigator.pop(context, updatedProfile); // Send updated profile back
+      }
+    } catch (e) {
+      // Show an alert if age is not a valid number
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Invalid age input. Please enter a numeric value.')));
+    }
   }
-}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

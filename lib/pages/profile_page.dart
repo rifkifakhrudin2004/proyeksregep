@@ -76,42 +76,49 @@ void _showIncompleteDataAlert() {
 }
   // Function to save profile to Firestore
   Future<void> _saveProfile() async {
-    User? user = _auth.currentUser;
+  User? user = _auth.currentUser;
 
-    // Check if all fields are filled
-    if (_areFieldsEmpty()) {
-      _showIncompleteDataAlert(); // Show alert if any field is empty
-      return; // Exit the function if there are empty fields
-    }
+  // Check if all fields are filled
+  if (_areFieldsEmpty()) {
+    _showIncompleteDataAlert(); // Show alert if any field is empty
+    return; // Exit the function if there are empty fields
+  }
 
-    if (user != null) {
-      // Check if profile already exists
-      DocumentSnapshot doc = await FirebaseFirestore.instance
-          .collection('profiles')
-          .doc(user.uid) // Get document based on user UID
-          .get();
+  // Check if the age field contains a valid integer
+  if (int.tryParse(ageController.text) == null) {
+    _showAlert("Input Error", "Usia harus berupa angka.");
+    return; // Exit the function if the input is not a valid integer
+  }
 
-      if (doc.exists) {
-        // If the profile already exists, show alert
-        _showAlert("Profile sudah ada", "Anda tidak dapat menyimpan profil Anda lagi.");
-      } else {
-        // Create a UserProfile object from input data
-        UserProfile profile = _createUserProfile(user.uid);
+  if (user != null) {
+    // Check if profile already exists
+    DocumentSnapshot doc = await FirebaseFirestore.instance
+        .collection('profiles')
+        .doc(user.uid) // Get document based on user UID
+        .get();
 
-        // Save data to Firestore with user UID as document key
-        await _saveProfileToFirestore(user.uid, profile);
+    if (doc.exists) {
+      // If the profile already exists, show alert
+      _showAlert("Profile sudah ada", "Anda tidak dapat menyimpan profil Anda lagi.");
+    } else {
+      // Create a UserProfile object from input data
+      UserProfile profile = _createUserProfile(user.uid);
 
-        // Show notification that data has been saved
-        _showSuccessSnackbar('Profil berhasil disimpan!');
+      // Save data to Firestore with user UID as document key
+      await _saveProfileToFirestore(user.uid, profile);
 
-        // Clear input fields after saving
-        _clearInputFields();
+      // Show notification that data has been saved
+      _showSuccessSnackbar('Profil berhasil disimpan!');
 
-        // Navigate to detail page
-        _navigateToProfileDetailPage(profile, user.uid);
-      }
+      // Clear input fields after saving
+      _clearInputFields();
+
+      // Navigate to detail page
+      _navigateToProfileDetailPage(profile, user.uid);
     }
   }
+}
+
 
   // Check if any fields are empty
   bool _areFieldsEmpty() {

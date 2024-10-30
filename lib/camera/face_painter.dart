@@ -11,7 +11,7 @@ class FacePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = faces.isNotEmpty ? Colors.green : Colors.blue
+      ..color = faces.isNotEmpty ? Colors.green : const Color.fromARGB(255, 255, 0, 0)
       ..strokeWidth = 2
       ..style = PaintingStyle.stroke;
 
