@@ -157,7 +157,7 @@ class _CameraScreenState extends State<CameraScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Ageskin"),
+        title: Text("Agingskin"),
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
