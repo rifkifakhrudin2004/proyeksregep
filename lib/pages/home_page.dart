@@ -1,16 +1,47 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  int _selectedIndex = 0;
+
+  // Function to handle menu item selection
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+
+    // Navigate to corresponding pages
+    switch (index) {
+      case 0:
+        Navigator.pushNamed(context, '/camera');
+        break;
+      case 1:
+        Navigator.pushNamed(context, '/storage');
+        break;
+      case 2:
+        Navigator.pushNamed(context, '/profile');
+        break;
+      case 3:
+        _logout();
+        break;
+    }
+  }
+
+  // Logout function
+  Future<void> _logout() async {
+    await FirebaseAuth.instance.signOut();
+    Navigator.pushReplacementNamed(context, '/');
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Mendapatkan ukuran layar perangkat
+    // Getting device screen size
     var screenWidth = MediaQuery.of(context).size.width;
-    var screenHeight = MediaQuery.of(context).size.height;
-
-    // Mendefinisikan ukuran tombol yang konsisten
-    var buttonWidth = screenWidth * 0.6;
-    var buttonHeight = screenHeight * 0.08;
 
     return Scaffold(
       appBar: AppBar(
@@ -26,121 +57,89 @@ class HomePage extends StatelessWidget {
             end: Alignment.bottomRight,
           ),
         ),
-        child: Column(
+        child: Center(
+          child: Padding(
+            padding: EdgeInsets.all(screenWidth * 0.05), // Padding based on screen width
+            child: Text(
+              'Selamat datang di Aplikasi Deteksi Wajah',
+              style: TextStyle(
+                fontSize: screenWidth * 0.06, // Dynamic text size
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      ),
+      // Bottom navigation bar with custom layout
+      bottomNavigationBar: Container(
+        height: 80.0, // Height for the bottom navigation bar
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Space between items
           children: [
             Expanded(
-              child: Center(
-                child: Padding(
-                  padding: EdgeInsets.all(screenWidth * 0.05), // Padding dinamis berdasarkan lebar layar
+              child: InkWell(
+                onTap: () {
+                  Navigator.pushNamed(context, '/profile');
+                },
+                child: Container(
+                  alignment: Alignment.center,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        'Selamat datang di Aplikasi Deteksi Wajah',
-                        style: TextStyle(
-                          fontSize: screenWidth * 0.06, // Ukuran teks yang dinamis
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      SizedBox(height: screenHeight * 0.05), // Jarak antar teks dan tombol dinamis
-                      // Tombol Buka Kamera dengan ukuran yang konsisten
-                      SizedBox(
-                        width: buttonWidth, // Lebar tombol tetap
-                        height: buttonHeight, // Tinggi tombol tetap
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            Navigator.pushNamed(context, '/camera');
-                          },
-                          icon: Icon(Icons.camera_alt, size: screenWidth * 0.05), // Ukuran ikon dinamis
-                          label: Text('Buka Kamera'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: Colors.blueAccent,
-                            textStyle: TextStyle(
-                              fontSize: screenWidth * 0.045, // Ukuran teks tombol yang dinamis
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: screenHeight * 0.03), // Jarak antar tombol dinamis
-                      // Tombol Gallery dengan ukuran yang konsisten
-                      SizedBox(
-                        width: buttonWidth, // Lebar tombol tetap
-                        height: buttonHeight, // Tinggi tombol tetap
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            Navigator.pushNamed(context, '/storage');
-                          },
-                          icon: Icon(Icons.storage, size: screenWidth * 0.05), // Ukuran ikon dinamis
-                          label: Text('Galeri'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: Colors.blueAccent,
-                            textStyle: TextStyle(
-                              fontSize: screenWidth * 0.045, // Ukuran teks tombol yang dinamis
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: screenHeight * 0.03), // Jarak antar tombol dinamis
-                      // Tombol Profile
-                      SizedBox(
-                        width: buttonWidth,
-                        height: buttonHeight,
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            Navigator.pushNamed(context, '/profile');
-                          },
-                          icon: Icon(Icons.person, size: screenWidth * 0.05),
-                          label: Text('Profil'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: Colors.blueAccent,
-                            textStyle: TextStyle(
-                              fontSize: screenWidth * 0.045,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: screenHeight * 0.03), // Jarak antar tombol dinamis
-                      // Tombol Logout
-                      SizedBox(
-                        width: buttonWidth,
-                        height: buttonHeight,
-                        child: ElevatedButton.icon(
-                          onPressed: () async {
-                            await FirebaseAuth.instance.signOut();
-                            Navigator.pushReplacementNamed(context, '/');
-                          },
-                          icon: Icon(Icons.logout, size: screenWidth * 0.05),
-                          label: Text('Logout'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red, // Ubah warna tombol logout
-                            foregroundColor: Colors.white,
-                            textStyle: TextStyle(
-                              fontSize: screenWidth * 0.045,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
+                      Icon(Icons.person, color: Colors.blueAccent),
+                      Text('Profil', style: TextStyle(color: Colors.blueAccent)),
                     ],
                   ),
                 ),
               ),
             ),
-            Padding(
-              padding: EdgeInsets.only(bottom: screenHeight * 0.02), // Jarak dari bawah layar dinamis
-              child: Text(
-                'Kelompok 2',
-                style: TextStyle(
-                  fontSize: screenWidth * 0.04,
-                  color: Colors.white,
+            Expanded(
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.pushNamed(context, '/camera');
+                },
+                child: Container(
+                  height: 50.0, // Adjusted height for the camera button
+                  width: 50.0, // Adjusted width for the camera button
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.blueAccent,
+                  ),
+                  child: Icon(Icons.add_a_photo, size: 30.0, color: Colors.white), // Smaller icon size
+                ),
+              ),
+            ),
+            Expanded(
+              child: InkWell(
+                onTap: () {
+                  Navigator.pushNamed(context, '/storage');
+                },
+                child: Container(
+                  alignment: Alignment.center,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.storage, color: Colors.blueAccent),
+                      Text('Galeri', style: TextStyle(color: Colors.blueAccent)),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              child: InkWell(
+                onTap: _logout,
+                child: Container(
+                  alignment: Alignment.center,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.logout, color: Colors.blueAccent),
+                      Text('Logout', style: TextStyle(color: Colors.blueAccent)),
+                    ],
+                  ),
                 ),
               ),
             ),

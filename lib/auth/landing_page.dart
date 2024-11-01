@@ -71,6 +71,16 @@ class LandingPage extends StatelessWidget {
               "WELCOME",
               style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
             ),
+            SizedBox(height: 8),
+            Text(
+              "AgingSkin",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Colors.blue[900],
+                letterSpacing: 1.2,
+              ),
+            ),
             SizedBox(height: 40),
             TextField(
               controller: emailController,

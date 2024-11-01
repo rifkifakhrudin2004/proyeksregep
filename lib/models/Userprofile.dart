@@ -1,17 +1,30 @@
 class UserProfile {
-  String id;
-  String name;
-  int age;
-  String dateOfBirth;
-  String? photoUrl; // New field for profile photo URL
+  final String id;
+  final String name;
+  final int age;
+  final String dateOfBirth;
+  final String phoneNumber;
+  final List<String> photoUrl;
 
   UserProfile({
     required this.id,
     required this.name,
     required this.age,
     required this.dateOfBirth,
-    this.photoUrl,
+    required this.phoneNumber,
+    this.photoUrl = const [],
   });
+
+  factory UserProfile.fromMap(Map<String, dynamic> map) {
+    return UserProfile(
+      id: map['id'] ?? '',
+      name: map['name'] ?? '',
+      age: map['age'] ?? 0,
+      dateOfBirth: map['dateOfBirth'] ?? '',
+      phoneNumber: map['phoneNumber'] ?? '',
+      photoUrl: List<String>.from(map['photoUrl'] ?? []),
+    );
+  }
 
   Map<String, dynamic> toMap() {
     return {
@@ -19,14 +32,8 @@ class UserProfile {
       'name': name,
       'age': age,
       'dateOfBirth': dateOfBirth,
-      'photoUrl': photoUrl, // Include photoUrl in map
+      'phoneNumber': phoneNumber,
+      'photoUrl': photoUrl,
     };
   }
-
-  UserProfile.fromMap(Map<String, dynamic> map)
-      : id = map['id'],
-        name = map['name'],
-        age = map['age'],
-        dateOfBirth = map['dateOfBirth'],
-        photoUrl = map['photoUrl']; // Initialize photoUrl
 }

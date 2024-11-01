@@ -7,12 +7,30 @@ class RegisterScreen extends StatelessWidget {
   final TextEditingController confirmPasswordController = TextEditingController();
 
   Future<void> _register(BuildContext context) async {
+    // Check if email contains domain
+    if (!emailController.text.contains('@')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Please enter a valid email with a domain")),
+      );
+      return;
+    }
+
+    // Check if password is numeric only
+    if (RegExp(r'^[0-9]+$').hasMatch(passwordController.text)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Password must contain non-numeric characters")),
+      );
+      return;
+    }
+
+    // Check if passwords match
     if (passwordController.text != confirmPasswordController.text) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Passwords do not match")),
       );
       return;
     }
+
     try {
       await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: emailController.text,
@@ -106,7 +124,7 @@ class RegisterScreen extends StatelessWidget {
             ),
           ],
         ),
-),
-);
-}
+      ),
+    );
+  }
 }
