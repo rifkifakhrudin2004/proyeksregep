@@ -32,13 +32,12 @@ class LandingPage extends StatelessWidget {
         password: passwordController.text,
       );
 
-      // Berhasil login, arahkan ke halaman HomePage dengan animasi transisi
       Navigator.push(
         context,
         PageRouteBuilder(
           pageBuilder: (context, animation, secondaryAnimation) => HomePage(),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            const begin = Offset(1.0, 0.0); // Animasi dari kanan ke kiri
+            const begin = Offset(1.0, 0.0);
             const end = Offset.zero;
             const curve = Curves.easeInOut;
 
@@ -62,83 +61,163 @@ class LandingPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              "WELCOME",
-              style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 8),
-            Text(
-              "AgingSkin",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: Colors.blue[900],
-                letterSpacing: 1.2,
-              ),
-            ),
-            SizedBox(height: 40),
-            TextField(
-              controller: emailController,
-              decoration: InputDecoration(
-                labelText: "Username, Email & Phone number",
-                filled: true,
-                fillColor: Colors.grey[300],
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
-            SizedBox(height: 20),
-            TextField(
-              controller: passwordController,
-              decoration: InputDecoration(
-                labelText: "Password",
-                filled: true,
-                fillColor: Colors.grey[300],
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-              obscureText: true,
-            ),
-            SizedBox(height: 10),
-            Align(
-              alignment: Alignment.centerRight,
-              child: Text("Forgot Password?", style: TextStyle(color: Colors.grey)),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue[900],
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                padding: EdgeInsets.symmetric(horizontal: 60, vertical: 15),
-              ),
-              onPressed: () => _login(context),
-              child: Text("Sign in", style: TextStyle(fontSize: 18)),
-            ),
-            SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+      backgroundColor: Color.fromARGB(255, 45, 153, 156), // Dark blue background
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("Don't have an account?"),
-                TextButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/register');
-                  },
-                  child: Text("Sign up", style: TextStyle(color: Colors.pink)),
+                SizedBox(height: 40),
+                Center(
+                  child: ClipOval(
+                  child: Image.asset(
+                    'assets/logo.jpg',
+                    height: 175,
+                    width: 175,
+                     fit: BoxFit.cover,
+                   ),
+                  ),
+                ),
+                SizedBox(height: 24),
+               Center(
+                child: Text(
+                    "Smart AgeDefying",
+                    style: TextStyle(
+                      fontSize: 26, // Slightly larger for emphasis
+                      fontWeight:
+                          FontWeight.w600, // Semi-bold for a modern touch
+                      color: Colors.white, // Clean white color
+                      letterSpacing: 1.5, // Moderate letter spacing
+                      // Removing shadows for a cleaner look
+                    ),
+                  ),
+                ),
+                SizedBox(height: 3),
+                // Center(
+                //   child: Text(
+                //     "AgingSkin",
+                //     style: TextStyle(
+                //       fontSize: 16,
+                //       color: Colors.white.withOpacity(0.8),
+                //     ),
+                //   ),
+                // ),
+                SizedBox(height: 40),
+                Container(
+                  padding: EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      TextField(
+                        controller: emailController,
+                        decoration: InputDecoration(
+                          hintText: "Email/Username",
+                          prefixIcon: Icon(Icons.email_outlined, color: Colors.grey),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.grey.shade300),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.grey.shade300),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 16),
+                      TextField(
+                        controller: passwordController,
+                        obscureText: true,
+                        decoration: InputDecoration(
+                          hintText: "Password",
+                          prefixIcon: Icon(Icons.lock_outline, color: Colors.grey),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.grey.shade300),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.grey.shade300),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 12),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: () {},
+                          child: Text(
+                            "Forgot Password?",
+                            style: TextStyle(color: Color.fromARGB(255, 45, 153, 156)),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 24),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color.fromARGB(255, 45, 153, 156),
+                            padding: EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          onPressed: () => _login(context),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                "SIGN IN",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              SizedBox(width: 8),
+                              Icon(Icons.arrow_forward, color: Colors.white),
+                            ],
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 24),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "Don't have an account?",
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 14,
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pushNamed(context, '/register');
+                            },
+                            child: Text(
+                              "Sign up",
+                              style: TextStyle(
+                                color: Color.fromARGB(255, 45, 153, 156),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
-          ],
+          ),
         ),
       ),
     );
