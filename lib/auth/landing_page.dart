@@ -2,9 +2,16 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:proyeksregep/pages/home_page.dart';
 
-class LandingPage extends StatelessWidget {
+class LandingPage extends StatefulWidget {
+  @override
+  _LandingPageState createState() => _LandingPageState();
+}
+
+class _LandingPageState extends State<LandingPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+
+  bool _obscurePassword = true;
 
   Future<void> _login(BuildContext context) async {
     if (emailController.text.isEmpty || passwordController.text.isEmpty) {
@@ -12,7 +19,7 @@ class LandingPage extends StatelessWidget {
         context: context,
         builder: (context) => AlertDialog(
           title: Text("Error"),
-          content: Text("Please enter both email and password."),
+          content: Text("Silahkan masukkan email dan Password terlebih dahulu."),
           actions: [
             TextButton(
               onPressed: () {
@@ -58,10 +65,54 @@ class LandingPage extends StatelessWidget {
     }
   }
 
+  Future<void> _resetPassword(BuildContext context) async {
+    if (emailController.text.isEmpty) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text("Error"),
+          content: Text("Please enter your email address."),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text("OK"),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: emailController.text);
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text("Success"),
+          content: Text("Password reset email sent! Please check your inbox."),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text("OK"),
+            ),
+          ],
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to send password reset email: ${e.toString()}')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 45, 153, 156), // Dark blue background
+      backgroundColor: Color.fromARGB(255, 243, 211, 163),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -72,44 +123,43 @@ class LandingPage extends StatelessWidget {
                 SizedBox(height: 40),
                 Center(
                   child: ClipOval(
-                  child: Image.asset(
-                    'assets/logo.jpg',
-                    height: 175,
-                    width: 175,
-                     fit: BoxFit.cover,
-                   ),
-                  ),
-                ),
-                SizedBox(height: 24),
-               Center(
-                child: Text(
-                    "Smart AgeDefying",
-                    style: TextStyle(
-                      fontSize: 26, // Slightly larger for emphasis
-                      fontWeight:
-                          FontWeight.w600, // Semi-bold for a modern touch
-                      color: Colors.white, // Clean white color
-                      letterSpacing: 1.5, // Moderate letter spacing
-                      // Removing shadows for a cleaner look
+                    child: Image.asset(
+                      'assets/Olivia.png',
+                      height: 185,
+                      width: 185,
+                      fit: BoxFit.cover,
                     ),
                   ),
                 ),
-                SizedBox(height: 3),
-                // Center(
-                //   child: Text(
-                //     "AgingSkin",
-                //     style: TextStyle(
-                //       fontSize: 16,
-                //       color: Colors.white.withOpacity(0.8),
-                //     ),
-                //   ),
-                // ),
-                SizedBox(height: 40),
+                SizedBox(height: 24),
+                Center(
+                  child: Text(
+                    "Smart AgeDefying",
+                    style: TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                      letterSpacing: 1.5,
+                    ),
+                  ),
+                ),
+                SizedBox(height: 32),
                 Container(
                   padding: EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    gradient: LinearGradient(
+                      colors: [Colors.white, Colors.grey.shade200],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
                     borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.shade300,
+                        blurRadius: 12,
+                        offset: Offset(0, 6),
+                      ),
+                    ],
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -129,13 +179,24 @@ class LandingPage extends StatelessWidget {
                           ),
                         ),
                       ),
-                      SizedBox(height: 16),
+                      SizedBox(height: 12),
                       TextField(
                         controller: passwordController,
-                        obscureText: true,
+                        obscureText: _obscurePassword,
                         decoration: InputDecoration(
                           hintText: "Password",
                           prefixIcon: Icon(Icons.lock_outline, color: Colors.grey),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                              color: Colors.grey,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _obscurePassword = !_obscurePassword;
+                              });
+                            },
+                          ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide(color: Colors.grey.shade300),
@@ -146,24 +207,26 @@ class LandingPage extends StatelessWidget {
                           ),
                         ),
                       ),
-                      SizedBox(height: 12),
+                      SizedBox(height: 8),
                       Align(
                         alignment: Alignment.centerRight,
                         child: TextButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            _resetPassword(context);
+                          },
                           child: Text(
                             "Forgot Password?",
-                            style: TextStyle(color: Color.fromARGB(255, 45, 153, 156)),
+                            style: TextStyle(color: Color.fromARGB(255, 241, 164, 49)),
                           ),
                         ),
                       ),
-                      SizedBox(height: 24),
+                      SizedBox(height: 16),
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Color.fromARGB(255, 45, 153, 156),
-                            padding: EdgeInsets.symmetric(vertical: 16),
+                            backgroundColor: Color.fromARGB(255, 243, 177, 79),
+                            padding: EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -180,13 +243,13 @@ class LandingPage extends StatelessWidget {
                                   color: Colors.white,
                                 ),
                               ),
-                              SizedBox(width: 8),
+                              SizedBox(width: 6),
                               Icon(Icons.arrow_forward, color: Colors.white),
                             ],
                           ),
                         ),
                       ),
-                      SizedBox(height: 24),
+                      SizedBox(height: 18),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -204,7 +267,7 @@ class LandingPage extends StatelessWidget {
                             child: Text(
                               "Sign up",
                               style: TextStyle(
-                                color: Color.fromARGB(255, 45, 153, 156),
+                                color: Color.fromARGB(255, 241, 164, 49),
                                 fontWeight: FontWeight.bold,
                                 fontSize: 14,
                               ),

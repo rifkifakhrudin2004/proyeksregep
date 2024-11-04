@@ -44,18 +44,9 @@ class _HomePageState extends State<HomePage> {
     var screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('SREGEP'),
-        centerTitle: true,
-        backgroundColor: Colors.blueAccent,
-      ),
       body: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.blueAccent, Colors.lightBlue],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+          color: Color.fromARGB(255, 197, 123, 123), // Solid background color
         ),
         child: Center(
           child: Padding(
@@ -75,76 +66,91 @@ class _HomePageState extends State<HomePage> {
       // Bottom navigation bar with custom layout
       bottomNavigationBar: Container(
         height: 80.0, // Height for the bottom navigation bar
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)), // Rounded corners
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.3),
+              spreadRadius: 5,
+              blurRadius: 7,
+              offset: Offset(0, 3), // changes position of shadow
+            ),
+          ],
+        ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween, // Space between items
           children: [
             Expanded(
-              child: InkWell(
-                onTap: () {
-                  Navigator.pushNamed(context, '/profile');
-                },
-                child: Container(
-                  alignment: Alignment.center,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.person, color: Colors.blueAccent),
-                      Text('Profil', style: TextStyle(color: Colors.blueAccent)),
-                    ],
-                  ),
-                ),
+              child: _buildNavItem(
+                icon: Icons.person,
+                label: 'Profil',
+                onTap: () => _onItemTapped(2),
               ),
             ),
             Expanded(
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.pushNamed(context, '/camera');
-                },
-                child: Container(
-                  height: 50.0, // Adjusted height for the camera button
-                  width: 50.0, // Adjusted width for the camera button
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.blueAccent,
-                  ),
-                  child: Icon(Icons.add_a_photo, size: 30.0, color: Colors.white), // Smaller icon size
-                ),
+              child: _buildCameraButton(),
+            ),
+            Expanded(
+              child: _buildNavItem(
+                icon: Icons.storage,
+                label: 'Galeri',
+                onTap: () => _onItemTapped(1),
               ),
             ),
             Expanded(
-              child: InkWell(
-                onTap: () {
-                  Navigator.pushNamed(context, '/storage');
-                },
-                child: Container(
-                  alignment: Alignment.center,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.storage, color: Colors.blueAccent),
-                      Text('Galeri', style: TextStyle(color: Colors.blueAccent)),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            Expanded(
-              child: InkWell(
+              child: _buildNavItem(
+                icon: Icons.logout,
+                label: 'Logout',
                 onTap: _logout,
-                child: Container(
-                  alignment: Alignment.center,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.logout, color: Colors.blueAccent),
-                      Text('Logout', style: TextStyle(color: Colors.blueAccent)),
-                    ],
-                  ),
-                ),
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildNavItem({required IconData icon, required String label, required VoidCallback onTap}) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(15),
+      child: Container(
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(15),
+          color: Colors.transparent,
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: Colors.blueAccent, size: 30), // Adjusted icon size
+            Text(label, style: TextStyle(color: Colors.blueAccent)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCameraButton() {
+    return GestureDetector(
+      onTap: () => _onItemTapped(0), // Go to camera
+      child: Container(
+        height: 60.0, // Adjusted height for the camera button
+        width: 60.0, // Adjusted width for the camera button
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Color.fromARGB(255, 194, 114, 114), // Consistent button color
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.3),
+              spreadRadius: 5,
+              blurRadius: 7,
+              offset: Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Icon(Icons.add_a_photo, size: 30.0, color: Colors.white), // Smaller icon size
       ),
     );
   }
