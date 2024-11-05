@@ -23,6 +23,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Login Register App',
       theme: ThemeData(primarySwatch: Colors.blue),
       initialRoute: '/splash', // Set SplashScreen sebagai route awal
