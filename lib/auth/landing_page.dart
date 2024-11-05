@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:proyeksregep/pages/home_page.dart';
+import 'package:awesome_dialog/awesome_dialog.dart';
 
 class LandingPage extends StatefulWidget {
   @override
@@ -13,23 +14,16 @@ class _LandingPageState extends State<LandingPage> {
 
   bool _obscurePassword = true;
 
-  Future<void> _login(BuildContext context) async {
+   Future<void> _login(BuildContext context) async {
     if (emailController.text.isEmpty || passwordController.text.isEmpty) {
-      showDialog(
+      AwesomeDialog(
         context: context,
-        builder: (context) => AlertDialog(
-          title: Text("Error"),
-          content: Text("Silahkan masukkan email dan Password terlebih dahulu."),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text("OK"),
-            ),
-          ],
-        ),
-      );
+        dialogType: DialogType.error,
+        animType: AnimType.rightSlide,
+        title: "Error",
+        desc: "Silahkan masukkan email dan password terlebih dahulu.",
+        btnOkOnPress: () {},
+      ).show();
       return;
     }
 
@@ -39,7 +33,7 @@ class _LandingPageState extends State<LandingPage> {
         password: passwordController.text,
       );
 
-      Navigator.push(
+     Navigator.push(
         context,
         PageRouteBuilder(
           pageBuilder: (context, animation, secondaryAnimation) => HomePage(),
@@ -59,11 +53,18 @@ class _LandingPageState extends State<LandingPage> {
         ),
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Login failed: ${e.toString()}')),
-      );
+      AwesomeDialog(
+        context: context,
+        dialogType: DialogType.error,
+        animType: AnimType.leftSlide,
+        title: "Login Gagal",
+        desc: "Email atau password yang Anda masukkan salah.",
+        btnOkOnPress: () {},
+        btnOkColor: Colors.red,
+      ).show();
     }
   }
+
 
   Future<void> _resetPassword(BuildContext context) async {
     if (emailController.text.isEmpty) {

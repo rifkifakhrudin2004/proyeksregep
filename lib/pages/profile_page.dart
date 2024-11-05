@@ -5,6 +5,8 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:proyeksregep/models/Userprofile.dart'; // Model UserProfile
 import 'package:image_picker/image_picker.dart';
+import 'package:awesome_dialog/awesome_dialog.dart';
+
 
 
 class ProfilePage extends StatefulWidget {
@@ -20,6 +22,8 @@ class _ProfilePageState extends State<ProfilePage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final ImagePicker _picker = ImagePicker();
 
+  
+
   UserProfile? userProfile;
   List<String> _photoUrl = []; // Changed to a list to hold multiple photo URLs
   bool isEditingName = false;
@@ -32,6 +36,29 @@ class _ProfilePageState extends State<ProfilePage> {
     super.initState();
     _loadProfile();
   }
+  // Tambahkan metode ini di kelas _ProfilePageState
+  String? getLastPhotoUrl() {
+    if (_photoUrl.isNotEmpty) {
+      return _photoUrl.last; // Mengembalikan URL foto terakhir
+    }
+    return null; // Jika tidak ada foto
+  }
+  Future<String?> getUserName() async {
+  User? user = FirebaseAuth.instance.currentUser;
+  if (user != null) {
+    DocumentSnapshot doc = await FirebaseFirestore.instance
+        .collection('profiles')
+        .doc(user.uid)
+        .get();
+
+    if (doc.exists) {
+      return doc['username']; // Asumsi nama field di Firestore adalah 'username'
+    }
+  }
+  return null;
+}
+
+
 Future<void> _loadProfile() async {
   User? user = _auth.currentUser;
   if (user != null) {
@@ -174,37 +201,46 @@ Future<void> _loadProfile() async {
   }
 }
 
-  Future<void> _saveProfile() async {
-  User? user = _auth.currentUser;
+  Future<void> _saveProfile(BuildContext context) async {
+    // Validate all fields are filled
+    if (nameController.text.isEmpty || ageController.text.isEmpty) {
+      AwesomeDialog(
+        context: context,
+        dialogType: DialogType.error,
+        animType: AnimType.rightSlide,
+        title: "Data Belum Lengkap",
+        desc: "Silakan isi semua data sebelum menyimpan.",
+        btnOkOnPress: () {},
+      ).show();
+      return;
+    }
 
-  if (_areFieldsEmpty()) {
-    _showIncompleteDataAlert();
-    return;
+    // Simulate a save action
+    try {
+      // Here you would normally save the profile data to the database
+      // For example: await saveToDatabase(nameController.text, ageController.text);
+
+      // If the save operation is successful
+      AwesomeDialog(
+        context: context,
+        dialogType: DialogType.success,
+        animType: AnimType.scale,
+        title: "Profil Tersimpan",
+        desc: "Profil Anda berhasil disimpan.",
+        btnOkOnPress: () {},
+      ).show();
+    } catch (e) {
+      // If the save operation fails
+      AwesomeDialog(
+        context: context,
+        dialogType: DialogType.error,
+        animType: AnimType.scale,
+        title: "Simpan Gagal",
+        desc: "Gagal menyimpan profil: ${e.toString()}",
+        btnOkOnPress: () {},
+      ).show();
+    }
   }
-
-  if (int.tryParse(ageController.text) == null) {
-    _showAlert("Input Error", "Usia harus berupa angka.");
-    return;
-  }
-
-  if (user != null) {
-    UserProfile profile = UserProfile(
-      id: user.uid,
-      name: nameController.text,
-      age: int.parse(ageController.text),
-      dateOfBirth: dobController.text,
-      phoneNumber: phoneNumberController.text, // Save phone number
-      photoUrl: _photoUrl, // Preserve the existing list of photos
-    );
-
-    await FirebaseFirestore.instance
-        .collection('profiles')
-        .doc(user.uid)
-        .set(profile.toMap(), SetOptions(merge: true)); // Use merge to keep existing data
-
-    _showSuccessSnackbar('Profil berhasil disimpan!');
-  }
-}
 
  Future<void> _removePhoto(String photoUrl) async {
   try {
@@ -288,7 +324,6 @@ Widget build(BuildContext context) {
                   setState(() {
                     isEditingName = !isEditingName;
                   });
-                  if (!isEditingName) _saveProfile();
                 },
               ),
             ],
@@ -309,7 +344,6 @@ Widget build(BuildContext context) {
                   setState(() {
                     isEditingAge = !isEditingAge;
                   });
-                  if (!isEditingAge) _saveProfile();
                 },
               ),
             ],
@@ -330,7 +364,6 @@ Widget build(BuildContext context) {
                   setState(() {
                     isEditingPhoneNumber = !isEditingPhoneNumber;
                   });
-                  if (!isEditingPhoneNumber) _saveProfile();
                 },
               ),
             ],
@@ -352,15 +385,17 @@ Widget build(BuildContext context) {
                   setState(() {
                     isEditingDob = !isEditingDob;
                   });
-                  if (!isEditingDob) _saveProfile();
                 },
               ),
             ],
           ),
-          const SizedBox(height: 20.0),
-          ElevatedButton(
-            onPressed: _saveProfile,
-            child: const Text('Simpan Profil'),
+          SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => _saveProfile(context),
+                child: Text("Simpan Profil"),
+              )
           ),
         ],
       ),

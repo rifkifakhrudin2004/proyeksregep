@@ -1,5 +1,7 @@
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'landing_page.dart';
 
 class RegisterScreen extends StatefulWidget {
   @override
@@ -14,47 +16,106 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _obscureConfirmPassword = true;
 
   Future<void> _register(BuildContext context) async {
-    // Check if email contains domain
+    // Validasi semua field terisi
+    if (emailController.text.isEmpty || passwordController.text.isEmpty || confirmPasswordController.text.isEmpty) {
+      AwesomeDialog(
+        context: context,
+        dialogType: DialogType.error,
+        animType: AnimType.rightSlide,
+        title: "Data Belum Lengkap",
+        desc: "Silakan isi semua data sebelum melanjutkan.",
+        btnOkOnPress: () {},
+      ).show();
+      return;
+    }
+
+    // Validasi email
     if (!emailController.text.contains('@')) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Please enter a valid email with a domain")),
-      );
+      AwesomeDialog(
+        context: context,
+        dialogType: DialogType.error,
+        animType: AnimType.rightSlide,
+        title: "Email Tidak Valid",
+        desc: "Silahkan masukkan email dengan domain yang benar.",
+        btnOkOnPress: () {},
+      ).show();
       return;
     }
 
-    // Check if password is numeric only
+    // Validasi panjang password
+    if (passwordController.text.length < 6) {
+      AwesomeDialog(
+        context: context,
+        dialogType: DialogType.error,
+        animType: AnimType.rightSlide,
+        title: "Password Kurang Karakter",
+        desc: "Password minimal harus memiliki 6 karakter.",
+        btnOkOnPress: () {},
+      ).show();
+      return;
+    }
+
+    // Validasi password tidak hanya angka
     if (RegExp(r'^[0-9]+$').hasMatch(passwordController.text)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Password must contain non-numeric characters")),
-      );
+      AwesomeDialog(
+        context: context,
+        dialogType: DialogType.error,
+        animType: AnimType.rightSlide,
+        title: "Password Kurang Kuat",
+        desc: "Password harus mengandung karakter selain angka.",
+        btnOkOnPress: () {},
+      ).show();
       return;
     }
 
-    // Check if passwords match
+    // Validasi konfirmasi password
     if (passwordController.text != confirmPasswordController.text) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Passwords do not match")),
-      );
+      AwesomeDialog(
+        context: context,
+        dialogType: DialogType.error,
+        animType: AnimType.rightSlide,
+        title: "Konfirmasi Password Salah",
+        desc: "Password dan konfirmasi password tidak cocok.",
+        btnOkOnPress: () {},
+      ).show();
       return;
     }
 
+    // Proses registrasi
     try {
       await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: emailController.text,
         password: passwordController.text,
       );
-      Navigator.pushReplacementNamed(context, '/');
+
+      // Jika registrasi berhasil
+      AwesomeDialog(
+        context: context,
+        dialogType: DialogType.success,
+        animType: AnimType.scale,
+        title: "Registrasi Berhasil",
+        desc: "Akun Anda berhasil dibuat.",
+        btnOkOnPress: () {
+          Navigator.pushReplacementNamed(context, '/');
+        },
+      ).show();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Registration failed: ${e.toString()}')),
-      );
+      // Jika registrasi gagal
+      AwesomeDialog(
+        context: context,
+        dialogType: DialogType.error,
+        animType: AnimType.scale,
+        title: "Registrasi Gagal",
+        desc: "Gagal membuat akun: ${e.toString()}",
+        btnOkOnPress: () {},
+      ).show();
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 45, 153, 156), // Dark blue background
+      backgroundColor: Color.fromARGB(255, 45, 153, 156),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -92,10 +153,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide(color: Colors.grey.shade300),
                           ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: Colors.grey.shade300),
-                          ),
                         ),
                       ),
                       SizedBox(height: 16),
@@ -120,10 +177,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide(color: Colors.grey.shade300),
                           ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: Colors.grey.shade300),
-                          ),
                         ),
                       ),
                       SizedBox(height: 16),
@@ -145,10 +198,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             },
                           ),
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: Colors.grey.shade300),
-                          ),
-                          enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide(color: Colors.grey.shade300),
                           ),
@@ -189,10 +238,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                           TextButton(
                             onPressed: () {
-                              Navigator.pushNamed(context, '/');
+                              Navigator.pushNamed(context, '/'); // Change this line to rightSlide transition
+                              Navigator.push(
+                                context,
+                                PageRouteBuilder(
+                                  pageBuilder: (context, animation, secondaryAnimation) => LandingPage(), // Replace with your login screen widget
+                                  transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                                    const begin = Offset(1.0, 0.0); // Start from the right
+                                    const end = Offset.zero; // End at the center
+                                    const curve = Curves.easeInOut;
+
+                                    var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+                                    var offsetAnimation = animation.drive(tween);
+                                    
+                                    return SlideTransition(
+                                      position: offsetAnimation,
+                                      child: child,
+                                    );
+                                  },
+                                ),
+                              );
                             },
                             child: Text(
-                              "Sign in",
+                              "Sign in now",
                               style: TextStyle(
                                 color: Color.fromARGB(255, 45, 153, 156),
                                 fontWeight: FontWeight.bold,
