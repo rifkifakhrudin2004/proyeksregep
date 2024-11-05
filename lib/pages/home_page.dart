@@ -75,7 +75,7 @@ class _HomePageState extends State<HomePage> {
         preferredSize: Size.fromHeight(90),
         child: AppBar(
           automaticallyImplyLeading: false,
-          backgroundColor: const Color.fromARGB(255, 230, 184, 209),
+          backgroundColor: const Color.fromRGBO(248, 187, 208, 1),
           elevation: 0,
           flexibleSpace: StreamBuilder<DocumentSnapshot>(
             stream: FirebaseFirestore.instance
@@ -226,7 +226,7 @@ class _HomePageState extends State<HomePage> {
       bottomNavigationBar: Container(
         height: 80.0,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: const Color.fromRGBO(248, 187, 208, 1),
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           boxShadow: [
             BoxShadow(
@@ -309,8 +309,8 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: Colors.blueAccent, size: 30),
-            Text(label, style: TextStyle(color: Colors.blueAccent)),
+            Icon(icon, color: const Color.fromRGBO(236, 64, 122, 1), size: 30),
+            Text(label, style: TextStyle(color: const Color.fromRGBO(236, 64, 122, 1))),
           ],
         ),
       ),
@@ -325,7 +325,7 @@ class _HomePageState extends State<HomePage> {
         width: 60.0,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: Color.fromARGB(255, 194, 114, 114),
+          color: const Color(0xFF880E4F),
           boxShadow: [
             BoxShadow(
               color: Colors.grey.withOpacity(0.3),

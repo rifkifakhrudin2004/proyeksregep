@@ -115,7 +115,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 45, 153, 156),
+      backgroundColor: const Color.fromRGBO(248, 187, 208, 1),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -208,7 +208,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         width: double.infinity,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Color.fromARGB(255, 45, 153, 156),
+                            backgroundColor:  const Color.fromRGBO(240, 98, 146, 1),
                             padding: EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -262,7 +262,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             child: Text(
                               "Sign in now",
                               style: TextStyle(
-                                color: Color.fromARGB(255, 45, 153, 156),
+                                color: const Color.fromRGBO(236, 64, 122, 1),
                                 fontWeight: FontWeight.bold,
                                 fontSize: 14,
                               ),
