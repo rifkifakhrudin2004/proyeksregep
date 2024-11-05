@@ -39,10 +39,29 @@ class _HomePageState extends State<HomePage> {
         ),
         Article(
           title: 'Artikel 3',
-          imageUrl: 'assets/makeup.jpg',
+          imageUrl: 'assets/logo.jpg',
           content: 'Konten artikel 3',
         ),
-        // Tambahkan artikel lainnya sesuai kebutuhan
+        Article(
+          title: 'Artikel 4',
+          imageUrl: 'assets/logo.jpg',
+          content: 'Konten artikel 4',
+        ),
+        Article(
+          title: 'Artikel 5',
+          imageUrl: 'assets/logo.jpg',
+          content: 'Konten artikel 5',
+        ),
+        Article(
+          title: 'Artikel 6',
+          imageUrl: 'assets/logo.jpg',
+          content: 'Konten artikel 6',
+        ),
+        // Article(
+        //   title: 'Artikel 7',
+        //   imageUrl: 'assets/logo.jpg',
+        //   content: 'Konten artikel 7',
+        // ),
       ];
     });
   }
@@ -170,14 +189,40 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
-      body: articles.isNotEmpty 
-          ? ListView.builder(
-              itemCount: articles.length,
-              itemBuilder: (context, index) {
-                return ArticleWidget(article: articles[index]);
-              },
-            )
-          : Center(child: CircularProgressIndicator()), // Show loading indicator if no articles
+      body: articles.isEmpty 
+           ? Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    // First article spans full width
+                    if (articles.isNotEmpty)
+                      Container(
+                        width: double.infinity,
+                        child: ArticleWidget(article: articles[0]),
+                      ),
+                    SizedBox(height: 16),
+                    // Remaining articles in two columns
+                    GridView.builder(
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                        mainAxisExtent: 220, // Adjust this value to control item height
+                      ),
+                      itemCount: articles.length - 1, // Exclude the first article
+                      itemBuilder: (context, index) {
+                        // Add 1 to index since we're skipping the first article
+                        return ArticleWidget(article: articles[index + 1]);
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
       bottomNavigationBar: Container(
         height: 80.0,
         decoration: BoxDecoration(

@@ -26,12 +26,12 @@ class FaceDetectorService {
     final bytes = Uint8List.fromList(allBytes);
 
     // Ubah rotasi jika diperlukan
-    final rotation = InputImageRotation.rotation90deg; // Sesuaikan dengan kebutuhan
+    final rotation = InputImageRotation.rotation270deg; // Sesuaikan dengan kebutuhan
 
     final metadata = InputImageMetadata(
       size: Size(image.width.toDouble(), image.height.toDouble()),
       rotation: InputImageRotation.rotation270deg,
-      format: InputImageFormat.yuv420,
+      format: InputImageFormat.nv21,
       bytesPerRow: image.planes[0].bytesPerRow,
     );
 
