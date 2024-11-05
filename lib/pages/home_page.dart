@@ -71,6 +71,7 @@ class _HomePageState extends State<HomePage> {
     var screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
+      backgroundColor: const Color.fromRGBO(252, 228, 236, 1),
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(90),
         child: AppBar(

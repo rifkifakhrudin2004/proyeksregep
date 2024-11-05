@@ -41,7 +41,7 @@ class ArticleWidget extends StatelessWidget {
                         child: Container(
                           padding: EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.9),
+                            color: const Color.fromRGBO(255, 255, 255, 1).withOpacity(0.9),
                             shape: BoxShape.circle,
                           ),
                           child: Icon(Icons.close, color: Colors.black87),
@@ -103,7 +103,7 @@ class ArticleWidget extends StatelessWidget {
             end: Alignment.bottomRight,
             colors: [
               Colors.white,
-              Color.fromARGB(255, 250, 244, 244),
+              Color.fromRGBO(255, 205, 210, 1),
             ],
           ),
         ),
