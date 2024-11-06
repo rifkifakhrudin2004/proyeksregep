@@ -200,47 +200,66 @@ Future<void> _loadProfile() async {
     setState(() {}); // Perbarui UI setelah URL diperbarui
   }
 }
-
-  Future<void> _saveProfile(BuildContext context) async {
-    // Validate all fields are filled
-    if (nameController.text.isEmpty || ageController.text.isEmpty) {
-      AwesomeDialog(
-        context: context,
-        dialogType: DialogType.error,
-        animType: AnimType.rightSlide,
-        title: "Data Belum Lengkap",
-        desc: "Silakan isi semua data sebelum menyimpan.",
-        btnOkOnPress: () {},
-      ).show();
-      return;
-    }
-
-    // Simulate a save action
-    try {
-      // Here you would normally save the profile data to the database
-      // For example: await saveToDatabase(nameController.text, ageController.text);
-
-      // If the save operation is successful
-      AwesomeDialog(
-        context: context,
-        dialogType: DialogType.success,
-        animType: AnimType.scale,
-        title: "Profil Tersimpan",
-        desc: "Profil Anda berhasil disimpan.",
-        btnOkOnPress: () {},
-      ).show();
-    } catch (e) {
-      // If the save operation fails
-      AwesomeDialog(
-        context: context,
-        dialogType: DialogType.error,
-        animType: AnimType.scale,
-        title: "Simpan Gagal",
-        desc: "Gagal menyimpan profil: ${e.toString()}",
-        btnOkOnPress: () {},
-      ).show();
-    }
+Future<void> _saveProfile(BuildContext context) async {
+  if (nameController.text.isEmpty || ageController.text.isEmpty || 
+      phoneNumberController.text.isEmpty || dobController.text.isEmpty) {
+    AwesomeDialog(
+      context: context,
+      dialogType: DialogType.error,
+      animType: AnimType.rightSlide,
+      title: "Data Belum Lengkap",
+      desc: "Silakan isi nama, usia, nomor telepon, dan tanggal lahir sebelum menyimpan.",
+      btnOkOnPress: () {},
+    ).show();
+    return;
   }
+
+  try {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      DocumentReference docRef = FirebaseFirestore.instance.collection('profiles').doc(user.uid);
+
+      // Cek apakah dokumen ada
+      DocumentSnapshot docSnapshot = await docRef.get();
+      Map<String, dynamic> profileData = {
+        'name': nameController.text,
+        'age': int.tryParse(ageController.text),
+        'dateOfBirth': dobController.text,
+        'phoneNumber': phoneNumberController.text,
+      };
+
+      profileData.removeWhere((key, value) => value == null || value == '');
+
+      if (docSnapshot.exists) {
+        // Jika dokumen ada, update dokumen
+        await docRef.update(profileData);
+      } else {
+        // Jika dokumen tidak ada, buat dokumen baru
+        await docRef.set(profileData);
+      }
+    }
+
+    AwesomeDialog(
+      context: context,
+      dialogType: DialogType.success,
+      animType: AnimType.scale,
+      title: "Profil Tersimpan",
+      desc: "Profil Anda berhasil disimpan.",
+      btnOkOnPress: () {},
+    ).show();
+  } catch (e) {
+    AwesomeDialog(
+      context: context,
+      dialogType: DialogType.error,
+      animType: AnimType.scale,
+      title: "Simpan Gagal",
+      desc: "Gagal menyimpan profil: ${e.toString()}",
+      btnOkOnPress: () {},
+    ).show();
+  }
+}
+
+
 
  Future<void> _removePhoto(String photoUrl) async {
   try {
@@ -281,7 +300,14 @@ Future<void> _loadProfile() async {
 Widget build(BuildContext context) {
   return Scaffold(
     appBar: AppBar(
-      title: const Text('Profile Page'),
+      title: const Text('Profile'),
+        leading: IconButton(
+        icon: const Icon(Icons.arrow_back),
+        onPressed: () {
+          Navigator.pop(context); // Kembali ke halaman sebelumnya
+        },
+      ),
+      backgroundColor: Colors.blue, // Ganti dengan warna yang diinginkan
     ),
     body: Padding(
       padding: const EdgeInsets.all(16.0),

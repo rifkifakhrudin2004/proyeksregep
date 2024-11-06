@@ -34,7 +34,7 @@ class _HomePageState extends State<HomePage> {
         ),
         Article(
           title: 'Artikel 2',
-          imageUrl: 'assets/logo.jpg',
+          imageUrl: 'assets/PenyebabKeriput.png',
           content: 'Konten artikel 2',
         ),
         Article(

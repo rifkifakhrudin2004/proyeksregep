@@ -12,15 +12,15 @@ class StoragePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Galeri', style:TextStyle(
-          color: Colors.black,
-          fontSize: 22,
-          fontWeight: FontWeight.bold,
-        ),
-        ),
-        centerTitle: true,
-        backgroundColor: const Color.fromRGBO(248, 187, 208, 1), // Warna AppBar
+      title: const Text('Profile'),
+        leading: IconButton(
+        icon: const Icon(Icons.arrow_back),
+        onPressed: () {
+          Navigator.pop(context); // Kembali ke halaman sebelumnya
+        },
       ),
+      backgroundColor: Colors.blue, // Ganti dengan warna yang diinginkan
+    ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
