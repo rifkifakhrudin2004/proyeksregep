@@ -57,11 +57,6 @@ class _HomePageState extends State<HomePage> {
           imageUrl: 'assets/logo.jpg',
           content: 'Konten artikel 6',
         ),
-        // Article(
-        //   title: 'Artikel 7',
-        //   imageUrl: 'assets/logo.jpg',
-        //   content: 'Konten artikel 7',
-        // ),
       ];
     });
   }
@@ -87,11 +82,8 @@ class _HomePageState extends State<HomePage> {
                 return Center(child: CircularProgressIndicator());
               }
               if (snapshot.hasData && snapshot.data != null) {
-                // Cast data to a Map
                 Map<String, dynamic>? data =
                     snapshot.data!.data() as Map<String, dynamic>?;
-
-                // Check if 'name' and 'photoUrl' fields exist
                 userName = data != null && data.containsKey('name')
                     ? data['name']
                     : null;
@@ -184,7 +176,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                 );
               }
-              return Container(); // Fallback if no data
+              return Container();
             },
           ),
         ),
@@ -196,14 +188,12 @@ class _HomePageState extends State<HomePage> {
                 padding: EdgeInsets.all(16.0),
                 child: Column(
                   children: [
-                    // First article spans full width
                     if (articles.isNotEmpty)
                       Container(
                         width: double.infinity,
                         child: ArticleWidget(article: articles[0]),
                       ),
                     SizedBox(height: 16),
-                    // Remaining articles in two columns
                     GridView.builder(
                       shrinkWrap: true,
                       physics: NeverScrollableScrollPhysics(),
@@ -211,11 +201,10 @@ class _HomePageState extends State<HomePage> {
                         crossAxisCount: 2,
                         crossAxisSpacing: 16,
                         mainAxisSpacing: 16,
-                        mainAxisExtent: 220, // Adjust this value to control item height
+                        mainAxisExtent: 220,
                       ),
-                      itemCount: articles.length - 1, // Exclude the first article
+                      itemCount: articles.length - 1,
                       itemBuilder: (context, index) {
-                        // Add 1 to index since we're skipping the first article
                         return ArticleWidget(article: articles[index + 1]);
                       },
                     ),
@@ -223,119 +212,128 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             ),
-      bottomNavigationBar: Container(
-        height: 80.0,
-        decoration: BoxDecoration(
-          color: const Color.fromRGBO(248, 187, 208, 1),
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.3),
-              spreadRadius: 5,
-              blurRadius: 7,
-              offset: Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: _buildNavItem(
-                icon: Icons.person,
-                label: 'Profil',
-                onTap: () => _onItemTapped(2),
-              ),
-            ),
-            Expanded(
-              child: _buildCameraButton(),
-            ),
-            Expanded(
-              child: _buildNavItem(
-                icon: Icons.storage,
-                label: 'Galeri',
-                onTap: () => _onItemTapped(1),
-              ),
-            ),
-            Expanded(
-              child: _buildNavItem(
-                icon: Icons.logout,
-                label: 'Logout',
-                onTap: _logout,
-              ),
-            ),
-          ],
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 1.0), 
+        child: FloatingActionButton(
+          onPressed: () => Navigator.pushNamed(context, '/camera'),
+          backgroundColor: const Color.fromRGBO(236, 64, 122, 1),
+          child: Icon(Icons.camera_alt, color: Colors.white, size: 30),
         ),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+bottomNavigationBar: BottomAppBar(
+  color: const Color.fromRGBO(248, 187, 208, 1),
+  shape: CircularNotchedRectangle(),
+  notchMargin: 20,
+  child: Container(
+    height: 80.0,
+    padding: const EdgeInsets.symmetric(horizontal: 0.1),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly, 
+      children: [
+        Expanded(
+          child: _buildNavItem(
+            icon: Icons.home,
+            label: 'Home',
+            index: 0,
+          ),
+        ),
+        Expanded(
+          child: _buildNavItem(
+            icon: Icons.photo_library,
+            label: 'Gallery',
+            index: 1,
+          ),
+        ),
+        SizedBox(width: 90),
+        Expanded(
+          child: _buildNavItem(
+            icon: Icons.history,
+            label: 'History',
+            index: 2,
+          ),
+        ),
+        Expanded(
+          child: InkWell(
+            onTap: () {
+              setState(() {
+                _selectedIndex = 3;
+              });
+              Navigator.pushNamed(context, '/profile');
+            },
+            borderRadius: BorderRadius.circular(15),
+            child: Container(
+              alignment: Alignment.center,
+              child: lastPhotoUrl != null
+                  ? CircleAvatar(
+                      radius: 23, 
+                      backgroundImage: NetworkImage(lastPhotoUrl!),
+                    )
+                  : CircleAvatar(
+                      radius: 23, 
+                      backgroundColor: Colors.grey[300],
+                      child: Icon(Icons.person, size: 24, color: Colors.grey),
+                    ),
+            ),
+          ),
+        ),
+      ],
+    ),
+  ),
+),
+
     );
-  }
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-
-    switch (index) {
-      case 0:
-        Navigator.pushNamed(context, '/camera');
-        break;
-      case 1:
-        Navigator.pushNamed(context, '/storage');
-        break;
-      case 2:
-        Navigator.pushNamed(context, '/profile');
-        break;
-      case 3:
-        _logout();
-        break;
-    }
-  }
-
-  Future<void> _logout() async {
-    await FirebaseAuth.instance.signOut();
-    Navigator.pushReplacementNamed(context, '/');
   }
 
   Widget _buildNavItem({
     required IconData icon,
     required String label,
-    required VoidCallback onTap,
+    required int index,
   }) {
     return InkWell(
-      onTap: onTap,
+      onTap: () {
+        setState(() {
+          _selectedIndex = index;
+        });
+        switch (index) {
+          case 0:
+            Navigator.pushNamed(context, '/home');
+            break;
+          case 1:
+            Navigator.pushNamed(context, '/storage');
+            break;
+          case 2:
+            Navigator.pushNamed(context, '/history');
+            break;
+          case 3:
+            Navigator.pushNamed(context, '/profile');
+            break;
+        }
+      },
       borderRadius: BorderRadius.circular(15),
       child: Container(
         alignment: Alignment.center,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: const Color.fromRGBO(236, 64, 122, 1), size: 30),
-            Text(label, style: TextStyle(color: const Color.fromRGBO(236, 64, 122, 1))),
+            Icon(icon,
+                color: _selectedIndex == index
+                    ? const Color.fromRGBO(236, 64, 122, 1)
+                    : Colors.black, size: 30),
+                    
+            if (index != 3) // Hapus label untuk profil
+              Text(
+                label,
+                style: TextStyle(
+                  color: _selectedIndex == index
+                      ? const Color.fromRGBO(236, 64, 122, 1)
+                      : Colors.black,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
+              ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildCameraButton() {
-    return GestureDetector(
-      onTap: () => _onItemTapped(0),
-      child: Container(
-        height: 60.0,
-        width: 60.0,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: const Color(0xFF880E4F),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.3),
-              spreadRadius: 5,
-              blurRadius: 7,
-              offset: Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Icon(Icons.add_a_photo, size: 30.0, color: Colors.white),
       ),
     );
   }
