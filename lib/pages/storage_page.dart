@@ -12,7 +12,7 @@ class StoragePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-      title: const Text('Profile'),
+      title: const Text('Gallery'),
         leading: IconButton(
         icon: const Icon(Icons.arrow_back),
         onPressed: () {
