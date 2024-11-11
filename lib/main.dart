@@ -73,7 +73,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
           duration: Duration(seconds: 2), // Durasi animasi fade-in
           child: ClipOval(
             child: Image.asset(
-              'assets/logo.jpg',
+              'assets/Olivia.png',
               width: 150,
               height: 150,
               fit: BoxFit.cover, // Agar gambar memenuhi bentuk bulat
