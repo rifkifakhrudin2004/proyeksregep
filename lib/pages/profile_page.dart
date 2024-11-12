@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:proyeksregep/models/Userprofile.dart'; // Model UserProfile
 import 'package:image_picker/image_picker.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
-
+import 'package:proyeksregep/auth/landing_page.dart';
 
 
 class ProfilePage extends StatefulWidget {
@@ -427,6 +427,14 @@ Widget build(BuildContext context) {
                 child: Text("Simpan Profil"),
               )
           ),
+          ElevatedButton(
+              onPressed: _logout,
+              child: Text('Logout'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red, // Ganti warna sesuai keinginan
+                padding: EdgeInsets.symmetric(vertical: 12, horizontal: 40),
+              ),
+            ),
         ],
       ),
     ),
@@ -497,79 +505,13 @@ void _showProfileNotFoundAlert() {
     },
   );
 }
-// Logout
-
-  @override
-  Widget logout(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Profile'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context); // Go back to the previous page
-          },
-        ),
-        backgroundColor: const Color.fromRGBO(248, 187, 208, 1),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () => _logout(context), // Calls logout when pressed
-          ),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            // Add your profile UI components here, like name, photo, etc.
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => _logout(context), // Logout button in body
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  foregroundColor: Colors.white,
-                ),
-                child: const Text("Logout"),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // Logout method (displays the logout confirmation alert dialog)
-  Future<void> _logout(BuildContext context) async {
-    bool confirmLogout = await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("Logout"),
-          content: const Text("Are you sure you want to logout?"),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(false); // Cancel logout
-              },
-              child: const Text("Cancel"),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(true); // Confirm logout
-              },
-              child: const Text("Logout"),
-            ),
-          ],
-        );
-      },
-    ) ?? false;
-
-    if (confirmLogout) {
-      // Clear user session or authentication state
-      Navigator.pushReplacementNamed(context, '/login'); // Navigate to login screen
-    }
-  }
+// Fungsi _logout
+void _logout() async {
+  await FirebaseAuth.instance.signOut();
+  // Setelah logout, arahkan ke halaman login
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(builder: (context) => LandingPage()), // Pastikan LoginPage sudah ada
+  );
+}
 }
