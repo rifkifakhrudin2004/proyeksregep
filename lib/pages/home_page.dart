@@ -203,9 +203,9 @@ class _HomePageState extends State<HomePage> {
                                 )
                               : CircleAvatar(
                                   radius: 40,
-                                  backgroundColor: Colors.grey[300],
+                                  backgroundColor: const Color.fromRGBO(252, 228, 236, 1),
                                   child: Icon(Icons.person,
-                                      size: 40, color: Colors.grey),
+                                      size: 40, color: const Color.fromRGBO(136, 14, 79, 1)),
                                 ),
                         ),
                         SizedBox(width: 10),

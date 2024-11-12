@@ -19,12 +19,12 @@ class StoragePage extends StatelessWidget {
           Navigator.pop(context); // Kembali ke halaman sebelumnya
         },
       ),
-      backgroundColor: Colors.blue, // Ganti dengan warna yang diinginkan
+      backgroundColor: const Color.fromRGBO(236, 64, 122, 1), // Ganti dengan warna yang diinginkan
     ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [const Color.fromRGBO(252, 228, 236, 1), const Color.fromRGBO(252, 228, 236, 1)],
+            colors: [const Color.fromRGBO(248, 187, 208, 1), const Color.fromRGBO(248, 187, 208, 1),],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
