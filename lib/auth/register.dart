@@ -129,8 +129,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     "Register Your Account",
                     style: TextStyle(
                       fontSize: 32,
+                      fontFamily: 'Roboto',
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: const Color.fromRGBO(136, 14, 79, 1),
                     ),
                   ),
                 ),

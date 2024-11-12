@@ -104,7 +104,7 @@ class _HomePageState extends State<HomePage> {
             children: [
               Text(
                 'Panduan Pemakaian Kamera',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color.fromRGBO(136, 14, 79, 1),),
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: 20),
@@ -137,7 +137,12 @@ class _HomePageState extends State<HomePage> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: Text('Mulai Kamera'),
+                child: const Text(
+                  'Mulai Kamera',
+                  style: TextStyle(
+                    color: Color.fromRGBO(136, 14, 79, 1),
+                  ),
+                ),
               ),
             ],
           ),
@@ -221,7 +226,7 @@ class _HomePageState extends State<HomePage> {
                                 style: TextStyle(
                                   fontSize: screenWidth * 0.05,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.black87,
+                                  color: const Color.fromRGBO(136, 14, 79, 1),
                                 ),
                               ),
                             ),
@@ -230,7 +235,7 @@ class _HomePageState extends State<HomePage> {
                               'Sudah cek kerutan wajahmu hari ini?',
                               style: TextStyle(
                                 fontSize: screenWidth * 0.035,
-                                color: Colors.black54,
+                                color: const Color.fromRGBO(136, 14, 79, 1),
                               ),
                             ),
                           ],
@@ -306,7 +311,7 @@ class _HomePageState extends State<HomePage> {
         child: FloatingActionButton(
           onPressed:
               _showCameraGuide, // Panggil fungsi langsung tanpa tanda kurung tambahan
-          backgroundColor: const Color.fromRGBO(236, 64, 122, 1),
+          backgroundColor: const Color.fromRGBO(136, 14, 79, 1),
           child: Icon(Icons.camera_alt, color: Colors.white, size: 30),
         ),
       ),
@@ -399,7 +404,7 @@ class _HomePageState extends State<HomePage> {
               icon,
               color: _selectedIndex == index
                   ? const Color.fromRGBO(236, 64, 122, 1)
-                  : Colors.black87,
+                  : const Color.fromRGBO(136, 14, 79, 1),
             ),
             SizedBox(height: 4),
             Text(
@@ -407,7 +412,7 @@ class _HomePageState extends State<HomePage> {
               style: TextStyle(
                 color: _selectedIndex == index
                     ? const Color.fromRGBO(236, 64, 122, 1)
-                    : Colors.black87,
+                    : const Color.fromRGBO(136, 14, 79, 1),
               ),
             ),
           ],

@@ -138,8 +138,9 @@ class _LandingPageState extends State<LandingPage> {
                     "Smart AgeDefying",
                     style: TextStyle(
                       fontSize: 26,
+                      fontFamily: 'Roboto',
                       fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                      color: const Color.fromRGBO(136, 14, 79, 1),
                       letterSpacing: 1.5,
                     ),
                   ),

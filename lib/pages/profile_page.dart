@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:proyeksregep/models/Userprofile.dart'; // Model UserProfile
 import 'package:image_picker/image_picker.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
-
+import 'package:proyeksregep/auth/landing_page.dart';
 
 
 class ProfilePage extends StatefulWidget {
@@ -180,7 +180,7 @@ Future<void> _loadProfile() async {
   Future<void> _pickAndUploadImage(ImageSource source) async {
   final XFile? image = await _picker.pickImage(source: source);
   if (image != null) {
-    String fileName = 'profile_photos/${_auth.currentUser!.uid}_${DateTime.now().millisecondsSinceEpoch}.jpg';
+    String fileName = 'profile_photos/${_auth.currentUser!.uid}${DateTime.now().millisecondsSinceEpoch}.jpg';
     Reference storageRef = FirebaseStorage.instance.ref().child(fileName);
 
     // Upload file ke Firebase Storage
@@ -300,9 +300,16 @@ Future<void> _saveProfile(BuildContext context) async {
 Widget build(BuildContext context) {
   return Scaffold(
     appBar: AppBar(
-      title: const Text('Profile'),
+      title: const Text('Profile',
+        style: TextStyle(
+          fontFamily:'Roboto',
+          fontWeight: FontWeight.bold,
+          color: Color.fromRGBO(136, 14, 79, 1),
+        ),
+      ),
         leading: IconButton(
         icon: const Icon(Icons.arrow_back),
+        color: const Color.fromRGBO(136, 14, 79, 1),
         onPressed: () {
           Navigator.pop(context); // Kembali ke halaman sebelumnya
         },
@@ -317,7 +324,8 @@ Widget build(BuildContext context) {
             onTap: _showPhotoPreview,
             child: CircleAvatar(
               radius: 60.0,
-              backgroundColor: _photoUrl.isEmpty ? const Color.fromRGBO(252, 228, 236, 1) : null,
+              backgroundColor: _photoUrl.isEmpty ? 
+              const Color.fromRGBO(252, 228, 236, 1) : null,
               child: _photoUrl.isNotEmpty
                   ? ClipOval(
                       child: Image.network(
@@ -331,8 +339,8 @@ Widget build(BuildContext context) {
                         },
                       ),
                     )
-                  : const Icon(Icons.person, size: 60.0, color: const Color.fromRGBO(136, 14, 79, 1)),
-            ), 
+                  : const Icon(Icons.person, size: 60.0,color:Color.fromRGBO(136, 14, 79, 1) ),
+            ),
           ),
           const SizedBox(height: 16.0),
           Row(
@@ -415,18 +423,41 @@ Widget build(BuildContext context) {
               ),
             ],
           ),
-          SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => _saveProfile(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromRGBO(236, 64, 122, 1), // Warna latar belakang tombol
-                  foregroundColor: Colors.black, // Warna teks tombol
+         SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () => _saveProfile(context),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color.fromRGBO(240, 98, 146, 1), // Button background color
+                foregroundColor:  Colors.white, // Button text color
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12), // Rounded corners
                 ),
-                child: Text("Simpan Profil"),
-              )
+                padding: EdgeInsets.symmetric(vertical: 16), // Padding inside the button
+                elevation: 8, // Shadow effect
+              ),
+              child: Text(
+                "Simpan Profil",
+                style: TextStyle(
+                  fontSize: 18, // Text size
+                  fontWeight: FontWeight.bold, // Bold text
+                ),
+              ),
+            ),
           ),
+          ElevatedButton(
+              onPressed: _logout,
+              child: Text('Logout'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red, // Ganti warna sesuai keinginan
+                foregroundColor: Colors.white,
+                padding: EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
         ],
       ),
     ),
@@ -497,79 +528,13 @@ void _showProfileNotFoundAlert() {
     },
   );
 }
-// Logout
-
-  @override
-  Widget logout(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Profile'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context); // Go back to the previous page
-          },
-        ),
-        backgroundColor: const Color.fromRGBO(248, 187, 208, 1),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () => _logout(context), // Calls logout when pressed
-          ),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            // Add your profile UI components here, like name, photo, etc.
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => _logout(context), // Logout button in body
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  foregroundColor: Colors.white,
-                ),
-                child: const Text("Logout"),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // Logout method (displays the logout confirmation alert dialog)
-  Future<void> _logout(BuildContext context) async {
-    bool confirmLogout = await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("Logout"),
-          content: const Text("Are you sure you want to logout?"),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(false); // Cancel logout
-              },
-              child: const Text("Cancel"),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(true); // Confirm logout
-              },
-              child: const Text("Logout"),
-            ),
-          ],
-        );
-      },
-    ) ?? false;
-
-    if (confirmLogout) {
-      // Clear user session or authentication state
-      Navigator.pushReplacementNamed(context, '/login'); // Navigate to login screen
-    }
-  }
+// Fungsi _logout
+void _logout() async {
+  await FirebaseAuth.instance.signOut();
+  // Setelah logout, arahkan ke halaman login
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(builder: (context) => LandingPage()), // Pastikan LoginPage sudah ada
+  );
+}
 }
