@@ -16,6 +16,7 @@ class _HomePageState extends State<HomePage> {
   String? userName;
   int _selectedIndex = 0;
   bool isLoading = true;
+  int _selectedStep = 0;
 
   @override
   void initState() {
@@ -55,23 +56,90 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  void _showFullImage(String imageUrl) {
-    showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (BuildContext context) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          child: GestureDetector(
-            onTap: () => Navigator.pop(context),
+ void _showFullImage(String imageUrl) {
+  showDialog(
+    context: context,
+    barrierDismissible: true,
+    builder: (BuildContext context) {
+      return Dialog(
+        backgroundColor: Colors.transparent,
+        child: GestureDetector(
+          onTap: () => Navigator.pop(context),
+          child: Center(
             child: Container(
+              constraints: BoxConstraints(maxWidth: 600, maxHeight: 600),
               decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage(imageUrl),
-                  fit: BoxFit.contain,
+                color: Colors.white, // Anda bisa memberikan warna latar belakang di sini
+                borderRadius: BorderRadius.circular(300), // Membuat sudut bulat
+              ),
+              child: ClipOval( // Menggunakan ClipOval untuk memotong gambar menjadi bulat
+                child: Image.network(
+                  imageUrl,
+                  fit: BoxFit.cover, // Menjaga gambar tetap proporsional
+                  width: 300, // Ukuran gambar sesuai dengan keinginan Anda
+                  height: 300, // Ukuran gambar sesuai dengan keinginan Anda
                 ),
               ),
             ),
+          ),
+        ),
+      );
+    },
+  );
+}
+
+
+  void _showCameraGuide() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          contentPadding: EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Panduan Pemakaian Kamera',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 20),
+              GestureDetector(
+                onTap: () {
+                  Navigator.pop(context); // Menutup dialog saat di-tap
+                },
+                child: InteractiveViewer(
+                  maxScale: 4.0, // Zoom maksimal
+                  minScale: 1.0, // Zoom minimal
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(15),
+                    child: Image.asset(
+                      'assets/panduan.png',
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context); // Menutup dialog
+                  Navigator.pushNamed(
+                      context, '/camera'); // Navigasi ke halaman kamera
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromRGBO(252, 228, 236, 1),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Text('Mulai Kamera'),
+              ),
+            ],
           ),
         );
       },
@@ -129,11 +197,15 @@ class _HomePageState extends State<HomePage> {
                               ? CircleAvatar(
                                   radius: 40,
                                   backgroundImage: NetworkImage(lastPhotoUrl!),
+                                  // Border bulat untuk menyesuaikan dengan bentuk bulat
+                                  foregroundColor: Colors
+                                      .transparent, // jika ingin gambar lebih bersih
                                 )
                               : CircleAvatar(
                                   radius: 40,
                                   backgroundColor: Colors.grey[300],
-                                  child: Icon(Icons.person, size: 40, color: Colors.grey),
+                                  child: Icon(Icons.person,
+                                      size: 40, color: Colors.grey),
                                 ),
                         ),
                         SizedBox(width: 10),
@@ -173,8 +245,8 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
-      body: articles.isEmpty 
-           ? Center(child: CircularProgressIndicator())
+      body: articles.isEmpty
+          ? Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
               child: Padding(
                 padding: EdgeInsets.all(16.0),
@@ -208,7 +280,8 @@ class _HomePageState extends State<HomePage> {
                       itemCount: articles.length - 1,
                       itemBuilder: (context, index) {
                         return GestureDetector(
-                          onTap: () => _showFullImage(articles[index + 1].imageUrl),
+                          onTap: () =>
+                              _showFullImage(articles[index + 1].imageUrl),
                           child: Container(
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(15),
@@ -229,9 +302,10 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
       floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 1.0), 
+        padding: const EdgeInsets.only(bottom: 1.0),
         child: FloatingActionButton(
-          onPressed: () => Navigator.pushNamed(context, '/camera'),
+          onPressed:
+              _showCameraGuide, // Panggil fungsi langsung tanpa tanda kurung tambahan
           backgroundColor: const Color.fromRGBO(236, 64, 122, 1),
           child: Icon(Icons.camera_alt, color: Colors.white, size: 30),
         ),
@@ -245,7 +319,7 @@ class _HomePageState extends State<HomePage> {
           height: 80.0,
           padding: const EdgeInsets.symmetric(horizontal: 0.1),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly, 
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               Expanded(
                 child: _buildNavItem(
@@ -270,27 +344,10 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               Expanded(
-                child: InkWell(
-                  onTap: () {
-                    setState(() {
-                      _selectedIndex = 3;
-                    });
-                    Navigator.pushNamed(context, '/profile');
-                  },
-                  borderRadius: BorderRadius.circular(15),
-                  child: Container(
-                    alignment: Alignment.center,
-                    child: lastPhotoUrl != null
-                        ? CircleAvatar(
-                            radius: 23, 
-                            backgroundImage: NetworkImage(lastPhotoUrl!),
-                          )
-                        : CircleAvatar(
-                            radius: 23, 
-                            backgroundColor: Colors.grey[300],
-                            child: Icon(Icons.person, size: 24, color: Colors.grey),
-                          ),
-                  ),
+                child: _buildNavItem(
+                  icon: Icons.person,
+                  label: 'Profile',
+                  index: 3,
                 ),
               ),
             ],
@@ -300,6 +357,29 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  void _navigateToPage(int index) {
+    if (mounted) {
+      setState(() {
+        _selectedIndex = index;
+      });
+
+      switch (index) {
+        case 0:
+          Navigator.pushReplacementNamed(context, '/home');
+          break;
+        case 1:
+          Navigator.pushNamed(context, '/storage');
+          break;
+        case 2:
+          Navigator.pushNamed(context, '/history');
+          break;
+        case 3:
+          Navigator.pushNamed(context, '/profile');
+          break;
+      }
+    }
+  }
+
   Widget _buildNavItem({
     required IconData icon,
     required String label,
@@ -307,32 +387,29 @@ class _HomePageState extends State<HomePage> {
   }) {
     return InkWell(
       onTap: () {
-        setState(() {
-          _selectedIndex = index;
-        });
-        switch (index) {
-          case 0:
-            Navigator.pushNamed(context, '/home');
-            break;
-          case 1:
-            Navigator.pushNamed(context, '/storage');
-            break;
-          case 2:
-            Navigator.pushNamed(context, '/history');
-            break;
-          case 3:
-            Navigator.pushNamed(context, '/profile');
-            break;
-        }
+        _navigateToPage(
+            index); // Use the method to handle the navigation and state update
       },
       child: Container(
         alignment: Alignment.center,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: _selectedIndex == index ? const Color.fromRGBO(236, 64, 122, 1) : Colors.black87),
+            Icon(
+              icon,
+              color: _selectedIndex == index
+                  ? const Color.fromRGBO(236, 64, 122, 1)
+                  : Colors.black87,
+            ),
             SizedBox(height: 4),
-            Text(label, style: TextStyle(color: _selectedIndex == index ? const Color.fromRGBO(236, 64, 122, 1) : Colors.black87)),
+            Text(
+              label,
+              style: TextStyle(
+                color: _selectedIndex == index
+                    ? const Color.fromRGBO(236, 64, 122, 1)
+                    : Colors.black87,
+              ),
+            ),
           ],
         ),
       ),
