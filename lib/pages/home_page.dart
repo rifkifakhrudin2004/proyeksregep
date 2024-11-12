@@ -55,38 +55,28 @@ class _HomePageState extends State<HomePage> {
       ];
     });
   }
-
  void _showFullImage(String imageUrl) {
-  showDialog(
-    context: context,
-    barrierDismissible: true,
-    builder: (BuildContext context) {
-      return Dialog(
-        backgroundColor: Colors.transparent,
-        child: GestureDetector(
-          onTap: () => Navigator.pop(context),
-          child: Center(
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: GestureDetector(
+            onTap: () => Navigator.pop(context),
             child: Container(
-              constraints: BoxConstraints(maxWidth: 600, maxHeight: 600),
               decoration: BoxDecoration(
-                color: Colors.white, // Anda bisa memberikan warna latar belakang di sini
-                borderRadius: BorderRadius.circular(300), // Membuat sudut bulat
-              ),
-              child: ClipOval( // Menggunakan ClipOval untuk memotong gambar menjadi bulat
-                child: Image.network(
-                  imageUrl,
-                  fit: BoxFit.cover, // Menjaga gambar tetap proporsional
-                  width: 300, // Ukuran gambar sesuai dengan keinginan Anda
-                  height: 300, // Ukuran gambar sesuai dengan keinginan Anda
+                image: DecorationImage(
+                  image: AssetImage(imageUrl),
+                  fit: BoxFit.contain,
                 ),
               ),
             ),
           ),
-        ),
-      );
-    },
-  );
-}
+        );
+      },
+    );
+  }
 
 
   void _showCameraGuide() {
@@ -417,7 +407,7 @@ class _HomePageState extends State<HomePage> {
             ),
           ],
         ),
-      ),
-    );
-  }
+     ),
+);
+}
 }
