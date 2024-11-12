@@ -331,8 +331,8 @@ Widget build(BuildContext context) {
                         },
                       ),
                     )
-                  : const Icon(Icons.person, size: 60.0),
-            ),
+                  : const Icon(Icons.person, size: 60.0, color: const Color.fromRGBO(136, 14, 79, 1)),
+            ), 
           ),
           const SizedBox(height: 16.0),
           Row(
