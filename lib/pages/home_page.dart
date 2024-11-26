@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:proyeksregep/models/article.dart';
 import 'profile_page.dart';
 import 'package:proyeksregep/widgets/article_widget.dart';
+import 'storage_page.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -55,7 +56,8 @@ class _HomePageState extends State<HomePage> {
       ];
     });
   }
- void _showFullImage(String imageUrl) {
+
+  void _showFullImage(String imageUrl) {
     showDialog(
       context: context,
       barrierDismissible: true,
@@ -78,7 +80,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-
   void _showCameraGuide() {
     showDialog(
       context: context,
@@ -94,7 +95,11 @@ class _HomePageState extends State<HomePage> {
             children: [
               Text(
                 'Panduan Pemakaian Kamera',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color.fromRGBO(136, 14, 79, 1),),
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color.fromRGBO(136, 14, 79, 1),
+                ),
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: 20),
@@ -198,9 +203,12 @@ class _HomePageState extends State<HomePage> {
                                 )
                               : CircleAvatar(
                                   radius: 40,
-                                  backgroundColor: const Color.fromRGBO(252, 228, 236, 1),
+                                  backgroundColor:
+                                      const Color.fromRGBO(252, 228, 236, 1),
                                   child: Icon(Icons.person,
-                                      size: 40, color: const Color.fromRGBO(136, 14, 79, 1)),
+                                      size: 40,
+                                      color:
+                                          const Color.fromRGBO(136, 14, 79, 1)),
                                 ),
                         ),
                         SizedBox(width: 10),
@@ -222,7 +230,7 @@ class _HomePageState extends State<HomePage> {
                             ),
                             SizedBox(height: 4),
                             Text(
-                              'Sudah cek kerutan wajahmu hari ini?',
+                              'Sudah cek kulitmu hari ini?',
                               style: TextStyle(
                                 fontSize: screenWidth * 0.035,
                                 color: const Color.fromRGBO(136, 14, 79, 1),
@@ -334,7 +342,7 @@ class _HomePageState extends State<HomePage> {
               Expanded(
                 child: _buildNavItem(
                   icon: Icons.history,
-                  label: 'History',
+                  label: 'Routine',
                   index: 2,
                 ),
               ),
@@ -363,10 +371,14 @@ class _HomePageState extends State<HomePage> {
           Navigator.pushReplacementNamed(context, '/home');
           break;
         case 1:
-          Navigator.pushNamed(context, '/storage');
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const StoragePage(),
+            )
+          );
           break;
         case 2:
-          Navigator.pushNamed(context, '/history');
+          Navigator.pushNamed(context, '/routine');
           break;
         case 3:
           Navigator.pushNamed(context, '/profile');
@@ -382,8 +394,7 @@ class _HomePageState extends State<HomePage> {
   }) {
     return InkWell(
       onTap: () {
-        _navigateToPage(
-            index); // Use the method to handle the navigation and state update
+        _navigateToPage(index);
       },
       child: Container(
         alignment: Alignment.center,
@@ -407,7 +418,7 @@ class _HomePageState extends State<HomePage> {
             ),
           ],
         ),
-     ),
-);
-}
+      ),
+    );
+  }
 }

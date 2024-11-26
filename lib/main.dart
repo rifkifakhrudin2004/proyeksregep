@@ -3,11 +3,11 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'auth/register.dart';
 import 'auth/landing_page.dart';
-import 'models/ImagesData.dart';
 import 'camera/camera_screen.dart';
 import 'pages/home_page.dart';
 import 'pages/storage_page.dart';
 import 'pages/profile_page.dart';
+import 'pages/routine_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,7 +18,6 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
-  final List<ImageData> imageList = []; // Daftar untuk menyimpan data gambar
 
   @override
   Widget build(BuildContext context) {
@@ -33,8 +32,8 @@ class MyApp extends StatelessWidget {
         '/register': (context) => RegisterScreen(),
         '/home': (context) => HomePage(),
         '/camera': (context) => CameraScreen(),
-        '/storage': (context) => StoragePage(imageList: imageList),
         '/profile': (context) => ProfilePage(),
+        '/routine': (context) => SkincareRoutinePage(),
       },
     );
   }
