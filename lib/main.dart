@@ -8,6 +8,7 @@ import 'pages/home_page.dart';
 import 'pages/storage_page.dart';
 import 'pages/profile_page.dart';
 import 'pages/routine_page.dart';
+import 'pages/routinelist_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,7 +34,7 @@ class MyApp extends StatelessWidget {
         '/home': (context) => HomePage(),
         '/camera': (context) => CameraScreen(),
         '/profile': (context) => ProfilePage(),
-        '/routine': (context) => SkincareRoutinePage(),
+        '/routine': (context) => SkincareRoutineListPage (),
       },
     );
   }
