@@ -308,55 +308,100 @@ void _openGallery() async {
     final XFile? pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
-      // Tampilkan dialog loading
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 16),
-                Text('Sedang memproses gambar...\nMohon tunggu'),
-              ],
-            ),
+      // Inisialisasi face detector
+      final faceDetector = GoogleMlKit.vision.faceDetector(FaceDetectorOptions(
+        enableClassification: true,
+        minFaceSize: 0.15,
+        performanceMode: FaceDetectorMode.accurate,
+      ));
+
+      // Baca gambar
+      final inputImage = InputImage.fromFilePath(pickedFile.path);
+
+      try {
+        // Deteksi wajah
+        final List<Face> faces = await faceDetector.processImage(inputImage);
+
+        // Validasi jumlah dan kualitas wajah
+        if (faces.isEmpty || faces.length > 1) {
+          // Tampilkan alert jika tidak ada wajah atau lebih dari satu wajah
+          _showAlertDialog(
+            'Validasi Gambar',
+            faces.isEmpty 
+              ? 'Tidak ada wajah terdeteksi. Silakan pilih gambar dengan wajah yang jelas.' 
+              : 'Hanya satu wajah yang diperbolehkan dalam gambar.'
           );
-        },
-      );
-
-      // Set state dengan file yang dipilih
-      setState(() {
-        imageFile = pickedFile;
-      });
-
-      // Dapatkan nama file
-      String fileName = _getFileName(pickedFile);
-
-      // Upload gambar ke Firebase
-      String? filePath = await _uploadImageToFirebase(pickedFile, fileName);
-
-      if (filePath != null) {
-        User? user = FirebaseAuth.instance.currentUser;
-        if (user != null) {
-          // Tutup dialog loading
-          Navigator.of(context).pop();
-
-          // Navigasi ke ReviewPage dengan status processing
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ReviewPage(
-                imageFile: pickedFile,
-                isProcessing: true,
-              ),
-            ),
-          );
-          
-          // Proses ML di background
-          await sendImageData(user.uid, filePath);
+          return;
         }
+
+        // Validasi ukuran dan kualitas wajah
+        final firstFace = faces.first;
+        if (firstFace.boundingBox.width < 100 || firstFace.boundingBox.height < 100) {
+          _showAlertDialog(
+            'Validasi Gambar',
+            'Wajah terlalu kecil. Pilih gambar dengan wajah yang lebih jelas dan dekat.'
+          );
+          return;
+        }
+
+        // Tampilkan dialog loading
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
+                  Text('Sedang memproses gambar...\nMohon tunggu'),
+                ],
+              ),
+            );
+          },
+        );
+
+        // Set state dengan file yang dipilih
+        setState(() {
+          imageFile = pickedFile;
+        });
+
+        // Dapatkan nama file
+        String fileName = _getFileName(pickedFile);
+
+        // Upload gambar ke Firebase
+        String? filePath = await _uploadImageToFirebase(pickedFile, fileName);
+
+        if (filePath != null) {
+          User? user = FirebaseAuth.instance.currentUser;
+          if (user != null) {
+            // Tutup dialog loading
+            Navigator.of(context).pop();
+
+            // Navigasi ke ReviewPage dengan status processing
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ReviewPage(
+                  imageFile: pickedFile,
+                  isProcessing: true,
+                ),
+              ),
+            );
+            
+            // Proses ML di background
+            await sendImageData(user.uid, filePath);
+          }
+        }
+
+        // Tutup face detector
+        await faceDetector.close();
+
+      } catch (e) {
+        // Tangani kesalahan deteksi wajah
+        print('Error deteksi wajah: $e');
+        _showAlertDialog('Error', 'Gagal memvalidasi gambar. Silakan coba lagi.');
       }
     }
   } catch (e) {

@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:proyeksregep/models/skincare_model.dart';
 import 'routine_page.dart';
 import 'dart:io';
+import 'package:firebase_auth/firebase_auth.dart'; //
 import 'package:proyeksregep/models/skincare_model.dart';
 
 class SkincareRoutineListPage extends StatefulWidget {
@@ -20,36 +21,48 @@ class _SkincareRoutineListPageState extends State<SkincareRoutineListPage> {
     _fetchRoutines();
   }
   void _fetchRoutines() {
-  FirebaseFirestore.instance
-      .collection('skincare_routines')
-      .snapshots()
-      .listen((querySnapshot) {
-    setState(() {
-      routines = querySnapshot.docs.map((doc) {
-        return SkincareRoutine(
-          id: doc.id,
-          avatarUrl: doc['avatarUrl'] ?? '',
-          category: doc['category'],
-          note: doc['note'],
-          mondayMorning: doc['mondayMorning'],
-          mondayNight: doc['mondayNight'],
-          tuesdayMorning: doc['tuesdayMorning'],
-          tuesdayNight: doc['tuesdayNight'],
-          wednesdayMorning: doc['wednesdayMorning'],
-          wednesdayNight: doc['wednesdayNight'],
-          thursdayMorning: doc['thursdayMorning'],
-          thursdayNight: doc['thursdayNight'],
-          fridayMorning: doc['fridayMorning'],
-          fridayNight: doc['fridayNight'],
-          saturdayMorning: doc['saturdayMorning'],
-          saturdayNight: doc['saturdayNight'],
-          sundayMorning: doc['sundayMorning'],
-          sundayNight: doc['sundayNight'],
-        );
-      }).toList();
+     User? currentUser = FirebaseAuth.instance.currentUser;
+
+    // Check if user is logged in
+    if (currentUser == null) {
+      // Handle case when no user is logged in
+      setState(() {
+        routines = [];
+      });
+      return;
+    }
+ FirebaseFirestore.instance
+        .collection('skincare_routines')
+        .where('userId', isEqualTo: currentUser.uid) // Filter by user ID
+        .snapshots()
+        .listen((querySnapshot) {
+      setState(() {
+        routines = querySnapshot.docs.map((doc) {
+          return SkincareRoutine(
+            id: doc.id,
+            userId: currentUser.uid, // Add userId
+            avatarUrl: doc['avatarUrl'] ?? '',
+            category: doc['category'],
+            note: doc['note'],
+            mondayMorning: doc['mondayMorning'],
+            mondayNight: doc['mondayNight'],
+            tuesdayMorning: doc['tuesdayMorning'],
+            tuesdayNight: doc['tuesdayNight'],
+            wednesdayMorning: doc['wednesdayMorning'],
+            wednesdayNight: doc['wednesdayNight'],
+            thursdayMorning: doc['thursdayMorning'],
+            thursdayNight: doc['thursdayNight'],
+            fridayMorning: doc['fridayMorning'],
+            fridayNight: doc['fridayNight'],
+            saturdayMorning: doc['saturdayMorning'],
+            saturdayNight: doc['saturdayNight'],
+            sundayMorning: doc['sundayMorning'],
+            sundayNight: doc['sundayNight'],
+          );
+        }).toList();
+      });
     });
-  });
-}
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -91,6 +104,14 @@ class _SkincareRoutineListPageState extends State<SkincareRoutineListPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
+          // Check if user is logged in before navigating to input page
+          User? currentUser = FirebaseAuth.instance.currentUser;
+          if (currentUser == null) {
+            // Show login required dialog
+            _showLoginRequiredDialog();
+            return;
+          }
+
           final newRoutine = await Navigator.push(
             context,
             MaterialPageRoute(
@@ -104,6 +125,27 @@ class _SkincareRoutineListPageState extends State<SkincareRoutineListPage> {
           }
         },
         child: Icon(Icons.add),
+      ),
+    );
+  }
+
+  // Show dialog when login is required
+  void _showLoginRequiredDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Login Required'),
+        content: Text('Please log in to add or view skincare routines.'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              // Optionally, navigate to login page
+              // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginPage()));
+            },
+            child: Text('OK'),
+          ),
+        ],
       ),
     );
   }

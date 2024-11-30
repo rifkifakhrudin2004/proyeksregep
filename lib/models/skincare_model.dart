@@ -1,5 +1,6 @@
 class SkincareRoutine {
   String? id;
+  final String userId;
   final String avatarUrl;
   final String category;
   final String note;
@@ -20,6 +21,7 @@ class SkincareRoutine {
 
   SkincareRoutine({
     this.id,
+    required this.userId,
     required this.avatarUrl,
     required this.category,
     required this.note,
@@ -40,6 +42,7 @@ class SkincareRoutine {
   });
   Map<String, dynamic> toMap() {
     return {
+      'userId': userId,
       'avatarUrl': avatarUrl,
       'category': category,
       'note': note,

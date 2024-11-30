@@ -5,11 +5,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:io';
 
 class SkincareRoutineInputPage extends StatefulWidget {
   final SkincareRoutine?
-      routine; // Menerima data skincare untuk editing, null jika untuk input baru
+      routine; 
   SkincareRoutineInputPage({this.routine});
 
   @override
@@ -265,7 +266,12 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
 
   // Save the skincare routine
   void _saveRoutine() async {
-    // Validate input
+    User? currentUser = FirebaseAuth.instance.currentUser;
+
+     if (currentUser == null) {
+      _showErrorDialog('Please log in to save a routine');
+      return;
+    }
     if (_selectedCategory.isEmpty) {
       _showErrorDialog('Please select a category');
       return;
@@ -284,7 +290,8 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
 
       // Prepare routine data
       final updatedRoutine = SkincareRoutine(
-        id: widget.routine?.id, // Preserve the existing ID if editing
+        id: widget.routine?.id, 
+        userId: currentUser.uid,
         avatarUrl: imageUrl,
         category: _selectedCategory,
         note: _noteController.text,
@@ -329,6 +336,13 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
         _isLoading = false;
       });
     }
+    Stream<QuerySnapshot> getUserRoutines() {
+    User? currentUser = FirebaseAuth.instance.currentUser;
+    return _firestore
+        .collection('skincare_routines')
+        .where('userId', isEqualTo: currentUser?.uid)
+        .snapshots();
+  }
   }
 
   // Method to upload image to Firebase Storage
