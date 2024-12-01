@@ -10,7 +10,7 @@ class ReviewPage extends StatefulWidget {
   final String? persentase;
   final String? handling;
   final String? skincare;
-  final bool isProcessing;
+ 
 
   const ReviewPage({
     Key? key,
@@ -19,7 +19,6 @@ class ReviewPage extends StatefulWidget {
     this.persentase,
     this.handling,
     this.skincare,
-    this.isProcessing = false,
   }) : super(key: key);
 
   @override
@@ -32,14 +31,17 @@ class _ReviewPageState extends State<ReviewPage> {
   @override
   void initState() {
     super.initState();
-    // Simulasi loading selama 2 detik
-    Future.delayed(Duration(seconds: 2), () {
-      if (mounted) {
-        setState(() {
-          isLoading = false;
-        });
-      }
-    });
+    _checkDataReadiness();
+  }
+  Future<void> _checkDataReadiness() async {
+    // Tambahkan pengecekan tambahan jika diperlukan
+    await Future.delayed(Duration(seconds: 2));
+    
+    if (mounted) {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   @override

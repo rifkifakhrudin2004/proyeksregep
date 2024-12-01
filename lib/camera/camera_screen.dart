@@ -172,7 +172,6 @@ class _CameraScreenState extends State<CameraScreen>
             MaterialPageRoute(
               builder: (context) => ReviewPage(
                 imageFile: file,
-                isProcessing: true,
               ),
             ),
           );
@@ -385,7 +384,6 @@ void _openGallery() async {
               MaterialPageRoute(
                 builder: (context) => ReviewPage(
                   imageFile: pickedFile,
-                  isProcessing: true,
                 ),
               ),
             );
