@@ -9,8 +9,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:io';
 
 class SkincareRoutineInputPage extends StatefulWidget {
-  final SkincareRoutine?
-      routine; 
+  final SkincareRoutine? routine;
   SkincareRoutineInputPage({this.routine});
 
   @override
@@ -22,10 +21,7 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
   late TextEditingController _noteController;
   late String _selectedCategory;
   late bool _mondayMorning, _mondayNight, _tuesdayMorning, _tuesdayNight;
-  late bool _wednesdayMorning,
-      _wednesdayNight,
-      _thursdayMorning,
-      _thursdayNight;
+  late bool _wednesdayMorning, _wednesdayNight, _thursdayMorning, _thursdayNight;
   late bool _fridayMorning, _fridayNight, _saturdayMorning, _saturdayNight;
   late bool _sundayMorning, _sundayNight;
   late String _avatarUrl;
@@ -55,8 +51,7 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
   void initState() {
     super.initState();
     _noteController = TextEditingController(text: widget.routine?.note);
-    _selectedCategory =
-        widget.routine?.category ?? _categories[0]; // Default to first category
+    _selectedCategory = widget.routine?.category ?? _categories[0]; // Default to first category
     _mondayMorning = widget.routine?.mondayMorning ?? false;
     _mondayNight = widget.routine?.mondayNight ?? false;
     _tuesdayMorning = widget.routine?.tuesdayMorning ?? false;
@@ -78,31 +73,29 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-            widget.routine == null ? 'Add Skincare Routine' : 'Edit Routine'),
+        title: Text(widget.routine == null ? 'Add Skincare Routine' : 'Edit Routine'),
+        backgroundColor: const Color.fromARGB(255, 253, 152, 185), // Pink color for the app bar
       ),
       body: _isLoading
           ? Center(
               child: SpinKitCircle(
-                color: Theme.of(context).primaryColor,
+                color: const Color.fromARGB(255, 247, 143, 177), // Pink color for the loading spinner
                 size: 50.0,
               ),
             )
           : Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Column(
+              child: ListView(
                 children: [
                   GestureDetector(
                     onTap: _pickAvatar,
                     child: CircleAvatar(
                       radius: 50,
                       backgroundImage: _avatarUrl.isNotEmpty
-                          ? Image.file(File(_avatarUrl))
-                              .image // Use Image.file instead of FileImage
-                          : NetworkImage(
-                                  'https://www.example.com/default-avatar.jpg')
+                          ? Image.file(File(_avatarUrl)).image
+                          : NetworkImage('https://www.example.com/default-avatar.jpg')
                               as ImageProvider,
-                      child: _avatarUrl.isEmpty ? Icon(Icons.camera_alt) : null,
+                      child: _avatarUrl.isEmpty ? Icon(Icons.camera_alt, color: Colors.white) : null,
                     ),
                   ),
                   SizedBox(height: 20),
@@ -137,27 +130,40 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
                   // Note Input
                   TextField(
                     controller: _noteController,
-                    decoration: InputDecoration(labelText: 'Notes'),
-                    maxLines: 3,
+                    decoration: InputDecoration(
+                      labelText: 'Notes',
+                      border: OutlineInputBorder(),
+                      contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                    ),
+                    maxLines: 2,
                   ),
                   SizedBox(height: 20),
 
                   // Save and Cancel Buttons
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      ElevatedButton(
-                        onPressed: _saveRoutine,
-                        child: Text('Save'),
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.pop(context); // Cancel and go back
-                        },
-                        child: Text('Cancel'),
-                      ),
-                    ],
-                  ),
+  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  children: [
+    ElevatedButton(
+      onPressed: _saveRoutine,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color.fromARGB(255, 253, 152, 185), // Warna tombol seperti sebelumnya
+        foregroundColor: Colors.black, // Warna teks tombol menjadi hitam
+      ),
+      child: Text('Save'),
+    ),
+    ElevatedButton(
+      onPressed: () {
+        Navigator.pop(context); // Cancel dan kembali
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color.fromARGB(255, 253, 152, 185), // Warna tombol seperti sebelumnya
+        foregroundColor: Colors.black, // Warna teks tombol menjadi hitam
+      ),
+      child: Text('Cancel'),
+    ),
+  ],
+),
+
                 ],
               ),
             ),
@@ -166,88 +172,91 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
 
   // Day selection widget
   Widget _buildDaySelection(String day) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        Text(day),
-        Checkbox(
-          value: day == 'Monday'
-              ? _mondayMorning
-              : day == 'Tuesday'
-                  ? _tuesdayMorning
-                  : day == 'Wednesday'
-                      ? _wednesdayMorning
-                      : day == 'Thursday'
-                          ? _thursdayMorning
-                          : day == 'Friday'
-                              ? _fridayMorning
-                              : day == 'Saturday'
-                                  ? _saturdayMorning
-                                  : day == 'Sunday'
-                                      ? _sundayMorning
-                                      : false,
-          onChanged: (value) {
-            setState(() {
-              if (day == 'Monday') {
-                _mondayMorning = value!;
-              } else if (day == 'Tuesday') {
-                _tuesdayMorning = value!;
-              } else if (day == 'Wednesday') {
-                _wednesdayMorning = value!;
-              } else if (day == 'Thursday') {
-                _thursdayMorning = value!;
-              } else if (day == 'Friday') {
-                _fridayMorning = value!;
-              } else if (day == 'Saturday') {
-                _saturdayMorning = value!;
-              } else if (day == 'Sunday') {
-                _sundayMorning = value!;
-              }
-            });
-          },
-        ),
-        Text("Morning"),
-        Checkbox(
-          value: day == 'Monday'
-              ? _mondayNight
-              : day == 'Tuesday'
-                  ? _tuesdayNight
-                  : day == 'Wednesday'
-                      ? _wednesdayNight
-                      : day == 'Thursday'
-                          ? _thursdayNight
-                          : day == 'Friday'
-                              ? _fridayNight
-                              : day == 'Saturday'
-                                  ? _saturdayNight
-                                  : day == 'Sunday'
-                                      ? _sundayNight
-                                      : false,
-          onChanged: (value) {
-            setState(() {
-              if (day == 'Monday') {
-                _mondayNight = value!;
-              } else if (day == 'Tuesday') {
-                _tuesdayNight = value!;
-              } else if (day == 'Wednesday') {
-                _wednesdayNight = value!;
-              } else if (day == 'Thursday') {
-                _thursdayNight = value!;
-              } else if (day == 'Friday') {
-                _fridayNight = value!;
-              } else if (day == 'Saturday') {
-                _saturdayNight = value!;
-              } else if (day == 'Sunday') {
-                _sundayNight = value!;
-              }
-            });
-          },
-        ),
-        Text("Night"),
-      ],
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        children: [
+          Expanded(child: Text(day, style: TextStyle(fontWeight: FontWeight.w600))),
+          Expanded(
+            child: Row(
+              children: [
+                Text("Morning"),
+                Checkbox(
+                  value: _getMorningValue(day),
+                  onChanged: (value) {
+                    setState(() {
+                      _setMorningValue(day, value!);
+                    });
+                  },
+                  activeColor: Colors.green, // Set checkbox color to green
+                ),
+                Text("Night"),
+                Checkbox(
+                  value: _getNightValue(day),
+                  onChanged: (value) {
+                    setState(() {
+                      _setNightValue(day, value!);
+                    });
+                  },
+                  activeColor: Colors.green, // Set checkbox color to green
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
+  bool _getMorningValue(String day) {
+    switch (day) {
+      case 'Monday': return _mondayMorning;
+      case 'Tuesday': return _tuesdayMorning;
+      case 'Wednesday': return _wednesdayMorning;
+      case 'Thursday': return _thursdayMorning;
+      case 'Friday': return _fridayMorning;
+      case 'Saturday': return _saturdayMorning;
+      case 'Sunday': return _sundayMorning;
+      default: return false;
+    }
+  }
+
+  bool _getNightValue(String day) {
+    switch (day) {
+      case 'Monday': return _mondayNight;
+      case 'Tuesday': return _tuesdayNight;
+      case 'Wednesday': return _wednesdayNight;
+      case 'Thursday': return _thursdayNight;
+      case 'Friday': return _fridayNight;
+      case 'Saturday': return _saturdayNight;
+      case 'Sunday': return _sundayNight;
+      default: return false;
+    }
+  }
+
+  void _setMorningValue(String day, bool value) {
+    switch (day) {
+      case 'Monday': _mondayMorning = value; break;
+      case 'Tuesday': _tuesdayMorning = value; break;
+      case 'Wednesday': _wednesdayMorning = value; break;
+      case 'Thursday': _thursdayMorning = value; break;
+      case 'Friday': _fridayMorning = value; break;
+      case 'Saturday': _saturdayMorning = value; break;
+      case 'Sunday': _sundayMorning = value; break;
+    }
+  }
+
+  void _setNightValue(String day, bool value) {
+    switch (day) {
+      case 'Monday': _mondayNight = value; break;
+      case 'Tuesday': _tuesdayNight = value; break;
+      case 'Wednesday': _wednesdayNight = value; break;
+      case 'Thursday': _thursdayNight = value; break;
+      case 'Friday': _fridayNight = value; break;
+      case 'Saturday': _saturdayNight = value; break;
+      case 'Sunday': _sundayNight = value; break;
+    }
+  }
   void _pickAvatar() async {
     // Pick an image from the gallery
     final XFile? pickedFile =

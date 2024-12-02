@@ -1,46 +1,43 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:proyeksregep/models/skincare_model.dart';
 import 'routine_page.dart';
-import 'dart:io';
-import 'package:firebase_auth/firebase_auth.dart'; //
-import 'package:proyeksregep/models/skincare_model.dart';
 
 class SkincareRoutineListPage extends StatefulWidget {
   @override
-  _SkincareRoutineListPageState createState() =>
-      _SkincareRoutineListPageState();
+  _SkincareRoutineListPageState createState() => _SkincareRoutineListPageState();
 }
 
 class _SkincareRoutineListPageState extends State<SkincareRoutineListPage> {
-  List<SkincareRoutine> routines = []; // Data skincare routines yang disimpan
+  List<SkincareRoutine> routines = [];
 
- @override
+  @override
   void initState() {
     super.initState();
     _fetchRoutines();
   }
-  void _fetchRoutines() {
-     User? currentUser = FirebaseAuth.instance.currentUser;
 
-    // Check if user is logged in
+  void _fetchRoutines() {
+    User? currentUser = FirebaseAuth.instance.currentUser;
+
     if (currentUser == null) {
-      // Handle case when no user is logged in
       setState(() {
         routines = [];
       });
       return;
     }
- FirebaseFirestore.instance
+
+    FirebaseFirestore.instance
         .collection('skincare_routines')
-        .where('userId', isEqualTo: currentUser.uid) // Filter by user ID
+        .where('userId', isEqualTo: currentUser.uid)
         .snapshots()
         .listen((querySnapshot) {
       setState(() {
         routines = querySnapshot.docs.map((doc) {
           return SkincareRoutine(
             id: doc.id,
-            userId: currentUser.uid, // Add userId
+            userId: currentUser.uid,
             avatarUrl: doc['avatarUrl'] ?? '',
             category: doc['category'],
             note: doc['note'],
@@ -64,69 +61,18 @@ class _SkincareRoutineListPageState extends State<SkincareRoutineListPage> {
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('My Skincare Routines'),
-      ),
-      body: ListView.builder(
-        itemCount: routines.length,
-        itemBuilder: (context, index) {
-          final routine = routines[index];
-          return Card(
-            child: ListTile(
-              leading: _buildAvatar(routine.avatarUrl),
-              title: Text(routine.category),
-              subtitle: Text(routine.note),
-              trailing: Icon(Icons.edit),
-              onTap: () async {
-                final updatedRoutine = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => SkincareRoutineInputPage(
-                      routine: routine,
-                    ),
-                  ),
-                );
-                if (updatedRoutine != null) {
-                  setState(() {
-                  int index = routines.indexWhere((r) => r.id == updatedRoutine.id);
-                  if (index != -1) {
-                  routines[index] = updatedRoutine;
-                      } 
-                  });
-                }
-              },
-            ),
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          // Check if user is logged in before navigating to input page
-          User? currentUser = FirebaseAuth.instance.currentUser;
-          if (currentUser == null) {
-            // Show login required dialog
-            _showLoginRequiredDialog();
-            return;
-          }
-
-          final newRoutine = await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => SkincareRoutineInputPage(),
-            ),
-          );
-          if (newRoutine != null) {
-            setState(() {
-              routines.add(newRoutine); // Add new routine to the list
-            });
-          }
-        },
-        child: Icon(Icons.add),
-      ),
-    );
+  void _deleteRoutine(String routineId) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('skincare_routines')
+          .doc(routineId)
+          .delete();
+      setState(() {
+        routines.removeWhere((routine) => routine.id == routineId);
+      });
+    } catch (e) {
+      print("Error deleting routine: $e");
+    }
   }
 
   // Show dialog when login is required
@@ -139,9 +85,7 @@ class _SkincareRoutineListPageState extends State<SkincareRoutineListPage> {
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.of(context).pop();
-              // Optionally, navigate to login page
-              // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginPage()));
+              Navigator.pop(context);
             },
             child: Text('OK'),
           ),
@@ -150,27 +94,371 @@ class _SkincareRoutineListPageState extends State<SkincareRoutineListPage> {
     );
   }
 
-  // Helper method to build avatar with proper image handling
+// Build the schedule table for the routine
+Widget _buildScheduleTable(SkincareRoutine routine) {
+  return Container(
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(10),
+      color: Colors.pink[50]?.withOpacity(0.5),
+      border: Border.all(
+        color: Colors.pink[100]!,
+        width: 1,
+      ),
+    ),
+    padding: const EdgeInsets.all(8.0),
+    child: Table(
+      columnWidths: {
+        0: FlexColumnWidth(1.5),  // Time column wider
+        1: FlexColumnWidth(1),     // Day columns equal
+        2: FlexColumnWidth(1),
+        3: FlexColumnWidth(1),
+        4: FlexColumnWidth(1),
+        5: FlexColumnWidth(1),
+        6: FlexColumnWidth(1),
+        7: FlexColumnWidth(1),
+      },
+      children: [
+        _buildTableHeader(),
+        _buildMorningNightRow(
+          'Morning', 
+          routine.mondayMorning, 
+          routine.tuesdayMorning, 
+          routine.wednesdayMorning, 
+          routine.thursdayMorning, 
+          routine.fridayMorning, 
+          routine.saturdayMorning, 
+          routine.sundayMorning
+        ),
+        _buildMorningNightRow(
+          'Night', 
+          routine.mondayNight, 
+          routine.tuesdayNight, 
+          routine.wednesdayNight, 
+          routine.thursdayNight, 
+          routine.fridayNight, 
+          routine.saturdayNight, 
+          routine.sundayNight
+        ),
+      ],
+      border: TableBorder.all(
+        color: Colors.transparent,
+        width: 0,
+      ),
+    ),
+  );
+}
+
+// Helper to build table header
+TableRow _buildTableHeader() {
+  return TableRow(
+    decoration: BoxDecoration(
+      color: Colors.pink[100]?.withOpacity(0.3),
+      borderRadius: BorderRadius.circular(8),
+    ),
+    children: [
+      _buildHeaderCell('Time'),
+      _buildHeaderCell('Mon'),
+      _buildHeaderCell('Tue'),
+      _buildHeaderCell('Wed'),
+      _buildHeaderCell('Thu'),
+      _buildHeaderCell('Fri'),
+      _buildHeaderCell('Sat'),
+      _buildHeaderCell('Sun'),
+    ],
+  );
+}
+
+// Helper to create header cell with consistent styling
+Widget _buildHeaderCell(String text) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+    child: Text(
+      text, 
+      textAlign: TextAlign.center,
+      style: TextStyle(
+        fontWeight: FontWeight.w600, 
+        fontSize: 12,
+        color: Colors.pink[800],
+        letterSpacing: 0.5,
+      ),
+    ),
+  );
+}
+
+// Helper to build Morning and Night rows
+TableRow _buildMorningNightRow(
+  String timeOfDay, 
+  bool mondayChecked, 
+  bool tuesdayChecked, 
+  bool wednesdayChecked, 
+  bool thursdayChecked, 
+  bool fridayChecked, 
+  bool saturdayChecked, 
+  bool sundayChecked
+) {
+  return TableRow(
+    decoration: BoxDecoration(
+      color: timeOfDay == 'Morning' 
+        ? Colors.white.withOpacity(0.7) 
+        : Colors.pink[50]?.withOpacity(0.3),
+    ),
+    children: [
+      _buildTimeCell(timeOfDay),
+      _buildCheckboxCell(mondayChecked),
+      _buildCheckboxCell(tuesdayChecked),
+      _buildCheckboxCell(wednesdayChecked),
+      _buildCheckboxCell(thursdayChecked),
+      _buildCheckboxCell(fridayChecked),
+      _buildCheckboxCell(saturdayChecked),
+      _buildCheckboxCell(sundayChecked),
+    ],
+  );
+}
+
+// Helper to create time cell
+Widget _buildTimeCell(String timeOfDay) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+    child: Text(
+      timeOfDay, 
+      textAlign: TextAlign.center,
+      style: TextStyle(
+        fontWeight: FontWeight.w500, 
+        color: Colors.pink[700],
+        fontSize: 12,
+      ),
+    ),
+  );
+}
+
+// Helper to build a checkbox for morning and night
+Widget _buildCheckboxCell(bool isChecked) {
+  return Center(
+    child: Container(
+      width: 24,
+      height: 24,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: isChecked 
+          ? Colors.green.withOpacity(0.2) 
+          : Colors.grey.withOpacity(0.1),
+      ),
+      child: Center(
+        child: Icon(
+          isChecked ? Icons.check_circle : Icons.radio_button_unchecked,
+          color: isChecked ? Colors.green[700] : Colors.grey[400],
+          size: 20,
+        ),
+      ),
+    ),
+  );
+}
+
+  // Build avatar with improved error handling
   Widget _buildAvatar(String avatarUrl) {
-    return CircleAvatar(
-      radius: 25, // Adjusted size
-      backgroundImage: _getImageProvider(avatarUrl),
-      child: avatarUrl.isEmpty ? Icon(Icons.camera_alt) : null,
+    return Container(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: Colors.pink.withOpacity(0.3),
+          width: 3,
+        ),
+      ),
+      child: CircleAvatar(
+        radius: 30,
+        backgroundImage: avatarUrl.isNotEmpty
+            ? NetworkImage(avatarUrl)
+            : AssetImage('assets/default_avatar.png') as ImageProvider,
+        backgroundColor: Colors.pink[50],
+        onBackgroundImageError: (_, __) {
+          // Fallback to default image if network image fails
+        },
+      ),
     );
   }
 
-  // Helper method to get appropriate ImageProvider
-  ImageProvider _getImageProvider(String avatarUrl) {
-    if (avatarUrl.isEmpty) {
-      return NetworkImage('https://www.example.com/default-avatar.jpg');
-    }
-    
-    // Check if it's a local file path
-    if (avatarUrl.startsWith('/')) {
-      return FileImage(File(avatarUrl));
-    }
-    
-    // Assume it's a network URL
-    return NetworkImage(avatarUrl);
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFFFF0F5), // Soft pastel pink background
+      appBar: AppBar(
+        title: Text(
+          'My Skincare Routines', 
+          style: TextStyle(
+            fontWeight: FontWeight.w600, 
+            color: Colors.white
+          ),
+        ),
+        backgroundColor: const Color(0xFFFF69B4), // Soft hot pink
+        elevation: 0,
+        centerTitle: true,
+      ),
+      body: routines.isEmpty
+          ? _buildEmptyState()
+          : Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              child: ListView.builder(
+                itemCount: routines.length,
+                itemBuilder: (context, index) {
+                  final routine = routines[index];
+                  return _buildRoutineCard(routine);
+                },
+                physics: const BouncingScrollPhysics(), // Smooth scrolling
+              ),
+            ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () async {
+          User? currentUser = FirebaseAuth.instance.currentUser;
+          if (currentUser == null) {
+            _showLoginRequiredDialog();
+            return;
+          }
+
+          final newRoutine = await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => SkincareRoutineInputPage(),
+            ),
+          );
+          if (newRoutine != null) {
+            setState(() {
+              routines.add(newRoutine);
+            });
+          }
+        },
+        backgroundColor: const Color(0xFFFF69B4),
+        icon: Icon(Icons.add, color: Colors.white),
+        label: Text('Add Routine', style: TextStyle(color: Colors.white)),
+      ),
+    );
+  }
+
+  // Empty state with more elegant design
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.face,
+            size: 120,
+            color: Colors.pink[300],
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'No Skincare Routines Yet',
+            style: TextStyle(
+              fontSize: 22, 
+              fontWeight: FontWeight.w600,
+              color: Colors.pink[800]
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            'Create your first routine and start tracking\nyour skincare journey',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 16, 
+              color: Colors.pink[600],
+              fontWeight: FontWeight.w300
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Routine card with more refined design
+  Widget _buildRoutineCard(SkincareRoutine routine) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.pink.withOpacity(0.1),
+            spreadRadius: 2,
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                _buildAvatar(routine.avatarUrl),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        routine.category,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600, 
+                          fontSize: 18,
+                          color: Colors.pink[800]
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        routine.note,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: Colors.pink[600],
+                          fontWeight: FontWeight.w300
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            _buildScheduleTable(routine),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                IconButton(
+                  icon: Icon(Icons.edit, color: Colors.pink[600]),
+                  onPressed: () async {
+                    final updatedRoutine = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SkincareRoutineInputPage(
+                          routine: routine,
+                        ),
+                      ),
+                    );
+                    if (updatedRoutine != null) {
+                      setState(() {
+                        int index = routines
+                            .indexWhere((r) => r.id == updatedRoutine.id);
+                        if (index != -1) {
+                          routines[index] = updatedRoutine;
+                        }
+                      });
+                    }
+                  },
+                ),
+                IconButton(
+                  icon: Icon(Icons.delete, color: Colors.pink[600]),
+                  onPressed: () {
+                    _deleteRoutine(routine.id!);
+                  },
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
