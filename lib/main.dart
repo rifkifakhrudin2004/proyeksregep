@@ -5,9 +5,7 @@ import 'auth/register.dart';
 import 'auth/landing_page.dart';
 import 'camera/camera_screen.dart';
 import 'pages/home_page.dart';
-import 'pages/storage_page.dart';
 import 'pages/profile_page.dart';
-import 'pages/routine_page.dart';
 import 'pages/routinelist_page.dart';
 
 void main() async {

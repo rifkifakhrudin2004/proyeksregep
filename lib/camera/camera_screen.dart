@@ -327,7 +327,7 @@ void _openGallery() async {
           _showAlertDialog(
             'Validasi Gambar',
             faces.isEmpty 
-              ? 'Tidak ada wajah terdeteksi. Silakan pilih gambar dengan wajah yang jelas.' 
+              ? 'Tidak ada wajah terdeteksi.' 
               : 'Hanya satu wajah yang diperbolehkan dalam gambar.'
           );
           return;

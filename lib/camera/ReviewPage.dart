@@ -4,12 +4,14 @@ import 'package:image_picker/image_picker.dart';
 import 'package:proyeksregep/pages/storage_page.dart';
 import 'package:shimmer/shimmer.dart';
 
+
 class ReviewPage extends StatefulWidget {
   final XFile imageFile;
   final String? predictedClass;
   final String? persentase;
   final String? handling;
   final String? skincare;
+  
  
 
   const ReviewPage({
@@ -35,7 +37,7 @@ class _ReviewPageState extends State<ReviewPage> {
   }
   Future<void> _checkDataReadiness() async {
     // Tambahkan pengecekan tambahan jika diperlukan
-    await Future.delayed(Duration(seconds: 2));
+    await Future.delayed(Duration(seconds: 1));
     
     if (mounted) {
       setState(() {

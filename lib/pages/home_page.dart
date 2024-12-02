@@ -188,18 +188,43 @@ class _HomePageState extends State<HomePage> {
                     child: Row(
                       children: [
                         GestureDetector(
-                          onTap: () {
-                            if (lastPhotoUrl != null) {
-                              _showFullImage(lastPhotoUrl!);
-                            }
-                          },
+  onTap: () {
+    if (lastPhotoUrl != null) {
+      showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (BuildContext context) {
+          return Dialog(
+            backgroundColor: Colors.transparent,
+            child: GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: Container(
+                width: double.infinity,
+                height: double.infinity,
+                alignment: Alignment.center,
+                child: Container(
+                  width: MediaQuery.of(context).size.width * 0.8,
+                  height: MediaQuery.of(context).size.width * 0.8,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    image: DecorationImage(
+                      image: NetworkImage(lastPhotoUrl!),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    }
+  },
                           child: lastPhotoUrl != null
                               ? CircleAvatar(
                                   radius: 40,
                                   backgroundImage: NetworkImage(lastPhotoUrl!),
-                                  // Border bulat untuk menyesuaikan dengan bentuk bulat
-                                  foregroundColor: Colors
-                                      .transparent, // jika ingin gambar lebih bersih
+                                  foregroundColor: Colors.transparent,
                                 )
                               : CircleAvatar(
                                   radius: 40,
@@ -372,10 +397,10 @@ class _HomePageState extends State<HomePage> {
           break;
         case 1:
           Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const StoragePage(),
-            )
-          );
+              context,
+              MaterialPageRoute(
+                builder: (context) => const StoragePage(),
+              ));
           break;
         case 2:
           Navigator.pushNamed(context, '/routine');
