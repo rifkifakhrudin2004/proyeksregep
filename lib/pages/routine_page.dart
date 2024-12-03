@@ -69,144 +69,254 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
     _avatarUrl = widget.routine?.avatarUrl ?? '';
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.routine == null ? 'Add Skincare Routine' : 'Edit Routine'),
-        backgroundColor: const Color.fromARGB(255, 253, 152, 185), // Pink color for the app bar
+    @override
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      title: Text(
+        widget.routine == null ? 'Add Skincare Routine' : 'Edit Routine',
+        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
       ),
-      body: _isLoading
-          ? Center(
-              child: SpinKitCircle(
-                color: const Color.fromARGB(255, 247, 143, 177), // Pink color for the loading spinner
-                size: 50.0,
-              ),
-            )
-          : Padding(
+      backgroundColor: const Color.fromARGB(255, 253, 152, 185),
+      elevation: 0,
+    ),
+    body: _isLoading
+        ? Center(
+            child: SpinKitCircle(
+              color: const Color.fromARGB(255, 247, 143, 177),
+              size: 50.0,
+            ),
+          )
+        : SingleChildScrollView(
+            child: Container(
               padding: const EdgeInsets.all(16.0),
-              child: ListView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  GestureDetector(
-                    onTap: _pickAvatar,
-                    child: CircleAvatar(
-                      radius: 50,
-                      backgroundImage: _avatarUrl.isNotEmpty
-                          ? Image.file(File(_avatarUrl)).image
-                          : NetworkImage('https://www.example.com/default-avatar.jpg')
-                              as ImageProvider,
-                      child: _avatarUrl.isEmpty ? Icon(Icons.camera_alt, color: Colors.white) : null,
+                  // Avatar Selection
+                  Center(
+                    child: GestureDetector(
+                      onTap: _pickAvatar,
+                      child: Stack(
+                        children: [
+                          CircleAvatar(
+                            radius: 60,
+                            backgroundImage: _avatarUrl.isNotEmpty
+                                ? FileImage(File(_avatarUrl))
+                                : NetworkImage('https://www.example.com/default-avatar.jpg') as ImageProvider,
+                            child: _avatarUrl.isEmpty 
+                                ? Icon(Icons.camera_alt, color: Colors.white, size: 40) 
+                                : null,
+                          ),
+                          Positioned(
+                            bottom: 0,
+                            right: 0,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: const Color.fromARGB(255, 253, 152, 185),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(4.0),
+                                child: Icon(
+                                  Icons.edit, 
+                                  color: Colors.white, 
+                                  size: 20,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   SizedBox(height: 20),
 
-                  DropdownButton<String>(
-                    value: _selectedCategory,
-                    isExpanded: true,
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        _selectedCategory = newValue!;
-                      });
-                    },
-                    items: _categories
-                        .map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
+                  // Category Dropdown with Styling
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Colors.grey.shade300),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          value: _selectedCategory,
+                          isExpanded: true,
+                          hint: Text('Select Category'),
+                          style: TextStyle(color: Colors.black, fontSize: 16),
+                          dropdownColor: Colors.white,
+                          icon: Icon(Icons.arrow_drop_down, color: Colors.pink),
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              _selectedCategory = newValue!;
+                            });
+                          },
+                          items: _categories
+                              .map<DropdownMenuItem<String>>((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(value, overflow: TextOverflow.ellipsis),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ),
                   ),
                   SizedBox(height: 20),
 
-                  // Day Selection with Time (Checkbox)
-                  _buildDaySelection('Monday'),
-                  _buildDaySelection('Tuesday'),
-                  _buildDaySelection('Wednesday'),
-                  _buildDaySelection('Thursday'),
-                  _buildDaySelection('Friday'),
-                  _buildDaySelection('Saturday'),
-                  _buildDaySelection('Sunday'),
+                  // Day Selection with improved layout
+                  Card(
+                    elevation: 2,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Select Days and Times',
+                            style: TextStyle(
+                              fontSize: 16, 
+                              fontWeight: FontWeight.bold,
+                              color: Colors.pink.shade700
+                            ),
+                          ),
+                          SizedBox(height: 10),
+                          _buildDaySelection('Monday'),
+                          _buildDaySelection('Tuesday'),
+                          _buildDaySelection('Wednesday'),
+                          _buildDaySelection('Thursday'),
+                          _buildDaySelection('Friday'),
+                          _buildDaySelection('Saturday'),
+                          _buildDaySelection('Sunday'),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 20),
 
-                  // Note Input
+                  // Notes Input with improved styling
                   TextField(
                     controller: _noteController,
                     decoration: InputDecoration(
                       labelText: 'Notes',
-                      border: OutlineInputBorder(),
+                      labelStyle: TextStyle(color: Colors.pink),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide(color: Colors.pink),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide(color: Colors.pink, width: 2),
+                      ),
                       contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
                     ),
-                    maxLines: 2,
+                    maxLines: 3,
                   ),
                   SizedBox(height: 20),
 
-                  // Save and Cancel Buttons
+                  // Save and Cancel Buttons with improved styling
                   Row(
-  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  children: [
-    ElevatedButton(
-      onPressed: _saveRoutine,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: const Color.fromARGB(255, 253, 152, 185), // Warna tombol seperti sebelumnya
-        foregroundColor: Colors.black, // Warna teks tombol menjadi hitam
-      ),
-      child: Text('Save'),
-    ),
-    ElevatedButton(
-      onPressed: () {
-        Navigator.pop(context); // Cancel dan kembali
-      },
-      style: ElevatedButton.styleFrom(
-        backgroundColor: const Color.fromARGB(255, 253, 152, 185), // Warna tombol seperti sebelumnya
-        foregroundColor: Colors.black, // Warna teks tombol menjadi hitam
-      ),
-      child: Text('Cancel'),
-    ),
-  ],
-),
-
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: _saveRoutine,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color.fromARGB(255, 253, 152, 185),
+                            foregroundColor: Colors.white,
+                            padding: EdgeInsets.symmetric(vertical: 15),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: Text('Save', style: TextStyle(fontSize: 16)),
+                        ),
+                      ),
+                      SizedBox(width: 10),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.grey.shade300,
+                            foregroundColor: Colors.black,
+                            padding: EdgeInsets.symmetric(vertical: 15),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: Text('Cancel', style: TextStyle(fontSize: 16)),
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
-    );
+    ),
+  );
   }
 
-  // Day selection widget
-  Widget _buildDaySelection(String day) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Row(
-        children: [
-          Expanded(child: Text(day, style: TextStyle(fontWeight: FontWeight.w600))),
-          Expanded(
-            child: Row(
-              children: [
-                Text("Morning"),
-                Checkbox(
+ Widget _buildDaySelection(String day) {
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 10),
+    child: Row(
+      children: [
+        Expanded(
+          flex: 2,
+          child: Text(
+            day, 
+            style: TextStyle(fontWeight: FontWeight.w600),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        Expanded(
+          flex: 3,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Text("Morning", style: TextStyle(fontSize: 12)),
+              SizedBox(
+                width: 30, // Reduced checkbox width
+                child: Checkbox(
                   value: _getMorningValue(day),
                   onChanged: (value) {
                     setState(() {
                       _setMorningValue(day, value!);
                     });
                   },
-                  activeColor: Colors.green, // Set checkbox color to green
+                  activeColor: Colors.green,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
-                Text("Night"),
-                Checkbox(
+              ),
+              SizedBox(width: 10),
+              Text("Night", style: TextStyle(fontSize: 12)),
+              SizedBox(
+                width: 30, // Reduced checkbox width
+                child: Checkbox(
                   value: _getNightValue(day),
                   onChanged: (value) {
                     setState(() {
                       _setNightValue(day, value!);
                     });
                   },
-                  activeColor: Colors.green, // Set checkbox color to green
+                  activeColor: Colors.green,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
+}
 
   bool _getMorningValue(String day) {
     switch (day) {

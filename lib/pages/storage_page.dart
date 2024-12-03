@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
-import 'dart:convert'; 
+import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:proyeksregep/pages/detailStorage_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class StoragePage extends StatefulWidget {
   final XFile? imageFile;
@@ -15,7 +17,7 @@ class StoragePage extends StatefulWidget {
     Key? key,
     this.imageFile,
     this.predictedClass = '',
-    this.persentase ='',
+    this.persentase = '',
     this.handling = '',
     this.skincare = '',
   }) : super(key: key);
@@ -34,34 +36,41 @@ class _StoragePageState extends State<StoragePage> {
     _loadStoredResults();
   }
 
-   Future<void> _loadStoredResults() async {
+  Future<void> _loadStoredResults() async {
     final prefs = await SharedPreferences.getInstance();
     final String? storedData = prefs.getString(storageKey);
-    
+
     if (storedData != null) {
       final List<dynamic> decodedData = json.decode(storedData);
+      final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+
       setState(() {
-        storedResults = decodedData.map((item) {
-          // Konversi path gambar ke XFile
-          if (item['image'] != null) {
-            item['image'] = XFile(item['image']);
-          }
-          return item;
-        }).cast<Map<String, dynamic>>().toList();
+        storedResults = decodedData
+            .where(
+                (item) => item['userId'] == currentUserId) // Filter by userId
+            .map((item) {
+              if (item['image'] != null) {
+                item['image'] = XFile(item['image']);
+              }
+              return item;
+            })
+            .cast<Map<String, dynamic>>()
+            .toList();
       });
     }
 
-    // Tambahkan data baru jika ada
+    // Tambahkan hasil baru jika tersedia
     if (widget.imageFile != null) {
       final newResult = {
+        'userId': FirebaseAuth.instance.currentUser?.uid, // userId dari akun
         'image': widget.imageFile,
         'prediction': widget.predictedClass,
-        'persentase' : widget.persentase,
+        'persentase': widget.persentase,
         'handling': widget.handling,
         'skincare': widget.skincare,
         'timestamp': DateTime.now().toIso8601String(),
       };
-      
+
       setState(() {
         storedResults.add(newResult);
       });
@@ -69,27 +78,26 @@ class _StoragePageState extends State<StoragePage> {
     }
   }
 
-   Future<void> _saveResults() async {
+  Future<void> _saveResults() async {
     final prefs = await SharedPreferences.getInstance();
     final dataToStore = storedResults.map((item) {
       final Map<String, dynamic> storableItem = Map.from(item);
-      // Simpan path gambar saja
       if (item['image'] != null) {
         storableItem['image'] = (item['image'] as XFile).path;
       }
       return storableItem;
     }).toList();
-    
+
     await prefs.setString(storageKey, json.encode(dataToStore));
   }
 
   void _deleteResult(int index) {
     setState(() {
       storedResults.removeAt(index);
-      _saveResults(); // Simpan perubahan setelah menghapus
+      _saveResults();
     });
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -119,121 +127,128 @@ class _StoragePageState extends State<StoragePage> {
           itemCount: storedResults.length,
           itemBuilder: (context, index) {
             final result = storedResults[index];
-            return Dismissible(
-              key: Key(result['timestamp'].toString()),
-              background: Container(
-                color: Colors.red,
-                alignment: Alignment.centerRight,
-                padding: const EdgeInsets.only(right: 20),
-                child: const Icon(
-                  Icons.delete,
-                  color: Colors.white,
-                ),
+            return Container(
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(15),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.2),
+                    spreadRadius: 1,
+                    blurRadius: 5,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
               ),
-              direction: DismissDirection.endToStart,
-              onDismissed: (direction) => _deleteResult(index),
-              child: Card(
-                elevation: 5,
-                margin: const EdgeInsets.only(bottom: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: ExpansionTile(
-                  leading: ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: result['image'] != null
-                        ? Image.file(
-                            File(result['image'].path),
-                            width: 80,
-                            height: 80,
-                            fit: BoxFit.cover,
-                          )
-                        : Container(
-                            width: 80,
-                            height: 80,
-                            color: Colors.grey,
-                            child: Icon(Icons.image),
+              child: Row(
+                children: [
+                  // Image
+                  Container(
+                    width: 100,
+                    height: 100,
+                    margin: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      image: result['image'] != null
+                          ? DecorationImage(
+                              image: FileImage(File(result['image'].path)),
+                              fit: BoxFit.cover,
+                            )
+                          : null,
+                    ),
+                    child: result['image'] == null
+                        ? const Icon(Icons.image, color: Colors.grey)
+                        : null,
+                  ),
+
+                  // Content
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            result['prediction'],
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: Color.fromRGBO(241, 104, 152, 1),
+                            ),
                           ),
-                  ),
-                  title: Text(
-                    result['prediction'],
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Color.fromRGBO(241, 104, 152, 1),
-                    ),
-                  ),
-                  subtitle: Text(
-                    result['timestamp'].toString().substring(0, 16),
-                    style: const TextStyle(
-                      color: Colors.grey,
-                      fontSize: 12,
-                    ),
-                  ),
-                  children: [
-                    SingleChildScrollView(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildDetailRow('Persentase', result['persentase']),
-                            const SizedBox(height: 10),
-                            _buildDetailRow('Handling', result['handling']),
-                            const SizedBox(height: 10),
-                            _buildDetailRow('Skincare', result['skincare']),
-                          ],
-                        ),
+                          const SizedBox(height: 5),
+                          Text(
+                            result['timestamp'].toString().substring(0, 16),
+                            style: const TextStyle(
+                              color: Colors.grey,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
+                  ),
+
+                  // Action Buttons
+                  Padding(
+                    padding: const EdgeInsets.only(right: 10),
+                    child: Column(
+                      children: [
+                        ElevatedButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    DetailStoragePage(result: result),
+                              ),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                const Color.fromRGBO(241, 104, 152, 1),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 8),
+                          ),
+                          child: const Text(
+                            'Detail',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 5),
+                        ElevatedButton(
+                          onPressed: () => _deleteResult(index),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:  const Color.fromRGBO(241, 104, 152, 1),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 8),
+                          ),
+                          child: const Text(
+                            'Hapus',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             );
           },
         ),
-      ),
-    );
-  }
-
-  Widget _buildDetailRow(String label, String value) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
-            spreadRadius: 1,
-            blurRadius: 3,
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Text(
-            label,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-              color: Colors.black87,
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Text(
-                value,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Colors.black54,
-                ),
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
