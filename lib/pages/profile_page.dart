@@ -247,7 +247,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 width: double.infinity,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [Colors.pink[700]!, Colors.blue[500]!],
+                    colors: [Colors.pink[700]!, Colors.pink[500]!],
                     begin: Alignment.centerLeft,
                     end: Alignment.centerRight,
                   ),
