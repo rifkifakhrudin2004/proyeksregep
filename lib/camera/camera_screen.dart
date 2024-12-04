@@ -8,7 +8,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'ReviewPage.dart';
+import '../pages/ReviewPage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as path;
 
