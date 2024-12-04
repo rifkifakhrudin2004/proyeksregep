@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:proyeksregep/models/article.dart';
-import 'profile_page.dart';
+import 'package:proyeksregep/widgets/custom_bottom_navigation.dart'; // Add this import
 import 'package:proyeksregep/widgets/article_widget.dart';
-import 'storage_page.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -15,9 +14,7 @@ class _HomePageState extends State<HomePage> {
   List<Article> articles = [];
   String? lastPhotoUrl;
   String? userName;
-  int _selectedIndex = 0;
   bool isLoading = true;
-  int _selectedStep = 0;
 
   @override
   void initState() {
@@ -105,11 +102,11 @@ class _HomePageState extends State<HomePage> {
               SizedBox(height: 20),
               GestureDetector(
                 onTap: () {
-                  Navigator.pop(context); // Menutup dialog saat di-tap
+                  Navigator.pop(context);
                 },
                 child: InteractiveViewer(
-                  maxScale: 4.0, // Zoom maksimal
-                  minScale: 1.0, // Zoom minimal
+                  maxScale: 4.0,
+                  minScale: 1.0,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(15),
                     child: Image.asset(
@@ -122,9 +119,8 @@ class _HomePageState extends State<HomePage> {
               SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
-                  Navigator.pop(context); // Menutup dialog
-                  Navigator.pushNamed(
-                      context, '/camera'); // Navigasi ke halaman kamera
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/camera');
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromRGBO(252, 228, 236, 1),
@@ -188,38 +184,45 @@ class _HomePageState extends State<HomePage> {
                     child: Row(
                       children: [
                         GestureDetector(
-  onTap: () {
-    if (lastPhotoUrl != null) {
-      showDialog(
-        context: context,
-        barrierDismissible: true,
-        builder: (BuildContext context) {
-          return Dialog(
-            backgroundColor: Colors.transparent,
-            child: GestureDetector(
-              onTap: () => Navigator.pop(context),
-              child: Container(
-                width: double.infinity,
-                height: double.infinity,
-                alignment: Alignment.center,
-                child: Container(
-                  width: MediaQuery.of(context).size.width * 0.8,
-                  height: MediaQuery.of(context).size.width * 0.8,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    image: DecorationImage(
-                      image: NetworkImage(lastPhotoUrl!),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          );
-        },
-      );
-    }
-  },
+                          onTap: () {
+                            if (lastPhotoUrl != null) {
+                              showDialog(
+                                context: context,
+                                barrierDismissible: true,
+                                builder: (BuildContext context) {
+                                  return Dialog(
+                                    backgroundColor: Colors.transparent,
+                                    child: GestureDetector(
+                                      onTap: () => Navigator.pop(context),
+                                      child: Container(
+                                        width: double.infinity,
+                                        height: double.infinity,
+                                        alignment: Alignment.center,
+                                        child: Container(
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              0.8,
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              0.8,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            image: DecorationImage(
+                                              image:
+                                                  NetworkImage(lastPhotoUrl!),
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              );
+                            }
+                          },
                           child: lastPhotoUrl != null
                               ? CircleAvatar(
                                   radius: 40,
@@ -285,7 +288,7 @@ class _HomePageState extends State<HomePage> {
                         onTap: () => _showFullImage(articles[0].imageUrl),
                         child: Container(
                           width: double.infinity,
-                          height: 300, // memperbesar ukuran gambar
+                          height: 300,
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(15),
                             child: Image.asset(
@@ -332,118 +335,13 @@ class _HomePageState extends State<HomePage> {
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 1.0),
         child: FloatingActionButton(
-          onPressed:
-              _showCameraGuide, // Panggil fungsi langsung tanpa tanda kurung tambahan
+          onPressed: _showCameraGuide,
           backgroundColor: const Color.fromRGBO(136, 14, 79, 1),
           child: Icon(Icons.camera_alt, color: Colors.white, size: 30),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: BottomAppBar(
-        color: const Color.fromRGBO(248, 187, 208, 1),
-        shape: CircularNotchedRectangle(),
-        notchMargin: 20,
-        child: Container(
-          height: 80.0,
-          padding: const EdgeInsets.symmetric(horizontal: 0.1),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Expanded(
-                child: _buildNavItem(
-                  icon: Icons.home,
-                  label: 'Home',
-                  index: 0,
-                ),
-              ),
-              Expanded(
-                child: _buildNavItem(
-                  icon: Icons.photo_library,
-                  label: 'Gallery',
-                  index: 1,
-                ),
-              ),
-              SizedBox(width: 90),
-              Expanded(
-                child: _buildNavItem(
-                  icon: Icons.history,
-                  label: 'Routine',
-                  index: 2,
-                ),
-              ),
-              Expanded(
-                child: _buildNavItem(
-                  icon: Icons.person,
-                  label: 'Profile',
-                  index: 3,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _navigateToPage(int index) {
-    if (mounted) {
-      setState(() {
-        _selectedIndex = index;
-      });
-
-      switch (index) {
-        case 0:
-          Navigator.pushReplacementNamed(context, '/home');
-          break;
-        case 1:
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const StoragePage(),
-              ));
-          break;
-        case 2:
-          Navigator.pushNamed(context, '/routine');
-          break;
-        case 3:
-          Navigator.pushNamed(context, '/profile');
-          break;
-      }
-    }
-  }
-
-  Widget _buildNavItem({
-    required IconData icon,
-    required String label,
-    required int index,
-  }) {
-    return InkWell(
-      onTap: () {
-        _navigateToPage(index);
-      },
-      child: Container(
-        alignment: Alignment.center,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              color: _selectedIndex == index
-                  ? const Color.fromRGBO(236, 64, 122, 1)
-                  : const Color.fromRGBO(136, 14, 79, 1),
-            ),
-            SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                color: _selectedIndex == index
-                    ? const Color.fromRGBO(236, 64, 122, 1)
-                    : const Color.fromRGBO(136, 14, 79, 1),
-              ),
-            ),
-          ],
-        ),
-      ),
+      bottomNavigationBar: CustomBottomNavigation(initialIndex: 0),
     );
   }
 }

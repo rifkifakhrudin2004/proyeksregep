@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:proyeksregep/pages/detailStorage_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:proyeksregep/widgets/custom_bottom_navigation.dart';
 
 class StoragePage extends StatefulWidget {
   final XFile? imageFile;
@@ -46,8 +47,7 @@ class _StoragePageState extends State<StoragePage> {
 
       setState(() {
         storedResults = decodedData
-            .where(
-                (item) => item['userId'] == currentUserId) // Filter by userId
+            .where((item) => item['userId'] == currentUserId) // Filter by userId
             .map((item) {
               if (item['image'] != null) {
                 item['image'] = XFile(item['image']);
@@ -226,7 +226,8 @@ class _StoragePageState extends State<StoragePage> {
                         ElevatedButton(
                           onPressed: () => _deleteResult(index),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor:  const Color.fromRGBO(241, 104, 152, 1),
+                            backgroundColor:
+                                const Color.fromRGBO(241, 104, 152, 1),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
@@ -250,6 +251,20 @@ class _StoragePageState extends State<StoragePage> {
           },
         ),
       ),
+      bottomNavigationBar: CustomBottomNavigation(initialIndex: 1),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 1.0),
+        child: FloatingActionButton(
+          onPressed: () {
+            // Camera guide or navigation logic
+            Navigator.pushNamed(context, '/camera');
+          },
+          backgroundColor: const Color.fromRGBO(136, 14, 79, 1),
+          child: Icon(Icons.camera_alt, color: Colors.white, size: 30),
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 }
+

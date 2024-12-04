@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:proyeksregep/models/skincare_model.dart';
 import 'routine_page.dart';
+import 'package:proyeksregep/widgets/custom_bottom_navigation.dart';
 
 class SkincareRoutineListPage extends StatefulWidget {
   @override
@@ -278,60 +279,71 @@ Widget _buildCheckboxCell(bool isChecked) {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFFFF0F5), // Soft pastel pink background
-      appBar: AppBar(
-        title: Text(
-          'My Skincare Routines', 
-          style: TextStyle(
-            fontWeight: FontWeight.w600, 
-            color: Colors.white
-          ),
+Widget build(BuildContext context) {
+  return Scaffold(
+    backgroundColor: const Color(0xFFFFF0F5), // Soft pastel pink background
+    appBar: AppBar(
+      title: Text(
+        'My Skincare Routines',
+        style: TextStyle(
+          fontWeight: FontWeight.w600,
+          color: Colors.white,
         ),
-        backgroundColor: const Color(0xFFFF69B4), // Soft hot pink
-        elevation: 0,
-        centerTitle: true,
       ),
-      body: routines.isEmpty
-          ? _buildEmptyState()
-          : Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-              child: ListView.builder(
-                itemCount: routines.length,
-                itemBuilder: (context, index) {
-                  final routine = routines[index];
-                  return _buildRoutineCard(routine);
-                },
-                physics: const BouncingScrollPhysics(), // Smooth scrolling
-              ),
-            ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          User? currentUser = FirebaseAuth.instance.currentUser;
-          if (currentUser == null) {
-            _showLoginRequiredDialog();
-            return;
-          }
+      backgroundColor: const Color(0xFFFF69B4), // Soft hot pink
+      elevation: 0,
+      centerTitle: true,
+      actions: [
+        IconButton(
+          onPressed: () async {
+            User? currentUser = FirebaseAuth.instance.currentUser;
+            if (currentUser == null) {
+              _showLoginRequiredDialog();
+              return;
+            }
 
-          final newRoutine = await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => SkincareRoutineInputPage(),
+            final newRoutine = await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => SkincareRoutineInputPage(),
+              ),
+            );
+            if (newRoutine != null) {
+              setState(() {
+                routines.add(newRoutine);
+              });
+            }
+          },
+          icon: Icon(Icons.add, color: Colors.white),
+          tooltip: 'Add Routine',
+        ),
+      ],
+    ),
+    body: routines.isEmpty
+        ? _buildEmptyState()
+        : Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: ListView.builder(
+              itemCount: routines.length,
+              itemBuilder: (context, index) {
+                final routine = routines[index];
+                return _buildRoutineCard(routine);
+              },
+              physics: const BouncingScrollPhysics(), // Smooth scrolling
             ),
-          );
-          if (newRoutine != null) {
-            setState(() {
-              routines.add(newRoutine);
-            });
-          }
-        },
-        backgroundColor: const Color(0xFFFF69B4),
-        icon: Icon(Icons.add, color: Colors.white),
-        label: Text('Add Routine', style: TextStyle(color: Colors.white)),
-      ),
-    );
-  }
+          ),
+    floatingActionButton: FloatingActionButton(
+      onPressed: () {
+        Navigator.pushNamed(context, '/camera'); // Navigation for camera action
+      },
+      backgroundColor: const Color(0xFF880E4F), // Slightly darker pink
+      child: Icon(Icons.camera_alt, color: Colors.white, size: 30),
+    ),
+    floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+    bottomNavigationBar: CustomBottomNavigation(initialIndex: 2),
+  );
+}
+
 
   // Empty state with more elegant design
   Widget _buildEmptyState() {
