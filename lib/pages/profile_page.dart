@@ -169,9 +169,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 onTap: _showPhotoPreview,
                 child: CircleAvatar(
                   radius: 70.0,
-                  backgroundColor: _photoUrl.isEmpty
-                      ? Colors.pink[100]
-                      : Colors.transparent,
+                  backgroundColor:
+                      _photoUrl.isEmpty ? Colors.pink[100] : Colors.transparent,
                   child: _photoUrl.isNotEmpty
                       ? ClipOval(
                           child: Image.network(
@@ -185,8 +184,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             },
                           ),
                         )
-                      : Icon(Icons.person,
-                          size: 70.0, color: Colors.pink[700]),
+                      : Icon(Icons.person, size: 70.0, color: Colors.pink[700]),
                 ),
               ),
               const SizedBox(height: 20.0),

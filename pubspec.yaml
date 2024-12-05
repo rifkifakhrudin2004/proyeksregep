@@ -55,6 +55,7 @@ dependencies:
   awesome_dialog: ^3.2.1
   rive_common: ^0.4.12
 
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

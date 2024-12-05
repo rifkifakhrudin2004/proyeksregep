@@ -132,61 +132,62 @@ class _CameraScreenState extends State<CameraScreen>
   }
 
   Future<void> _captureImage() async {
-  if (_controller != null && _controller!.value.isInitialized) {
-    try {
-      // Tampilkan dialog loading sebelum capture
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 16),
-                Text('Sedang memproses gambar...\nMohon tunggu'),
-              ],
-            ),
-          );
-        },
-      );
-
-      final XFile file = await _controller!.takePicture();
-      setState(() {
-        imageFile = file;
-      });
-
-      String fileName = _getFileName(file);
-      String? filePath = await _uploadImageToFirebase(file, fileName);
-
-      if (filePath != null) {
-        User? user = FirebaseAuth.instance.currentUser;
-        if (user != null) {
-          // Tutup dialog loading
-          Navigator.of(context).pop();
-
-          // Navigasi ke ReviewPage dengan status processing
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ReviewPage(
-                imageFile: file,
+    if (_controller != null && _controller!.value.isInitialized) {
+      try {
+        // Tampilkan dialog loading sebelum capture
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
+                  Text('Sedang memproses gambar...\nMohon tunggu'),
+                ],
               ),
-            ),
-          );
-          
-          // Proses ML di background
-          await sendImageData(user.uid, filePath);
+            );
+          },
+        );
+
+        final XFile file = await _controller!.takePicture();
+        setState(() {
+          imageFile = file;
+        });
+
+        String fileName = _getFileName(file);
+        String? filePath = await _uploadImageToFirebase(file, fileName);
+
+        if (filePath != null) {
+          User? user = FirebaseAuth.instance.currentUser;
+          if (user != null) {
+            // Tutup dialog loading
+            Navigator.of(context).pop();
+
+            // Navigasi ke ReviewPage dengan status processing
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ReviewPage(
+                  imageFile: file,
+                ),
+              ),
+            );
+
+            // Proses ML di background
+            await sendImageData(user.uid, filePath);
+          }
         }
+      } catch (e) {
+        // Pastikan dialog loading ditutup jika terjadi error
+        Navigator.of(context).pop();
+        print('Error saat mengambil gambar: $e');
       }
-    } catch (e) {
-      // Pastikan dialog loading ditutup jika terjadi error
-      Navigator.of(context).pop();
-      print('Error saat mengambil gambar: $e');
     }
   }
-}
+
   Future<String?> _uploadImageToFirebase(XFile file, String fileName) async {
     try {
       User? user = FirebaseAuth.instance.currentUser;
@@ -210,7 +211,7 @@ class _CameraScreenState extends State<CameraScreen>
   Future<void> sendImageData(String userId, String imageFilename) async {
     try {
       final fileName = imageFilename.split('/').last;
-      final url = Uri.parse('http://192.168.0.114:5000/upload');
+      final url = Uri.parse('http://192.168.30.125:5000/upload');
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
@@ -226,7 +227,9 @@ class _CameraScreenState extends State<CameraScreen>
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = json.decode(response.body);
         String predictedClass = responseData['prediction']['predicted_class'];
-        String persentase = responseData['prediction']['predicted_probability'].toString() + '%';
+        String persentase =
+            responseData['prediction']['predicted_probability'].toString() +
+                '%';
 
         String handling = '';
         String skincare = '';
@@ -235,7 +238,8 @@ class _CameraScreenState extends State<CameraScreen>
           if (double.parse(persentase.replaceAll('%', '')) >= 50) {
             handling = 'Kulit kering berat! Gunakan pelembab super intensif';
             skincare = 'Ceramide Cream, Hyaluronic Acid, Barrier Repair Serum';
-          } else if (double.parse(persentase.replaceAll('%', '')) >= 20 && double.parse(persentase.replaceAll('%', '')) < 50) {
+          } else if (double.parse(persentase.replaceAll('%', '')) >= 20 &&
+              double.parse(persentase.replaceAll('%', '')) < 50) {
             handling = 'Kulit kering sedang! Gunakan pelembab khusus';
             skincare = 'Rich Moisturizer, Niacinamide Serum';
           } else {
@@ -245,9 +249,12 @@ class _CameraScreenState extends State<CameraScreen>
         } else if (predictedClass == 'oily') {
           if (double.parse(persentase.replaceAll('%', '')) >= 50) {
             handling = 'Kulit sangat berminyak! Kontrol produksi sebum';
-            skincare = 'Salicylic Acid Cleanser, Oil-free Mattifying Moisturizer';
-          } else if (double.parse(persentase.replaceAll('%', '')) >= 20 && double.parse(persentase.replaceAll('%', '')) < 50) {
-            handling = 'Kulit berminyak sedang! Gunakan produk pembersih khusus';
+            skincare =
+                'Salicylic Acid Cleanser, Oil-free Mattifying Moisturizer';
+          } else if (double.parse(persentase.replaceAll('%', '')) >= 20 &&
+              double.parse(persentase.replaceAll('%', '')) < 50) {
+            handling =
+                'Kulit berminyak sedang! Gunakan produk pembersih khusus';
             skincare = 'Gentle Foaming Cleanser, Lightweight Gel Moisturizer';
           } else {
             handling = 'Kulit berminyak ringan! Gunakan produk kontrol minyak';
@@ -299,116 +306,116 @@ class _CameraScreenState extends State<CameraScreen>
       },
     );
   }
-  
-void _openGallery() async {
-  try {
-    // Pilih gambar dari galeri
-    final ImagePicker picker = ImagePicker();
-    final XFile? pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
-    if (pickedFile != null) {
-      // Inisialisasi face detector
-      final faceDetector = GoogleMlKit.vision.faceDetector(FaceDetectorOptions(
-        enableClassification: true,
-        minFaceSize: 0.15,
-        performanceMode: FaceDetectorMode.accurate,
-      ));
+  void _openGallery() async {
+    try {
+      // Pilih gambar dari galeri
+      final ImagePicker picker = ImagePicker();
+      final XFile? pickedFile =
+          await picker.pickImage(source: ImageSource.gallery);
 
-      // Baca gambar
-      final inputImage = InputImage.fromFilePath(pickedFile.path);
+      if (pickedFile != null) {
+        // Inisialisasi face detector
+        final faceDetector =
+            GoogleMlKit.vision.faceDetector(FaceDetectorOptions(
+          enableClassification: true,
+          minFaceSize: 0.15,
+          performanceMode: FaceDetectorMode.accurate,
+        ));
 
-      try {
-        // Deteksi wajah
-        final List<Face> faces = await faceDetector.processImage(inputImage);
+        // Baca gambar
+        final inputImage = InputImage.fromFilePath(pickedFile.path);
 
-        // Validasi jumlah dan kualitas wajah
-        if (faces.isEmpty || faces.length > 1) {
-          // Tampilkan alert jika tidak ada wajah atau lebih dari satu wajah
-          _showAlertDialog(
-            'Validasi Gambar',
-            faces.isEmpty 
-              ? 'Tidak ada wajah terdeteksi.' 
-              : 'Hanya satu wajah yang diperbolehkan dalam gambar.'
-          );
-          return;
-        }
+        try {
+          // Deteksi wajah
+          final List<Face> faces = await faceDetector.processImage(inputImage);
 
-        // Validasi ukuran dan kualitas wajah
-        final firstFace = faces.first;
-        if (firstFace.boundingBox.width < 100 || firstFace.boundingBox.height < 100) {
-          _showAlertDialog(
-            'Validasi Gambar',
-            'Wajah terlalu kecil. Pilih gambar dengan wajah yang lebih jelas dan dekat.'
-          );
-          return;
-        }
-
-        // Tampilkan dialog loading
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 16),
-                  Text('Sedang memproses gambar...\nMohon tunggu'),
-                ],
-              ),
-            );
-          },
-        );
-
-        // Set state dengan file yang dipilih
-        setState(() {
-          imageFile = pickedFile;
-        });
-
-        // Dapatkan nama file
-        String fileName = _getFileName(pickedFile);
-
-        // Upload gambar ke Firebase
-        String? filePath = await _uploadImageToFirebase(pickedFile, fileName);
-
-        if (filePath != null) {
-          User? user = FirebaseAuth.instance.currentUser;
-          if (user != null) {
-            // Tutup dialog loading
-            Navigator.of(context).pop();
-
-            // Navigasi ke ReviewPage dengan status processing
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ReviewPage(
-                  imageFile: pickedFile,
-                ),
-              ),
-            );
-            
-            // Proses ML di background
-            await sendImageData(user.uid, filePath);
+          // Validasi jumlah dan kualitas wajah
+          if (faces.isEmpty || faces.length > 1) {
+            // Tampilkan alert jika tidak ada wajah atau lebih dari satu wajah
+            _showAlertDialog(
+                'Validasi Gambar',
+                faces.isEmpty
+                    ? 'Tidak ada wajah terdeteksi.'
+                    : 'Hanya satu wajah yang diperbolehkan dalam gambar.');
+            return;
           }
+
+          // Validasi ukuran dan kualitas wajah
+          final firstFace = faces.first;
+          if (firstFace.boundingBox.width < 100 ||
+              firstFace.boundingBox.height < 100) {
+            _showAlertDialog('Validasi Gambar',
+                'Wajah terlalu kecil. Pilih gambar dengan wajah yang lebih jelas dan dekat.');
+            return;
+          }
+
+          // Tampilkan dialog loading
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text('Sedang memproses gambar...\nMohon tunggu'),
+                  ],
+                ),
+              );
+            },
+          );
+
+          // Set state dengan file yang dipilih
+          setState(() {
+            imageFile = pickedFile;
+          });
+
+          // Dapatkan nama file
+          String fileName = _getFileName(pickedFile);
+
+          // Upload gambar ke Firebase
+          String? filePath = await _uploadImageToFirebase(pickedFile, fileName);
+
+          if (filePath != null) {
+            User? user = FirebaseAuth.instance.currentUser;
+            if (user != null) {
+              // Tutup dialog loading
+              Navigator.of(context).pop();
+
+              // Navigasi ke ReviewPage dengan status processing
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ReviewPage(
+                    imageFile: pickedFile,
+                  ),
+                ),
+              );
+
+              // Proses ML di background
+              await sendImageData(user.uid, filePath);
+            }
+          }
+
+          // Tutup face detector
+          await faceDetector.close();
+        } catch (e) {
+          // Tangani kesalahan deteksi wajah
+          print('Error deteksi wajah: $e');
+          _showAlertDialog(
+              'Error', 'Gagal memvalidasi gambar. Silakan coba lagi.');
         }
-
-        // Tutup face detector
-        await faceDetector.close();
-
-      } catch (e) {
-        // Tangani kesalahan deteksi wajah
-        print('Error deteksi wajah: $e');
-        _showAlertDialog('Error', 'Gagal memvalidasi gambar. Silakan coba lagi.');
       }
+    } catch (e) {
+      // Pastikan dialog loading ditutup jika terjadi error
+      Navigator.of(context).pop();
+      print('Error saat memilih gambar dari galeri: $e');
+      _showAlertDialog('Error', 'Gagal memilih gambar. Silakan coba lagi.');
     }
-  } catch (e) {
-    // Pastikan dialog loading ditutup jika terjadi error
-    Navigator.of(context).pop();
-    print('Error saat memilih gambar dari galeri: $e');
-    _showAlertDialog('Error', 'Gagal memilih gambar. Silakan coba lagi.');
   }
-}
 
   @override
   void dispose() {
@@ -503,24 +510,24 @@ void _openGallery() async {
                 ),
               ),
             ),
-            if (persentase != null)
-          Positioned(
-            bottom: 70,
-            left: 20,
-            right: 20,
-            child: Container(
-              padding: EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.black54,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Text(
-                'Probabilitas: $persentase%',
-                style: TextStyle(color: Colors.white, fontSize: 16),
-                textAlign: TextAlign.center,
+          if (persentase != null)
+            Positioned(
+              bottom: 70,
+              left: 20,
+              right: 20,
+              child: Container(
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.black54,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  'Probabilitas: $persentase%',
+                  style: TextStyle(color: Colors.white, fontSize: 16),
+                  textAlign: TextAlign.center,
+                ),
               ),
             ),
-          ),
           Positioned(
             bottom: 20,
             left: 20,
