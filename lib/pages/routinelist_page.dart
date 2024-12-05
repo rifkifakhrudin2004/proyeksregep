@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:proyeksregep/models/skincare_model.dart';
 import 'routine_page.dart';
+import 'package:proyeksregep/widgets/custom_bottom_navigation.dart';
 
 class SkincareRoutineListPage extends StatefulWidget {
   @override
@@ -278,60 +279,71 @@ Widget _buildCheckboxCell(bool isChecked) {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFFFF0F5), // Soft pastel pink background
-      appBar: AppBar(
-        title: Text(
-          'My Skincare Routines', 
-          style: TextStyle(
-            fontWeight: FontWeight.w600, 
-            color: Colors.white
-          ),
+Widget build(BuildContext context) {
+  return Scaffold(
+    backgroundColor: const Color(0xFFFFF0F5), // Soft pastel pink background
+    appBar: AppBar(
+      title: Text(
+        'My Skincare Routines',
+        style: TextStyle(
+          fontWeight: FontWeight.w600,
+          color: Colors.white,
         ),
-        backgroundColor: const Color(0xFFFF69B4), // Soft hot pink
-        elevation: 0,
-        centerTitle: true,
       ),
-      body: routines.isEmpty
-          ? _buildEmptyState()
-          : Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-              child: ListView.builder(
-                itemCount: routines.length,
-                itemBuilder: (context, index) {
-                  final routine = routines[index];
-                  return _buildRoutineCard(routine);
-                },
-                physics: const BouncingScrollPhysics(), // Smooth scrolling
-              ),
-            ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          User? currentUser = FirebaseAuth.instance.currentUser;
-          if (currentUser == null) {
-            _showLoginRequiredDialog();
-            return;
-          }
+      backgroundColor: const Color(0xFFFF69B4), // Soft hot pink
+      elevation: 0,
+      centerTitle: true,
+      actions: [
+        IconButton(
+          onPressed: () async {
+            User? currentUser = FirebaseAuth.instance.currentUser;
+            if (currentUser == null) {
+              _showLoginRequiredDialog();
+              return;
+            }
 
-          final newRoutine = await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => SkincareRoutineInputPage(),
+            final newRoutine = await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => SkincareRoutineInputPage(),
+              ),
+            );
+            if (newRoutine != null) {
+              setState(() {
+                routines.add(newRoutine);
+              });
+            }
+          },
+          icon: Icon(Icons.add, color: Colors.white),
+          tooltip: 'Add Routine',
+        ),
+      ],
+    ),
+    body: routines.isEmpty
+        ? _buildEmptyState()
+        : Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: ListView.builder(
+              itemCount: routines.length,
+              itemBuilder: (context, index) {
+                final routine = routines[index];
+                return _buildRoutineCard(routine);
+              },
+              physics: const BouncingScrollPhysics(), // Smooth scrolling
             ),
-          );
-          if (newRoutine != null) {
-            setState(() {
-              routines.add(newRoutine);
-            });
-          }
-        },
-        backgroundColor: const Color(0xFFFF69B4),
-        icon: Icon(Icons.add, color: Colors.white),
-        label: Text('Add Routine', style: TextStyle(color: Colors.white)),
-      ),
-    );
-  }
+          ),
+    floatingActionButton: FloatingActionButton(
+      onPressed: () {
+        Navigator.pushNamed(context, '/camera'); // Navigation for camera action
+      },
+      backgroundColor: const Color(0xFF880E4F), // Slightly darker pink
+      child: Icon(Icons.camera_alt, color: Colors.white, size: 30),
+    ),
+    floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+    bottomNavigationBar: CustomBottomNavigation(initialIndex: 2),
+  );
+}
+
 
   // Empty state with more elegant design
   Widget _buildEmptyState() {
@@ -368,97 +380,140 @@ Widget _buildCheckboxCell(bool isChecked) {
     );
   }
 
-  // Routine card with more refined design
   Widget _buildRoutineCard(SkincareRoutine routine) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.pink.withOpacity(0.1),
-            spreadRadius: 2,
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                _buildAvatar(routine.avatarUrl),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        routine.category,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600, 
-                          fontSize: 18,
-                          color: Colors.pink[800]
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        routine.note,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: Colors.pink[600],
-                          fontWeight: FontWeight.w300
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            _buildScheduleTable(routine),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                IconButton(
-                  icon: Icon(Icons.edit, color: Colors.pink[600]),
-                  onPressed: () async {
-                    final updatedRoutine = await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => SkincareRoutineInputPage(
-                          routine: routine,
-                        ),
-                      ),
-                    );
-                    if (updatedRoutine != null) {
-                      setState(() {
-                        int index = routines
-                            .indexWhere((r) => r.id == updatedRoutine.id);
-                        if (index != -1) {
-                          routines[index] = updatedRoutine;
-                        }
-                      });
-                    }
-                  },
-                ),
-                IconButton(
-                  icon: Icon(Icons.delete, color: Colors.pink[600]),
-                  onPressed: () {
-                    _deleteRoutine(routine.id!);
-                  },
-                ),
-              ],
-            ),
-          ],
+  return Container(
+    margin: const EdgeInsets.only(bottom: 16),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(15),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.pink.withOpacity(0.1),
+          spreadRadius: 2,
+          blurRadius: 10,
+          offset: const Offset(0, 4),
         ),
-      ),
-    );
+      ],
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  _buildAvatar(routine.avatarUrl),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          routine.category,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600, 
+                            fontSize: 18,
+                            color: Colors.pink[800]
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          routine.note.isNotEmpty ? routine.note : 'No additional notes',
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: routine.note.isNotEmpty 
+                              ? Colors.pink[600] 
+                              : Colors.pink[400]?.withOpacity(0.7),
+                            fontWeight: FontWeight.w300,
+                            fontStyle: routine.note.isEmpty 
+                              ? FontStyle.italic 
+                              : FontStyle.normal,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              _buildScheduleTable(routine),
+            ],
+          ),
+        ),
+        Divider(
+          height: 1,
+          color: Colors.pink[100],
+          thickness: 0.5,
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              IconButton(
+                tooltip: 'Edit Routine',
+                icon: Icon(Icons.edit, color: Colors.pink[600]),
+                onPressed: () async {
+                  final updatedRoutine = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SkincareRoutineInputPage(
+                        routine: routine,
+                      ),
+                      fullscreenDialog: true, // This helps prevent data covering
+                    ),
+                  );
+                  if (updatedRoutine != null) {
+                    setState(() {
+                      int index = routines
+                          .indexWhere((r) => r.id == updatedRoutine.id);
+                      if (index != -1) {
+                        routines[index] = updatedRoutine;
+                      }
+                    });
+                  }
+                },
+              ),
+              IconButton(
+                tooltip: 'Delete Routine',
+                icon: Icon(Icons.delete, color: Colors.pink[600]),
+                onPressed: () {
+                  // Show a confirmation dialog before deleting
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text('Delete Routine'),
+                        content: Text('Are you sure you want to delete this skincare routine?'),
+                        actions: [
+                          TextButton(
+                            child: Text('Cancel'),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                          TextButton(
+                            child: Text('Delete'),
+                            onPressed: () {
+                              _deleteRoutine(routine.id!);
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
   }
 }

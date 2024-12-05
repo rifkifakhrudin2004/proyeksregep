@@ -5,6 +5,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:proyeksregep/widgets/custom_bottom_navigation.dart';
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -280,6 +281,19 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ),
       ),
+       bottomNavigationBar: CustomBottomNavigation(initialIndex: 3),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 1.0),
+        child: FloatingActionButton(
+          onPressed: () {
+            // Camera guide or navigation logic
+            Navigator.pushNamed(context, '/camera');
+          },
+          backgroundColor: const Color.fromRGBO(136, 14, 79, 1),
+          child: Icon(Icons.camera_alt, color: Colors.white, size: 30),
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 

@@ -209,19 +209,7 @@ class _LandingPageState extends State<LandingPage> {
                           ),
                         ),
                       ),
-                      SizedBox(height: 8),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton(
-                          onPressed: () {
-                            _resetPassword(context);
-                          },
-                          child: Text(
-                            "Forgot Password?",
-                            style: TextStyle(color: const Color.fromRGBO(236, 64, 122, 1)),
-                          ),
-                        ),
-                      ),
+                     
                       SizedBox(height: 16),
                       SizedBox(
                         width: double.infinity,
