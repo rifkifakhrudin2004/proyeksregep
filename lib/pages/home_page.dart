@@ -292,7 +292,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(40.0),
                   child: SmoothPageIndicator(
                     controller: _pageController,
                     count: routines.length,
@@ -324,7 +324,7 @@ class _HomePageState extends State<HomePage> {
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Container(
-          margin: const EdgeInsets.only(bottom: 400),
+          margin: const EdgeInsets.only(bottom: 380),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(15),
@@ -371,68 +371,6 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
     );
-  }
-
-  Widget _buildNavItem({
-    required IconData icon,
-    required String label,
-    required int index,
-  }) {
-    return InkWell(
-      onTap: () {
-        _navigateToPage(index);
-      },
-      child: Container(
-        alignment: Alignment.center,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              color: _selectedIndex == index
-                  ? const Color.fromRGBO(236, 64, 122, 1)
-                  : const Color.fromRGBO(136, 14, 79, 1),
-            ),
-            SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                color: _selectedIndex == index
-                    ? const Color.fromRGBO(236, 64, 122, 1)
-                    : const Color.fromRGBO(136, 14, 79, 1),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _navigateToPage(int index) {
-    if (mounted) {
-      setState(() {
-        _selectedIndex = index;
-      });
-
-      switch (index) {
-        case 0:
-          Navigator.pushReplacementNamed(context, '/home');
-          break;
-        case 1:
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const StoragePage(),
-              ));
-          break;
-        case 2:
-          Navigator.pushNamed(context, '/routine');
-          break;
-        case 3:
-          Navigator.pushNamed(context, '/profile');
-          break;
-      }
-    }
   }
 
   Widget _buildAvatar(String avatarUrl) {

@@ -102,6 +102,7 @@ class _StoragePageState extends State<StoragePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text(
           'Skin Analysis Results',
           style: TextStyle(

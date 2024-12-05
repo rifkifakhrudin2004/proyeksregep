@@ -283,6 +283,7 @@ Widget build(BuildContext context) {
   return Scaffold(
     backgroundColor: const Color(0xFFFFF0F5), // Soft pastel pink background
     appBar: AppBar(
+      automaticallyImplyLeading: false,
       title: Text(
         'My Skincare Routines',
         style: TextStyle(

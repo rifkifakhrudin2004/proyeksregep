@@ -148,18 +148,13 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: Text(
           'Profile',
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.white,
           ),
-        ),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {
-            Navigator.pop(context);
-          },
         ),
         backgroundColor: Colors.pink[700],
         elevation: 0,
