@@ -416,8 +416,12 @@ class _HomePageState extends State<HomePage> {
 
       switch (index) {
         case 0:
-          Navigator.pushReplacementNamed(context, '/home');
-          break;
+  Navigator.pushAndRemoveUntil(
+    context, 
+    MaterialPageRoute(builder: (context) => HomePage()), 
+    (route) => false
+  );
+  break;
         case 1:
           Navigator.push(
               context,
