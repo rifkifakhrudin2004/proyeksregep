@@ -182,6 +182,7 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
       backgroundColor: Colors.pink[50],
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: Text(
           'Profile',
           style: TextStyle(
@@ -196,7 +197,7 @@ class _ProfilePageState extends State<ProfilePage> {
             Navigator.pop(context);
           },
         ),
-        backgroundColor: const Color.fromRGBO(241, 104, 152, 1),
+backgroundColor: Colors.pink[700] ?? const Color.fromRGBO(241, 104, 152, 1),
         elevation: 0,
       ),
       body: SingleChildScrollView(

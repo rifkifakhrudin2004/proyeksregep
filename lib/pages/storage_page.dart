@@ -264,7 +264,6 @@ class _StoragePageState extends State<StoragePage> {
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-    );
-  }
+);
 }
-
+}

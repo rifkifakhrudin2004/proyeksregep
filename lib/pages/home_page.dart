@@ -292,7 +292,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(40.0),
                   child: SmoothPageIndicator(
                     controller: _pageController,
                     count: routines.length,
@@ -324,7 +324,7 @@ class _HomePageState extends State<HomePage> {
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Container(
-          margin: const EdgeInsets.only(bottom: 400),
+          margin: const EdgeInsets.only(bottom: 380),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(15),

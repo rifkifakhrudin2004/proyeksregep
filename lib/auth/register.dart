@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'landing_page.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:proyeksregep/auth/landing_page.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class RegisterScreen extends StatefulWidget {
   @override
@@ -112,7 +113,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final specificColor = const Color.fromRGBO(240, 98, 146, 1);
+    final specificColor = const Color.fromRGBO(216, 27, 96, 1);
 
     return Scaffold(
       body: Container(
@@ -134,16 +135,31 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 children: <Widget>[
                   FadeInUp(
                       duration: Duration(milliseconds: 1000),
-                      child: Text(
+                      child: 
+                      Text(
                         "Register",
-                        style: TextStyle(color: Colors.white, fontSize: 40),
+                        style: GoogleFonts.montserrat(
+                          textStyle: TextStyle(
+                            color: Colors.white, 
+                            fontSize: 40,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 2
+                          ),
+                        ),
                       )),
                   SizedBox(height: 10),
                   FadeInUp(
                       duration: Duration(milliseconds: 1300),
                       child: Text(
                         "Create Your Account",
-                        style: TextStyle(color: Colors.white, fontSize: 18),
+                        style: GoogleFonts.lato(
+                          textStyle: TextStyle(
+                            color: Colors.white, 
+                            fontSize: 18,
+                            fontWeight: FontWeight.normal,
+                            letterSpacing: 1.5,
+                          ),
+                        ),
                       )),
                 ],
               ),
@@ -152,7 +168,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: const Color(0xFFFFFFFF),
                     borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(60),
                         topRight: Radius.circular(60))),
@@ -182,13 +198,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     decoration: BoxDecoration(
                                         border: Border(
                                             bottom: BorderSide(
-                                                color: Colors.grey.shade200))),
+                                                color: const Color(0xFFEEEEEE)))),
                                     child: TextField(
                                       controller: emailController,
                                       decoration: InputDecoration(
                                           hintText: "Email",
                                           hintStyle:
-                                              TextStyle(color: Colors.grey),
+                                              TextStyle(
+                                                color: Color.fromRGBO(136, 14, 79, 1),
+                                              ),
                                           border: InputBorder.none),
                                     ),
                                   ),
@@ -205,14 +223,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       decoration: InputDecoration(
                                         hintText: "Password",
                                         hintStyle:
-                                            TextStyle(color: Colors.grey),
+                                            TextStyle(color: Color.fromRGBO(136, 14, 79, 1)),
                                         border: InputBorder.none,
                                         suffixIcon: IconButton(
                                           icon: Icon(
                                             _obscurePassword
                                                 ? Icons.visibility_off
                                                 : Icons.visibility,
-                                            color: Colors.grey,
+                                            color: const Color.fromRGBO(216, 27, 96, 1),
                                           ),
                                           onPressed: () {
                                             setState(() {
@@ -233,14 +251,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       decoration: InputDecoration(
                                         hintText: "Confirm Password",
                                         hintStyle:
-                                            TextStyle(color: Colors.grey),
+                                            TextStyle(color: Color.fromRGBO(136, 14, 79, 1)),
                                         border: InputBorder.none,
                                         suffixIcon: IconButton(
                                           icon: Icon(
                                             _obscureConfirmPassword
                                                 ? Icons.visibility_off
                                                 : Icons.visibility,
-                                            color: Colors.grey,
+                                            color: const Color.fromRGBO(216, 27, 96, 1),
                                           ),
                                           onPressed: () {
                                             setState(() {
@@ -267,13 +285,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               margin: EdgeInsets.symmetric(horizontal: 50),
                               decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(50),
-                                  color: specificColor),
+                                  color: const Color.fromRGBO(216, 27, 96, 1)),
                               child: Center(
                                 child: Text(
                                   "Sign Up",
-                                  style: TextStyle(
+                                  style: GoogleFonts.montserrat(
+                                    textStyle: TextStyle(
                                       color: Colors.white,
-                                      fontWeight: FontWeight.bold),
+                                      fontWeight: FontWeight.normal,
+                                      letterSpacing: 1),
+                                  ),
                                 ),
                               ),
                             ),
@@ -288,7 +309,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             children: [
                               Text(
                                 "Already have an account? ",
-                                style: TextStyle(color: Colors.grey),
+                                style: TextStyle(color: const Color(0xFF9E9E9E)),
                               ),
                               GestureDetector(
                                 onTap: () {
@@ -321,7 +342,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 child: Text(
                                   "Sign in",
                                   style: TextStyle(
-                                      color: specificColor,
+                                      color: Color.fromRGBO(136, 14, 79, 1),
                                       fontWeight: FontWeight.bold),
                                 ),
                               )
