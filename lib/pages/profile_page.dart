@@ -17,6 +17,8 @@ class _ProfilePageState extends State<ProfilePage> {
   final TextEditingController ageController = TextEditingController();
   final TextEditingController dobController = TextEditingController();
   final TextEditingController phoneNumberController = TextEditingController();
+  final TextEditingController addressController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final ImagePicker _picker = ImagePicker();
 
@@ -25,6 +27,8 @@ class _ProfilePageState extends State<ProfilePage> {
   bool isEditingAge = false;
   bool isEditingDob = false;
   bool isEditingPhoneNumber = false;
+  bool isEditingAddress = false;
+  bool isEditingEmail = false;
 
   @override
   void initState() {
@@ -49,6 +53,8 @@ class _ProfilePageState extends State<ProfilePage> {
             ageController.text = (data['age'] ?? '').toString();
             dobController.text = data['dateOfBirth'] ?? '';
             phoneNumberController.text = data['phoneNumber'] ?? '';
+            addressController.text = data['address'] ?? '';
+            emailController.text = data['email'] ?? '';
             _photoUrl = List<String>.from(data['photoUrl'] ?? []);
           });
         } else {
@@ -87,14 +93,15 @@ class _ProfilePageState extends State<ProfilePage> {
     if (nameController.text.isEmpty ||
         ageController.text.isEmpty ||
         phoneNumberController.text.isEmpty ||
-        dobController.text.isEmpty) {
+        dobController.text.isEmpty ||
+        addressController.text.isEmpty ||
+        emailController.text.isEmpty) {
       AwesomeDialog(
         context: context,
         dialogType: DialogType.error,
         animType: AnimType.rightSlide,
         title: "Data Belum Lengkap",
-        desc:
-            "Silakan isi nama, usia, nomor telepon, dan tanggal lahir sebelum menyimpan.",
+        desc: "Silakan isi semua data profil sebelum menyimpan.",
         btnOkOnPress: () {},
       ).show();
       return;
@@ -112,6 +119,8 @@ class _ProfilePageState extends State<ProfilePage> {
           'age': int.tryParse(ageController.text),
           'dateOfBirth': dobController.text,
           'phoneNumber': phoneNumberController.text,
+          'address': addressController.text,
+          'email': emailController.text,
         };
 
         profileData.removeWhere((key, value) => value == null || value == '');
@@ -143,14 +152,40 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+  void _showAlert(String title, String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              child: Text("OK"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showProfileNotFoundAlert() {
+    _showAlert(
+        "Profil Tidak Ditemukan", "Data profil Anda belum ada di sistem.");
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.pink[50],
       appBar: AppBar(
         title: Text(
           'Profile',
           style: TextStyle(
+            fontFamily: 'Montserrat',
             fontWeight: FontWeight.bold,
             color: Colors.white,
           ),
@@ -161,7 +196,7 @@ class _ProfilePageState extends State<ProfilePage> {
             Navigator.pop(context);
           },
         ),
-        backgroundColor: Colors.pink[700],
+        backgroundColor: const Color.fromRGBO(241, 104, 152, 1),
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -171,7 +206,7 @@ class _ProfilePageState extends State<ProfilePage> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               GestureDetector(
-                onTap: _showPhotoPreview,
+                onTap: () {},
                 child: CircleAvatar(
                   radius: 70.0,
                   backgroundColor:
@@ -183,10 +218,6 @@ class _ProfilePageState extends State<ProfilePage> {
                             fit: BoxFit.cover,
                             width: 140.0,
                             height: 140.0,
-                            errorBuilder: (context, exception, stackTrace) {
-                              return Icon(Icons.person,
-                                  size: 70.0, color: Colors.pink[700]);
-                            },
                           ),
                         )
                       : Icon(Icons.person, size: 70.0, color: Colors.pink[700]),
@@ -204,11 +235,11 @@ class _ProfilePageState extends State<ProfilePage> {
                   });
                 },
               ),
+              const SizedBox(height: 10.0),
               _buildProfileField(
                 controller: ageController,
                 label: 'Usia',
                 icon: Icons.cake_outlined,
-                keyboardType: TextInputType.number,
                 isEditing: isEditingAge,
                 onEditPressed: () {
                   setState(() {
@@ -216,11 +247,23 @@ class _ProfilePageState extends State<ProfilePage> {
                   });
                 },
               ),
+              const SizedBox(height: 10.0),
+              _buildProfileField(
+                controller: dobController,
+                label: 'Tanggal Lahir',
+                icon: Icons.calendar_today_outlined,
+                isEditing: isEditingDob,
+                onEditPressed: () {
+                  setState(() {
+                    isEditingDob = !isEditingDob;
+                  });
+                },
+              ),
+              const SizedBox(height: 10.0),
               _buildProfileField(
                 controller: phoneNumberController,
                 label: 'Nomor Telepon',
                 icon: Icons.phone_outlined,
-                keyboardType: TextInputType.phone,
                 isEditing: isEditingPhoneNumber,
                 onEditPressed: () {
                   setState(() {
@@ -228,70 +271,41 @@ class _ProfilePageState extends State<ProfilePage> {
                   });
                 },
               ),
+              const SizedBox(height: 10.0),
               _buildProfileField(
-                controller: dobController,
-                label: 'Tanggal Lahir',
-                icon: Icons.calendar_today_outlined,
-                isEditing: isEditingDob,
-                onTap: isEditingDob ? () => _selectDate(context) : null,
-                readOnly: true,
+                controller: addressController,
+                label: 'Alamat',
+                icon: Icons.home_outlined,
+                isEditing: isEditingAddress,
                 onEditPressed: () {
                   setState(() {
-                    isEditingDob = !isEditingDob;
+                    isEditingAddress = !isEditingAddress;
                   });
                 },
               ),
-              const SizedBox(height: 30),
-              Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Colors.pink[700]!, Colors.pink[500]!],
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                  ),
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.pink.withOpacity(0.3),
-                      spreadRadius: 1,
-                      blurRadius: 5,
-                      offset: Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: ElevatedButton(
-                  onPressed: () => _saveProfile(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.transparent,
-                    shadowColor: Colors.transparent,
-                    padding: EdgeInsets.symmetric(vertical: 15),
-                  ),
-                  child: Text(
-                    "Simpan Profil",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
+              const SizedBox(height: 10.0),
+              _buildProfileField(
+                controller: emailController,
+                label: 'Email',
+                icon: Icons.email_outlined,
+                isEditing: isEditingEmail,
+                onEditPressed: () {
+                  setState(() {
+                    isEditingEmail = !isEditingEmail;
+                  });
+                },
               ),
             ],
           ),
         ),
       ),
-       bottomNavigationBar: CustomBottomNavigation(initialIndex: 3),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 1.0),
-        child: FloatingActionButton(
-          onPressed: () {
-            // Camera guide or navigation logic
-            Navigator.pushNamed(context, '/camera');
-          },
-          backgroundColor: const Color.fromRGBO(136, 14, 79, 1),
-          child: Icon(Icons.camera_alt, color: Colors.white, size: 30),
-        ),
+      bottomNavigationBar: CustomBottomNavigation(initialIndex: 3),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.pushNamed(context, '/camera');
+        },
+        backgroundColor: const Color.fromRGBO(136, 14, 79, 1),
+        child: Icon(Icons.camera_alt, color: Colors.white, size: 30),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
@@ -303,117 +317,25 @@ class _ProfilePageState extends State<ProfilePage> {
     required IconData icon,
     required bool isEditing,
     required VoidCallback onEditPressed,
-    TextInputType keyboardType = TextInputType.text,
-    bool readOnly = false,
-    VoidCallback? onTap,
   }) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 10),
-      decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 2,
-            blurRadius: 5,
-            offset: Offset(0, 3),
-          ),
-        ],
-      ),
-      child: TextField(
-        controller: controller,
-        keyboardType: keyboardType,
-        readOnly: readOnly,
-        onTap: onTap,
-        decoration: InputDecoration(
-          labelText: label,
-          prefixIcon: Icon(icon),
-          suffixIcon: IconButton(
-            icon: Icon(
-              isEditing ? Icons.check : Icons.edit,
-              color: Colors.pink[700],
-            ),
-            onPressed: onEditPressed,
-          ),
-          border: OutlineInputBorder(borderSide: BorderSide.none),
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+    return TextField(
+      controller: controller,
+      enabled: isEditing,
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon),
+        suffixIcon: IconButton(
+          icon: Icon(isEditing ? Icons.check : Icons.edit),
+          onPressed: onEditPressed,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10.0),
         ),
       ),
-    );
-  }
-
-  Future<void> _selectDate(BuildContext context) async {
-    DateTime? selectedDate = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(1900),
-      lastDate: DateTime.now(),
-    );
-    if (selectedDate != null) {
-      dobController.text =
-          "${selectedDate.day}/${selectedDate.month}/${selectedDate.year}";
-    }
-  }
-
-  void _showAlert(String title, String message) {
-    AwesomeDialog(
-      context: context,
-      dialogType: DialogType.warning,
-      animType: AnimType.rightSlide,
-      title: title,
-      desc: message,
-      btnOkOnPress: () {},
-    ).show();
-  }
-
-  void _showPhotoPreview() {
-    AwesomeDialog(
-      context: context,
-      dialogType: DialogType.noHeader,
-      animType: AnimType.scale,
-      body: Column(
-        children: [
-          const SizedBox(height: 10),
-          ClipOval(
-            child: Image.network(
-              _photoUrl.isNotEmpty ? _photoUrl.first : '',
-              errorBuilder: (context, exception, stackTrace) {
-                return Icon(Icons.person, size: 70, color: Colors.pink[700]);
-              },
-              fit: BoxFit.cover,
-              width: 140.0,
-              height: 140.0,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              ElevatedButton(
-                onPressed: () => _pickAndUploadImage(ImageSource.camera),
-                child: const Text("Kamera"),
-              ),
-              ElevatedButton(
-                onPressed: () => _pickAndUploadImage(ImageSource.gallery),
-                child: const Text("Galeri"),
-              ),
-            ],
-          ),
-        ],
+      style: TextStyle(
+        fontFamily: 'Montserrat',
+        fontWeight: FontWeight.bold,
       ),
-    ).show();
-  }
-
-  void _showProfileNotFoundAlert() {
-    AwesomeDialog(
-      context: context,
-      dialogType: DialogType.info,
-      animType: AnimType.rightSlide,
-      title: "Profil Tidak Ditemukan",
-      desc: "Data profil Anda belum tersedia. Silakan lengkapi profil.",
-      btnOkOnPress: () {},
-    ).show();
+    );
   }
 }
