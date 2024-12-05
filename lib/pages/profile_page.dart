@@ -90,12 +90,12 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _saveProfile(BuildContext context) async {
-    if (nameController.text.isEmpty ||
-        ageController.text.isEmpty ||
-        phoneNumberController.text.isEmpty ||
-        dobController.text.isEmpty ||
-        addressController.text.isEmpty ||
-        emailController.text.isEmpty) {
+    if (nameController.text.trim().isEmpty ||
+        ageController.text.trim().isEmpty ||
+        phoneNumberController.text.trim().isEmpty ||
+        dobController.text.trim().isEmpty ||
+        addressController.text.trim().isEmpty ||
+        emailController.text.trim().isEmpty) {
       AwesomeDialog(
         context: context,
         dialogType: DialogType.error,
@@ -115,12 +115,12 @@ class _ProfilePageState extends State<ProfilePage> {
 
         DocumentSnapshot docSnapshot = await docRef.get();
         Map<String, dynamic> profileData = {
-          'name': nameController.text,
-          'age': int.tryParse(ageController.text),
-          'dateOfBirth': dobController.text,
-          'phoneNumber': phoneNumberController.text,
-          'address': addressController.text,
-          'email': emailController.text,
+          'name': nameController.text.trim(),
+          'age': int.tryParse(ageController.text.trim()),
+          'dateOfBirth': dobController.text.trim(),
+          'phoneNumber': phoneNumberController.text.trim(),
+          'address': addressController.text.trim(),
+          'email': emailController.text.trim(),
         };
 
         profileData.removeWhere((key, value) => value == null || value == '');
@@ -130,16 +130,16 @@ class _ProfilePageState extends State<ProfilePage> {
         } else {
           await docRef.set(profileData);
         }
-      }
 
-      AwesomeDialog(
-        context: context,
-        dialogType: DialogType.success,
-        animType: AnimType.scale,
-        title: "Profil Tersimpan",
-        desc: "Profil Anda berhasil disimpan.",
-        btnOkOnPress: () {},
-      ).show();
+        AwesomeDialog(
+          context: context,
+          dialogType: DialogType.success,
+          animType: AnimType.scale,
+          title: "Profil Tersimpan",
+          desc: "Profil Anda berhasil disimpan.",
+          btnOkOnPress: () {},
+        ).show();
+      }
     } catch (e) {
       AwesomeDialog(
         context: context,
@@ -177,6 +177,48 @@ class _ProfilePageState extends State<ProfilePage> {
         "Profil Tidak Ditemukan", "Data profil Anda belum ada di sistem.");
   }
 
+  void _editField(TextEditingController controller, String fieldKey) async {
+  String newValue = controller.text.trim();  // Pastikan data tidak kosong atau berisi spasi
+  if (newValue.isEmpty) {
+    AwesomeDialog(
+      context: context,
+      dialogType: DialogType.error,
+      animType: AnimType.rightSlide,
+      title: "Edit Gagal",
+      desc: "$fieldKey tidak boleh kosong.",
+      btnOkOnPress: () {},
+    ).show();
+    return;
+  }
+
+  try {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      await FirebaseFirestore.instance
+          .collection('profiles')
+          .doc(user.uid)
+          .update({fieldKey: newValue});  // Update field di Firestore
+      AwesomeDialog(
+        context: context,
+        dialogType: DialogType.success,
+        animType: AnimType.rightSlide,
+        title: "Edit Berhasil",
+        desc: "$fieldKey berhasil diperbarui.",
+        btnOkOnPress: () {},
+      ).show();
+    }
+  } catch (e) {
+    AwesomeDialog(
+      context: context,
+      dialogType: DialogType.error,
+      animType: AnimType.rightSlide,
+      title: "Edit Gagal",
+      desc: "Gagal memperbarui $fieldKey: $e",
+      btnOkOnPress: () {},
+    ).show();
+  }
+}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -206,7 +248,9 @@ class _ProfilePageState extends State<ProfilePage> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               GestureDetector(
-                onTap: () {},
+                onTap: () async {
+                  await _pickAndUploadImage(ImageSource.gallery);
+                },
                 child: CircleAvatar(
                   radius: 70.0,
                   backgroundColor:
@@ -233,6 +277,9 @@ class _ProfilePageState extends State<ProfilePage> {
                   setState(() {
                     isEditingName = !isEditingName;
                   });
+                  if (!isEditingName) {
+                    _editField(nameController, 'name');
+                  }
                 },
               ),
               const SizedBox(height: 10.0),
@@ -245,6 +292,9 @@ class _ProfilePageState extends State<ProfilePage> {
                   setState(() {
                     isEditingAge = !isEditingAge;
                   });
+                  if (!isEditingAge) {
+                    _editField(ageController, 'age');
+                  }
                 },
               ),
               const SizedBox(height: 10.0),
@@ -257,6 +307,9 @@ class _ProfilePageState extends State<ProfilePage> {
                   setState(() {
                     isEditingDob = !isEditingDob;
                   });
+                  if (!isEditingDob) {
+                    _editField(dobController, 'dateOfBirth');
+                  }
                 },
               ),
               const SizedBox(height: 10.0),
@@ -269,6 +322,9 @@ class _ProfilePageState extends State<ProfilePage> {
                   setState(() {
                     isEditingPhoneNumber = !isEditingPhoneNumber;
                   });
+                  if (!isEditingPhoneNumber) {
+                    _editField(phoneNumberController, 'phoneNumber');
+                  }
                 },
               ),
               const SizedBox(height: 10.0),
@@ -281,6 +337,9 @@ class _ProfilePageState extends State<ProfilePage> {
                   setState(() {
                     isEditingAddress = !isEditingAddress;
                   });
+                  if (!isEditingAddress) {
+                    _editField(addressController, 'address');
+                  }
                 },
               ),
               const SizedBox(height: 10.0),
@@ -293,6 +352,9 @@ class _ProfilePageState extends State<ProfilePage> {
                   setState(() {
                     isEditingEmail = !isEditingEmail;
                   });
+                  if (!isEditingEmail) {
+                    _editField(emailController, 'email');
+                  }
                 },
               ),
               const SizedBox(height: 20.0),
@@ -342,13 +404,13 @@ class _ProfilePageState extends State<ProfilePage> {
   }) {
     return TextField(
       controller: controller,
-      enabled: isEditing,
+      enabled: isEditing, // Enable editing if isEditing is true
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: Icon(icon),
         suffixIcon: IconButton(
           icon: Icon(isEditing ? Icons.check : Icons.edit),
-          onPressed: onEditPressed,
+          onPressed: onEditPressed, // Handle save or edit logic
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10.0),
