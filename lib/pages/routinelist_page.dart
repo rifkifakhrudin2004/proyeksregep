@@ -291,7 +291,7 @@ Widget build(BuildContext context) {
           color: Colors.white,
         ),
       ),
-      backgroundColor: const Color(0xFFFF69B4), // Soft hot pink
+      backgroundColor: const Color.fromRGBO(248, 187, 208, 1), // Soft hot pink
       elevation: 0,
       centerTitle: true,
       actions: [

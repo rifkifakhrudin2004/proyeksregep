@@ -110,7 +110,37 @@ class _StoragePageState extends State<StoragePage> {
             color: Colors.white,
           ),
         ),
-        backgroundColor: const Color.fromRGBO(241, 104, 152, 1),
+        backgroundColor: body: routines.isEmpty
+          ? _buildEmptyState()
+          : Column(
+              children: [
+                Expanded(
+                  child: PageView.builder(
+                    controller: _pageController,
+                    itemCount: routines.length,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: _buildRoutineCard(routines[index]),
+                      );
+                    },
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(40.0),
+                  child: SmoothPageIndicator(
+                    controller: _pageController,
+                    count: routines.length,
+                    effect: WormEffect(
+                      dotColor: Colors.pink[200]!,
+                      activeDotColor: Colors.pink[800]!,
+                      dotHeight: 10,
+                      dotWidth: 10,
+                    ),
+                  ),
+                ),
+              ],
+            ),,
       ),
       body: Container(
         decoration: BoxDecoration(
