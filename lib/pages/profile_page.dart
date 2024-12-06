@@ -17,6 +17,8 @@ class _ProfilePageState extends State<ProfilePage> {
   final TextEditingController ageController = TextEditingController();
   final TextEditingController dobController = TextEditingController();
   final TextEditingController phoneNumberController = TextEditingController();
+  final TextEditingController addressController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final ImagePicker _picker = ImagePicker();
 
@@ -25,6 +27,8 @@ class _ProfilePageState extends State<ProfilePage> {
   bool isEditingAge = false;
   bool isEditingDob = false;
   bool isEditingPhoneNumber = false;
+  bool isEditingAddress = false;
+  bool isEditingEmail = false;
 
   @override
   void initState() {
@@ -49,6 +53,8 @@ class _ProfilePageState extends State<ProfilePage> {
             ageController.text = (data['age'] ?? '').toString();
             dobController.text = data['dateOfBirth'] ?? '';
             phoneNumberController.text = data['phoneNumber'] ?? '';
+            addressController.text = data['address'] ?? '';
+            emailController.text = data['email'] ?? '';
             _photoUrl = List<String>.from(data['photoUrl'] ?? []);
           });
         } else {
@@ -121,17 +127,18 @@ class _ProfilePageState extends State<ProfilePage> {
 
 
   Future<void> _saveProfile(BuildContext context) async {
-    if (nameController.text.isEmpty ||
-        ageController.text.isEmpty ||
-        phoneNumberController.text.isEmpty ||
-        dobController.text.isEmpty) {
+    if (nameController.text.trim().isEmpty ||
+        ageController.text.trim().isEmpty ||
+        phoneNumberController.text.trim().isEmpty ||
+        dobController.text.trim().isEmpty ||
+        addressController.text.trim().isEmpty ||
+        emailController.text.trim().isEmpty) {
       AwesomeDialog(
         context: context,
         dialogType: DialogType.error,
         animType: AnimType.rightSlide,
         title: "Data Belum Lengkap",
-        desc:
-            "Silakan isi nama, usia, nomor telepon, dan tanggal lahir sebelum menyimpan.",
+        desc: "Silakan isi semua data profil sebelum menyimpan.",
         btnOkOnPress: () {},
       ).show();
       return;
@@ -145,10 +152,12 @@ class _ProfilePageState extends State<ProfilePage> {
 
         DocumentSnapshot docSnapshot = await docRef.get();
         Map<String, dynamic> profileData = {
-          'name': nameController.text,
-          'age': int.tryParse(ageController.text),
-          'dateOfBirth': dobController.text,
-          'phoneNumber': phoneNumberController.text,
+          'name': nameController.text.trim(),
+          'age': int.tryParse(ageController.text.trim()),
+          'dateOfBirth': dobController.text.trim(),
+          'phoneNumber': phoneNumberController.text.trim(),
+          'address': addressController.text.trim(),
+          'email': emailController.text.trim(),
         };
 
         profileData.removeWhere((key, value) => value == null || value == '');
@@ -158,16 +167,16 @@ class _ProfilePageState extends State<ProfilePage> {
         } else {
           await docRef.set(profileData);
         }
-      }
 
-      AwesomeDialog(
-        context: context,
-        dialogType: DialogType.success,
-        animType: AnimType.scale,
-        title: "Profil Tersimpan",
-        desc: "Profil Anda berhasil disimpan.",
-        btnOkOnPress: () {},
-      ).show();
+        AwesomeDialog(
+          context: context,
+          dialogType: DialogType.success,
+          animType: AnimType.scale,
+          title: "Profil Tersimpan",
+          desc: "Profil Anda berhasil disimpan.",
+          btnOkOnPress: () {},
+        ).show();
+      }
     } catch (e) {
       AwesomeDialog(
         context: context,
@@ -180,20 +189,93 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+  void _showAlert(String title, String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              child: Text("OK"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showProfileNotFoundAlert() {
+    _showAlert(
+        "Profil Tidak Ditemukan", "Data profil Anda belum ada di sistem.");
+  }
+
+  void _editField(TextEditingController controller, String fieldKey) async {
+  String newValue = controller.text.trim();  // Pastikan data tidak kosong atau berisi spasi
+  if (newValue.isEmpty) {
+    AwesomeDialog(
+      context: context,
+      dialogType: DialogType.error,
+      animType: AnimType.rightSlide,
+      title: "Edit Gagal",
+      desc: "$fieldKey tidak boleh kosong.",
+      btnOkOnPress: () {},
+    ).show();
+    return;
+  }
+
+  try {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      await FirebaseFirestore.instance
+          .collection('profiles')
+          .doc(user.uid)
+          .update({fieldKey: newValue});  // Update field di Firestore
+      AwesomeDialog(
+        context: context,
+        dialogType: DialogType.success,
+        animType: AnimType.rightSlide,
+        title: "Edit Berhasil",
+        desc: "$fieldKey berhasil diperbarui.",
+        btnOkOnPress: () {},
+      ).show();
+    }
+  } catch (e) {
+    AwesomeDialog(
+      context: context,
+      dialogType: DialogType.error,
+      animType: AnimType.rightSlide,
+      title: "Edit Gagal",
+      desc: "Gagal memperbarui $fieldKey: $e",
+      btnOkOnPress: () {},
+    ).show();
+  }
+}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        automaticallyImplyLeading: false,
         title: Text(
           'Profile',
           style: TextStyle(
+            fontFamily: 'Montserrat',
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: Color.fromRGBO(136, 14, 79, 1),
           ),
         ),
-        backgroundColor: Colors.pink[700],
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Color.fromRGBO(136, 14, 79, 1)),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        backgroundColor: const Color.fromRGBO(252, 228, 236, 1),//profile
         elevation: 0,
         actions: [
           PopupMenuButton<int>(
@@ -237,11 +319,13 @@ class _ProfilePageState extends State<ProfilePage> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               GestureDetector(
-                onTap: _showPhotoPreview,
+                onTap: () async {
+                  await _pickAndUploadImage(ImageSource.gallery);
+                },
                 child: CircleAvatar(
                   radius: 70.0,
                   backgroundColor:
-                      _photoUrl.isEmpty ? Colors.pink[100] : Colors.transparent,
+                      _photoUrl.isEmpty ? Color.fromRGBO(136, 14, 79, 1) : Colors.transparent,
                   child: _photoUrl.isNotEmpty
                       ? ClipOval(
                           child: Image.network(
@@ -249,13 +333,9 @@ class _ProfilePageState extends State<ProfilePage> {
                             fit: BoxFit.cover,
                             width: 140.0,
                             height: 140.0,
-                            errorBuilder: (context, exception, stackTrace) {
-                              return Icon(Icons.person,
-                                  size: 70.0, color: Colors.pink[700]);
-                            },
                           ),
                         )
-                      : Icon(Icons.person, size: 70.0, color: Colors.pink[700]),
+                      : Icon(Icons.person, size: 70.0, color: const Color.fromRGBO(252, 228, 236, 1)),
                 ),
               ),
               const SizedBox(height: 20.0),
@@ -268,96 +348,119 @@ class _ProfilePageState extends State<ProfilePage> {
                   setState(() {
                     isEditingName = !isEditingName;
                   });
+                  if (!isEditingName) {
+                    _editField(nameController, 'name');
+                  }
                 },
               ),
+              const SizedBox(height: 10.0),
               _buildProfileField(
                 controller: ageController,
                 label: 'Usia',
                 icon: Icons.cake_outlined,
-                keyboardType: TextInputType.number,
                 isEditing: isEditingAge,
                 onEditPressed: () {
                   setState(() {
                     isEditingAge = !isEditingAge;
                   });
+                  if (!isEditingAge) {
+                    _editField(ageController, 'age');
+                  }
                 },
               ),
-              _buildProfileField(
-                controller: phoneNumberController,
-                label: 'Nomor Telepon',
-                icon: Icons.phone_outlined,
-                keyboardType: TextInputType.phone,
-                isEditing: isEditingPhoneNumber,
-                onEditPressed: () {
-                  setState(() {
-                    isEditingPhoneNumber = !isEditingPhoneNumber;
-                  });
-                },
-              ),
+              const SizedBox(height: 10.0),
               _buildProfileField(
                 controller: dobController,
                 label: 'Tanggal Lahir',
                 icon: Icons.calendar_today_outlined,
                 isEditing: isEditingDob,
-                onTap: isEditingDob ? () => _selectDate(context) : null,
-                readOnly: true,
                 onEditPressed: () {
                   setState(() {
                     isEditingDob = !isEditingDob;
                   });
+                  if (!isEditingDob) {
+                    _editField(dobController, 'dateOfBirth');
+                  }
                 },
               ),
-              const SizedBox(height: 30),
-              Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Colors.pink[700]!, Colors.pink[500]!],
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
+              const SizedBox(height: 10.0),
+              _buildProfileField(
+                controller: phoneNumberController,
+                label: 'Nomor Telepon',
+                icon: Icons.phone_outlined,
+                isEditing: isEditingPhoneNumber,
+                onEditPressed: () {
+                  setState(() {
+                    isEditingPhoneNumber = !isEditingPhoneNumber;
+                  });
+                  if (!isEditingPhoneNumber) {
+                    _editField(phoneNumberController, 'phoneNumber');
+                  }
+                },
+              ),
+              const SizedBox(height: 10.0),
+              _buildProfileField(
+                controller: addressController,
+                label: 'Alamat',
+                icon: Icons.home_outlined,
+                isEditing: isEditingAddress,
+                onEditPressed: () {
+                  setState(() {
+                    isEditingAddress = !isEditingAddress;
+                  });
+                  if (!isEditingAddress) {
+                    _editField(addressController, 'address');
+                  }
+                },
+              ),
+              const SizedBox(height: 10.0),
+              _buildProfileField(
+                controller: emailController,
+                label: 'Email',
+                icon: Icons.email_outlined,
+                isEditing: isEditingEmail,
+                onEditPressed: () {
+                  setState(() {
+                    isEditingEmail = !isEditingEmail;
+                  });
+                  if (!isEditingEmail) {
+                    _editField(emailController, 'email');
+                  }
+                },
+              ),
+              const SizedBox(height: 20.0),
+              ElevatedButton(
+                onPressed: () => _saveProfile(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromRGBO(252, 228, 236, 1),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0),
                   ),
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.pink.withOpacity(0.3),
-                      spreadRadius: 1,
-                      blurRadius: 5,
-                      offset: Offset(0, 3),
-                    ),
-                  ],
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 40.0, vertical: 15.0),
                 ),
-                child: ElevatedButton(
-                  onPressed: () => _saveProfile(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.transparent,
-                    shadowColor: Colors.transparent,
-                    padding: EdgeInsets.symmetric(vertical: 15),
-                  ),
-                  child: Text(
-                    "Simpan Profil",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+                child: Text(
+                  'Simpan Profil',
+                  style: TextStyle(
+                    fontFamily: 'Montserrat',
+                    fontWeight: FontWeight.bold,
+                    color: Color.fromRGBO(136, 14, 79, 1),
+                    fontSize: 16,
                   ),
                 ),
               ),
+              const SizedBox(height: 20.0),
             ],
           ),
         ),
       ),
-       bottomNavigationBar: CustomBottomNavigation(initialIndex: 3),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 1.0),
-        child: FloatingActionButton(
-          onPressed: () {
-            // Camera guide or navigation logic
-            Navigator.pushNamed(context, '/camera');
-          },
-          backgroundColor: const Color.fromRGBO(136, 14, 79, 1),
-          child: Icon(Icons.camera_alt, color: Colors.white, size: 30),
-        ),
+      bottomNavigationBar: CustomBottomNavigation(initialIndex: 3),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.pushNamed(context, '/camera');
+        },
+        backgroundColor: const Color.fromRGBO(136, 14, 79, 1),
+        child: Icon(Icons.camera_alt, color: Colors.white, size: 30),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
@@ -369,117 +472,25 @@ class _ProfilePageState extends State<ProfilePage> {
     required IconData icon,
     required bool isEditing,
     required VoidCallback onEditPressed,
-    TextInputType keyboardType = TextInputType.text,
-    bool readOnly = false,
-    VoidCallback? onTap,
   }) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 10),
-      decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 2,
-            blurRadius: 5,
-            offset: Offset(0, 3),
-          ),
-        ],
-      ),
-      child: TextField(
-        controller: controller,
-        keyboardType: keyboardType,
-        readOnly: readOnly,
-        onTap: onTap,
-        decoration: InputDecoration(
-          labelText: label,
-          prefixIcon: Icon(icon),
-          suffixIcon: IconButton(
-            icon: Icon(
-              isEditing ? Icons.check : Icons.edit,
-              color: Colors.pink[700],
-            ),
-            onPressed: onEditPressed,
-          ),
-          border: OutlineInputBorder(borderSide: BorderSide.none),
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+    return TextField(
+      controller: controller,
+      enabled: isEditing, // Enable editing if isEditing is true
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon),
+        suffixIcon: IconButton(
+          icon: Icon(isEditing ? Icons.check : Icons.edit),
+          onPressed: onEditPressed, // Handle save or edit logic
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10.0),
         ),
       ),
-    );
-  }
-
-  Future<void> _selectDate(BuildContext context) async {
-    DateTime? selectedDate = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(1900),
-      lastDate: DateTime.now(),
-    );
-    if (selectedDate != null) {
-      dobController.text =
-          "${selectedDate.day}/${selectedDate.month}/${selectedDate.year}";
-    }
-  }
-
-  void _showAlert(String title, String message) {
-    AwesomeDialog(
-      context: context,
-      dialogType: DialogType.warning,
-      animType: AnimType.rightSlide,
-      title: title,
-      desc: message,
-      btnOkOnPress: () {},
-    ).show();
-  }
-
-  void _showPhotoPreview() {
-    AwesomeDialog(
-      context: context,
-      dialogType: DialogType.noHeader,
-      animType: AnimType.scale,
-      body: Column(
-        children: [
-          const SizedBox(height: 10),
-          ClipOval(
-            child: Image.network(
-              _photoUrl.isNotEmpty ? _photoUrl.first : '',
-              errorBuilder: (context, exception, stackTrace) {
-                return Icon(Icons.person, size: 70, color: Colors.pink[700]);
-              },
-              fit: BoxFit.cover,
-              width: 140.0,
-              height: 140.0,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              ElevatedButton(
-                onPressed: () => _pickAndUploadImage(ImageSource.camera),
-                child: const Text("Kamera"),
-              ),
-              ElevatedButton(
-                onPressed: () => _pickAndUploadImage(ImageSource.gallery),
-                child: const Text("Galeri"),
-              ),
-            ],
-          ),
-        ],
+      style: TextStyle(
+        fontFamily: 'Montserrat',
+        fontWeight: FontWeight.bold,
       ),
-    ).show();
-  }
-
-  void _showProfileNotFoundAlert() {
-    AwesomeDialog(
-      context: context,
-      dialogType: DialogType.info,
-      animType: AnimType.rightSlide,
-      title: "Profil Tidak Ditemukan",
-      desc: "Data profil Anda belum tersedia. Silakan lengkapi profil.",
-      btnOkOnPress: () {},
-    ).show();
+    );
   }
 }

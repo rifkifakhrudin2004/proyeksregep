@@ -54,10 +54,10 @@ class _ReviewPageState extends State<ReviewPage> {
           'Skin Analysis Result',
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: const Color.fromRGBO(252, 228, 236, 1),
           ),
         ),
-        backgroundColor: const Color.fromRGBO(241, 104, 152, 1),
+        backgroundColor: Color.fromRGBO(136, 14, 79, 1),
         centerTitle: true,
         elevation: 0,
       ),

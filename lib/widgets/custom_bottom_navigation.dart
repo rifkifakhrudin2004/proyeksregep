@@ -101,7 +101,7 @@ class _CustomBottomNavigationState extends State<CustomBottomNavigation> {
   @override
   Widget build(BuildContext context) {
     return BottomAppBar(
-      color: const Color.fromRGBO(248, 187, 208, 1),
+      color: const Color.fromRGBO(252, 228, 236, 1),
       shape: const CircularNotchedRectangle(),
       notchMargin: 20,
       child: Container(

@@ -281,17 +281,17 @@ Widget _buildCheckboxCell(bool isChecked) {
   @override
 Widget build(BuildContext context) {
   return Scaffold(
-    backgroundColor: const Color(0xFFFFF0F5), // Soft pastel pink background
+    backgroundColor: Color.fromRGBO(255, 255, 255, 1), // Soft pastel pink background
     appBar: AppBar(
       automaticallyImplyLeading: false,
       title: Text(
         'My Skincare Routines',
         style: TextStyle(
           fontWeight: FontWeight.w600,
-          color: Colors.white,
+          color: Color.fromRGBO(136, 14, 79, 1),
         ),
       ),
-      backgroundColor: const Color.fromRGBO(248, 187, 208, 1), // Soft hot pink
+      backgroundColor: const Color.fromRGBO(252, 228, 236, 1), // Soft hot pink
       elevation: 0,
       centerTitle: true,
       actions: [
@@ -315,7 +315,7 @@ Widget build(BuildContext context) {
               });
             }
           },
-          icon: Icon(Icons.add, color: Colors.white),
+          icon: Icon(Icons.add, color: Color.fromRGBO(136, 14, 79, 1)),
           tooltip: 'Add Routine',
         ),
       ],
@@ -337,7 +337,7 @@ Widget build(BuildContext context) {
       onPressed: () {
         Navigator.pushNamed(context, '/camera'); // Navigation for camera action
       },
-      backgroundColor: const Color(0xFF880E4F), // Slightly darker pink
+      backgroundColor: const Color.fromRGBO(136, 14, 79, 1), // Slightly darker pink
       child: Icon(Icons.camera_alt, color: Colors.white, size: 30),
     ),
     floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,

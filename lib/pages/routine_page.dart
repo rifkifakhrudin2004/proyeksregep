@@ -79,15 +79,15 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
       appBar: AppBar(
         title: Text(
           widget.routine == null ? 'Add Skincare Routine' : 'Edit Routine',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: TextStyle(color: Color.fromRGBO(136, 14, 79, 1), fontWeight: FontWeight.bold),
         ),
-        backgroundColor: const Color.fromARGB(255, 253, 152, 185),
+        backgroundColor: const Color.fromRGBO(252, 228, 236, 1),
         elevation: 0,
       ),
       body: _isLoading
           ? Center(
               child: SpinKitCircle(
-                color: const Color.fromARGB(255, 247, 143, 177),
+                color: const Color.fromARGB(255, 247, 143, 177), 
                 size: 50.0,
               ),
             )
@@ -116,10 +116,10 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
           ? Icon(
               Icons.camera_alt, // Ikon default kamera
               size: 60,
-              color: Colors.grey,
+              color: Color.fromRGBO(136, 14, 79, 1),
             )
           : null,
-      backgroundColor: Colors.grey[200], // Warna latar belakang
+      backgroundColor: const Color.fromRGBO(252, 228, 236, 1), // Warna latar belakang
     ),
   ),
 ),
@@ -140,10 +140,10 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
                             value: _selectedCategory,
                             isExpanded: true,
                             hint: Text('Select Category'),
-                            style: TextStyle(color: Colors.black, fontSize: 16),
+                            style: TextStyle(color: Color.fromRGBO(136, 14, 79, 1), fontSize: 16),
                             dropdownColor: Colors.white,
                             icon:
-                                Icon(Icons.arrow_drop_down, color: Colors.pink),
+                                Icon(Icons.arrow_drop_down, color: Color.fromRGBO(136, 14, 79, 1)),
                             onChanged: (String? newValue) {
                               setState(() {
                                 _selectedCategory = newValue!;
@@ -179,7 +179,7 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
                               style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.pink.shade700),
+                                  color: Color.fromRGBO(136, 14, 79, 1)),
                             ),
                             SizedBox(height: 10),
                             _buildDaySelection('Monday'),
@@ -200,7 +200,7 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
                       controller: _noteController,
                       decoration: InputDecoration(
                         labelText: 'Notes',
-                        labelStyle: TextStyle(color: Colors.pink),
+                        labelStyle: TextStyle(color: Color.fromRGBO(136, 14, 79, 1)),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
                           borderSide: BorderSide(color: Colors.pink),
@@ -225,8 +225,8 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
                             onPressed: _saveRoutine,
                             style: ElevatedButton.styleFrom(
                               backgroundColor:
-                                  const Color.fromARGB(255, 253, 152, 185),
-                              foregroundColor: Colors.white,
+                                  const Color.fromRGBO(136, 14, 79, 1),
+                              foregroundColor: const Color.fromRGBO(252, 228, 236, 1),
                               padding: EdgeInsets.symmetric(vertical: 15),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
@@ -242,8 +242,8 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
                               Navigator.pop(context);
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.grey.shade300,
-                              foregroundColor: Colors.black,
+                              backgroundColor: const Color.fromRGBO(252, 228, 236, 1), 
+                              foregroundColor: const Color.fromRGBO(136, 14, 79, 1),
                               padding: EdgeInsets.symmetric(vertical: 15),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),

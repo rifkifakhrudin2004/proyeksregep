@@ -20,11 +20,14 @@ class _HomePageState extends State<HomePage> {
   String? userName;
   int _selectedIndex = 0;
   final PageController _pageController = PageController();
+  List<Article> articles = [];
+  bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
     _fetchRoutines();
+    _fetchArticles();
   }
 
   @override
@@ -73,6 +76,33 @@ class _HomePageState extends State<HomePage> {
           );
         }).toList();
       });
+    });
+  }
+
+  Future<void> _fetchArticles() async {
+    setState(() {
+      articles = [
+        Article(
+          title: 'Artikel 1',
+          imageUrl: 'assets/PenyebabKeriput.png',
+          content: 'Konten artikel 2',
+        ),
+        Article(
+          title: 'Artikel 2',
+          imageUrl: 'assets/JenisKeriput.png',
+          content: 'Konten artikel 3',
+        ),
+        Article(
+          title: 'Artikel 3',
+          imageUrl: 'assets/CegahKeriput.png',
+          content: 'Konten artikel 4',
+        ),
+        Article(
+          title: 'Artikel 4',
+          imageUrl: 'assets/perawatanKeriput.png',
+          content: 'Konten artikel 5',
+        ),
+      ];
     });
   }
 
@@ -146,12 +176,12 @@ class _HomePageState extends State<HomePage> {
     var screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      backgroundColor: const Color.fromRGBO(252, 228, 236, 1),
+      backgroundColor: const Color.fromRGBO(252, 255, 255, 1),
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(90),
         child: AppBar(
           automaticallyImplyLeading: false,
-          backgroundColor: const Color.fromRGBO(248, 187, 208, 1),
+          backgroundColor: const Color.fromRGBO(252, 228, 236, 1),
           elevation: 0,
           flexibleSpace: StreamBuilder<DocumentSnapshot>(
             stream: FirebaseFirestore.instance
@@ -231,11 +261,11 @@ class _HomePageState extends State<HomePage> {
                               : CircleAvatar(
                                   radius: 40,
                                   backgroundColor:
-                                      const Color.fromRGBO(252, 228, 236, 1),
+                                      const Color.fromRGBO(136, 14, 79, 1),
                                   child: Icon(Icons.person,
                                       size: 40,
                                       color:
-                                          const Color.fromRGBO(136, 14, 79, 1)),
+                                          const Color.fromRGBO(252, 228, 236, 1)),
                                 ),
                         ),
                         SizedBox(width: 10),
@@ -275,37 +305,111 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
-      body: routines.isEmpty
-          ? _buildEmptyState()
-          : Column(
-              children: [
-                Expanded(
-                  child: PageView.builder(
-                    controller: _pageController,
-                    itemCount: routines.length,
-                    itemBuilder: (context, index) {
-                      return Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: _buildRoutineCard(routines[index]),
-                      );
-                    },
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(40.0),
-                  child: SmoothPageIndicator(
-                    controller: _pageController,
-                    count: routines.length,
-                    effect: WormEffect(
-                      dotColor: Colors.pink[200]!,
-                      activeDotColor: Colors.pink[800]!,
-                      dotHeight: 10,
-                      dotWidth: 10,
+      body: Column(
+        mainAxisSize: MainAxisSize
+            .min, // Menentukan agar column menggunakan ruang sekecil mungkin
+        children: [
+          // Bagian Rutinitas
+          if (routines.isNotEmpty)
+            Expanded(
+              flex: 1, // Menyesuaikan flex agar lebih seimbang
+              child: Padding(
+                padding: const EdgeInsets.all(
+                    16.0), // Mengurangi padding untuk rutinitas
+                child: Column(
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start, // Menyusun judul di kiri
+                  children: [
+                    Text(
+                      'Rutinitas Harian',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Color.fromRGBO(136, 14, 79, 1),
+                      ),
                     ),
-                  ),
+                    SizedBox(
+                        height: 8), // Jarak antara judul dan konten rutinitas
+                    Expanded(
+                      child: Stack(
+                        children: [
+                          // PageView untuk rutinitas
+                          PageView.builder(
+                            controller: _pageController,
+                            itemCount: routines.length,
+                            itemBuilder: (context, index) {
+                              return _buildRoutineCard(routines[index]);
+                            },
+                          ),
+                          // Indikator titik di bawah
+                          Align(
+                            alignment: Alignment.bottomCenter,
+                            child: Padding(
+                              padding: const EdgeInsets.only(bottom: 8.0),
+                              child: SmoothPageIndicator(
+                                controller: _pageController,
+                                count: routines.length,
+                                effect: ExpandingDotsEffect(
+                                  dotHeight: 8.0,
+                                  dotWidth: 8.0,
+                                  spacing: 4.0,
+                                  activeDotColor:
+                                      Color.fromRGBO(136, 14, 79, 1),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
+          // Jika routines kosong, tampilkan empty state
+          if (routines.isEmpty)
+            Expanded(
+              flex: 1,
+              child: _buildEmptyState(),
+            ),
+
+          // Bagian Artikel
+    Expanded(
+      flex: 1, // Menyesuaikan flex agar lebih seimbang
+      child: Padding(
+        padding: const EdgeInsets.all(16.0), // Mengurangi padding pada artikel
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Artikel Skincare',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Color.fromRGBO(136, 14, 79, 1),
+              ),
+            ),
+            SizedBox(height: 5), // Mengurangi jarak antar teks dan artikel
+            Expanded(
+              child: GridView.builder(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2, // Jumlah kolom
+                  crossAxisSpacing: 8, // Jarak antar kolom
+                  mainAxisSpacing: 8, // Jarak antar baris
+                  childAspectRatio: 0.8, // Menyesuaikan rasio aspek item
+                ),
+                itemCount: articles.length,
+                itemBuilder: (context, index) {
+                  return _buildArticleCard(articles[index]);
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  ],
+),
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 1.0),
         child: FloatingActionButton(
@@ -319,12 +423,55 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  Widget _buildArticleCard(Article article) {
+    return GestureDetector(
+      onTap: () {
+        // Menampilkan gambar dalam ukuran besar saat diklik
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return Dialog(
+              backgroundColor: Colors.transparent,
+              child: Center(
+                child: Image.asset(
+                  article.imageUrl,
+                  fit: BoxFit.contain,
+                  height: MediaQuery.of(context).size.height *
+                      0.8, // Membuat gambar lebih besar
+                ),
+              ),
+            );
+          },
+        );
+      },
+      child: Container(
+        width: 200,
+        margin: EdgeInsets.only(right: 2),
+        child: Card(
+          elevation: 4,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(15),
+            child: Image.asset(
+              article.imageUrl,
+              height: 120,
+              width: double.infinity,
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildEmptyState() {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Container(
-          margin: const EdgeInsets.only(bottom: 380),
+          margin: const EdgeInsets.only(bottom: 200),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(15),
@@ -397,13 +544,13 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildRoutineCard(SkincareRoutine routine) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 300),
+      margin: const EdgeInsets.only(bottom: 50),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color.fromRGBO(252, 228, 236, 1),
         borderRadius: BorderRadius.circular(15),
         boxShadow: [
           BoxShadow(
-            color: Colors.pink.withOpacity(0.1),
+            color: Color.fromRGBO(136, 14, 79, 1).withOpacity(0.1),
             spreadRadius: 2,
             blurRadius: 10,
             offset: const Offset(0, 4),
