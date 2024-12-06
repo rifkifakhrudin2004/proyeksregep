@@ -82,6 +82,43 @@ class _ProfilePageState extends State<ProfilePage> {
       });
     }
   }
+  Future<void> _logout() async {
+    try {
+      // Show confirmation dialog before logging out
+      AwesomeDialog(
+        context: context,
+        dialogType: DialogType.warning,
+        animType: AnimType.scale,
+        title: "Konfirmasi Logout",
+        desc: "Apakah Anda yakin ingin keluar dari akun?",
+        btnCancelOnPress: () {},
+        btnOkText: "Ya, Logout",
+        btnOkColor: Colors.pink[700],
+        btnOkOnPress: () async {
+          // Perform logout
+          await _auth.signOut();
+          
+          // Navigate to login page and remove all previous routes
+          Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+        },
+      ).show();
+    } catch (e) {
+      _showAlert('Logout Error', 'Gagal logout: $e');
+    }
+  }
+  void _showAboutUs() {
+    AwesomeDialog(
+      context: context,
+      dialogType: DialogType.info,
+      animType: AnimType.scale,
+      title: "Tentang Kami",
+      desc: "Aplikasi ini dikembangkan untuk membantu pengguna dalam aktivitas sehari-hari. "
+             "Kami berkomitmen untuk memberikan pengalaman terbaik dan solusi yang inovatif.",
+      btnOkOnPress: () {},
+      btnOkText: "Tutup",
+    ).show();
+  }
+
 
   Future<void> _saveProfile(BuildContext context) async {
     if (nameController.text.isEmpty ||
@@ -158,6 +195,40 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
         backgroundColor: Colors.pink[700],
         elevation: 0,
+        actions: [
+          PopupMenuButton<int>(
+            icon: Icon(Icons.more_vert, color: Colors.white),
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 1,
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline, color: Colors.pink[700]),
+                    SizedBox(width: 10),
+                    Text("Tentang Kami"),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 2,
+                child: Row(
+                  children: [
+                    Icon(Icons.logout, color: Colors.pink[700]),
+                    SizedBox(width: 10),
+                    Text("Logout"),
+                  ],
+                ),
+              ),
+            ],
+            onSelected: (value) {
+              if (value == 1) {
+                _showAboutUs();
+              } else if (value == 2) {
+                _logout();
+              }
+            },
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Padding(

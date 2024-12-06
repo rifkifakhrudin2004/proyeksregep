@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:proyeksregep/pages/home_page.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class LandingPage extends StatefulWidget {
   @override
@@ -14,7 +15,7 @@ class _LandingPageState extends State<LandingPage> {
 
   bool _obscurePassword = true;
 
-   Future<void> _login(BuildContext context) async {
+  Future<void> _login(BuildContext context) async {
     if (emailController.text.isEmpty || passwordController.text.isEmpty) {
       AwesomeDialog(
         context: context,
@@ -33,7 +34,7 @@ class _LandingPageState extends State<LandingPage> {
         password: passwordController.text,
       );
 
-     Navigator.push(
+      Navigator.push(
         context,
         PageRouteBuilder(
           pageBuilder: (context, animation, secondaryAnimation) => HomePage(),
@@ -42,7 +43,8 @@ class _LandingPageState extends State<LandingPage> {
             const end = Offset.zero;
             const curve = Curves.easeInOut;
 
-            var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+            var tween =
+                Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
             var offsetAnimation = animation.drive(tween);
 
             return SlideTransition(
@@ -65,7 +67,6 @@ class _LandingPageState extends State<LandingPage> {
     }
   }
 
-
   Future<void> _resetPassword(BuildContext context) async {
     if (emailController.text.isEmpty) {
       showDialog(
@@ -87,7 +88,8 @@ class _LandingPageState extends State<LandingPage> {
     }
 
     try {
-      await FirebaseAuth.instance.sendPasswordResetEmail(email: emailController.text);
+      await FirebaseAuth.instance
+          .sendPasswordResetEmail(email: emailController.text);
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
@@ -105,7 +107,9 @@ class _LandingPageState extends State<LandingPage> {
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to send password reset email: ${e.toString()}')),
+        SnackBar(
+            content:
+                Text('Failed to send password reset email: ${e.toString()}')),
       );
     }
   }
@@ -136,12 +140,12 @@ class _LandingPageState extends State<LandingPage> {
                 Center(
                   child: Text(
                     "Smart AgeDefying",
-                    style: TextStyle(
-                      fontSize: 26,
-                      fontFamily: 'Roboto',
-                      fontWeight: FontWeight.w600,
-                      color: const Color.fromRGBO(136, 14, 79, 1),
-                      letterSpacing: 1.5,
+                    style: GoogleFonts.montserrat(
+                      textStyle: TextStyle(
+                          color: Colors.white,
+                          fontSize: 25,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 2),
                     ),
                   ),
                 ),
@@ -170,7 +174,12 @@ class _LandingPageState extends State<LandingPage> {
                         controller: emailController,
                         decoration: InputDecoration(
                           hintText: "Email/Username",
-                          prefixIcon: Icon(Icons.email_outlined, color: Colors.grey),
+                          hintStyle: TextStyle(
+                            color: const Color.fromRGBO(136, 14, 79,
+                                1), // Ganti dengan warna yang Anda inginkan
+                          ),
+                          prefixIcon: Icon(Icons.email_outlined,
+                              color: const Color.fromRGBO(136, 14, 79, 1)),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide(color: Colors.grey.shade300),
@@ -187,11 +196,17 @@ class _LandingPageState extends State<LandingPage> {
                         obscureText: _obscurePassword,
                         decoration: InputDecoration(
                           hintText: "Password",
-                          prefixIcon: Icon(Icons.lock_outline, color: Colors.grey),
+                          hintStyle: TextStyle(
+                            color: const Color.fromRGBO(136, 14, 79, 1), // Ganti dengan warna yang Anda inginkan
+                          ),
+                          prefixIcon: Icon(Icons.lock_outline,
+                              color: const Color.fromRGBO(136, 14, 79, 1)),
                           suffixIcon: IconButton(
                             icon: Icon(
-                              _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                              color: Colors.grey,
+                              _obscurePassword
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                              color: const Color.fromRGBO(136, 14, 79, 1),
                             ),
                             onPressed: () {
                               setState(() {
@@ -209,13 +224,13 @@ class _LandingPageState extends State<LandingPage> {
                           ),
                         ),
                       ),
-                     
                       SizedBox(height: 16),
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color.fromRGBO(240, 98, 146, 1),
+                            backgroundColor:
+                                const Color.fromRGBO(216, 27, 96, 1),
                             padding: EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -226,11 +241,12 @@ class _LandingPageState extends State<LandingPage> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                "SIGN IN",
+                                "sign up",
                                 style: TextStyle(
                                   fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
+                                  fontWeight: FontWeight.normal,
+                                  color: const Color.fromRGBO(255, 255, 255, 1),
+                                  letterSpacing: 1
                                 ),
                               ),
                               SizedBox(width: 6),
@@ -257,7 +273,7 @@ class _LandingPageState extends State<LandingPage> {
                             child: Text(
                               "Sign up",
                               style: TextStyle(
-                                color: const Color.fromRGBO(236, 64, 122, 1),
+                                color: const Color.fromRGBO(136, 14, 79, 1),
                                 fontWeight: FontWeight.bold,
                                 fontSize: 14,
                               ),
