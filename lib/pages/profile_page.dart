@@ -222,23 +222,23 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.pink[50],
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(
           'Profile',
           style: TextStyle(
             fontFamily: 'Montserrat',
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: Color.fromRGBO(136, 14, 79, 1),
           ),
         ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: Color.fromRGBO(136, 14, 79, 1)),
           onPressed: () {
             Navigator.pop(context);
           },
         ),
-        backgroundColor: const Color.fromRGBO(241, 104, 152, 1),
+        backgroundColor: const Color.fromRGBO(252, 228, 236, 1),//profile
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -254,7 +254,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 child: CircleAvatar(
                   radius: 70.0,
                   backgroundColor:
-                      _photoUrl.isEmpty ? Colors.pink[100] : Colors.transparent,
+                      _photoUrl.isEmpty ? Color.fromRGBO(136, 14, 79, 1) : Colors.transparent,
                   child: _photoUrl.isNotEmpty
                       ? ClipOval(
                           child: Image.network(
@@ -264,7 +264,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             height: 140.0,
                           ),
                         )
-                      : Icon(Icons.person, size: 70.0, color: Colors.pink[700]),
+                      : Icon(Icons.person, size: 70.0, color: const Color.fromRGBO(252, 228, 236, 1)),
                 ),
               ),
               const SizedBox(height: 20.0),
@@ -361,7 +361,7 @@ class _ProfilePageState extends State<ProfilePage> {
               ElevatedButton(
                 onPressed: () => _saveProfile(context),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromRGBO(241, 104, 152, 1),
+                  backgroundColor: const Color.fromRGBO(252, 228, 236, 1),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10.0),
                   ),
@@ -373,7 +373,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   style: TextStyle(
                     fontFamily: 'Montserrat',
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: Color.fromRGBO(136, 14, 79, 1),
                     fontSize: 16,
                   ),
                 ),

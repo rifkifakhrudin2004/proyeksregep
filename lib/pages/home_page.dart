@@ -176,12 +176,12 @@ class _HomePageState extends State<HomePage> {
     var screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      backgroundColor: const Color.fromRGBO(252, 228, 236, 1),
+      backgroundColor: const Color.fromRGBO(252, 255, 255, 1),
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(90),
         child: AppBar(
           automaticallyImplyLeading: false,
-          backgroundColor: const Color.fromRGBO(248, 187, 208, 1),
+          backgroundColor: const Color.fromRGBO(252, 228, 236, 1),
           elevation: 0,
           flexibleSpace: StreamBuilder<DocumentSnapshot>(
             stream: FirebaseFirestore.instance
@@ -261,11 +261,11 @@ class _HomePageState extends State<HomePage> {
                               : CircleAvatar(
                                   radius: 40,
                                   backgroundColor:
-                                      const Color.fromRGBO(252, 228, 236, 1),
+                                      const Color.fromRGBO(136, 14, 79, 1),
                                   child: Icon(Icons.person,
                                       size: 40,
                                       color:
-                                          const Color.fromRGBO(136, 14, 79, 1)),
+                                          const Color.fromRGBO(252, 228, 236, 1)),
                                 ),
                         ),
                         SizedBox(width: 10),
@@ -546,11 +546,11 @@ class _HomePageState extends State<HomePage> {
     return Container(
       margin: const EdgeInsets.only(bottom: 50),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color.fromRGBO(252, 228, 236, 1),
         borderRadius: BorderRadius.circular(15),
         boxShadow: [
           BoxShadow(
-            color: Colors.pink.withOpacity(0.1),
+            color: Color.fromRGBO(136, 14, 79, 1).withOpacity(0.1),
             spreadRadius: 2,
             blurRadius: 10,
             offset: const Offset(0, 4),

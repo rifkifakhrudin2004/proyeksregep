@@ -106,10 +106,10 @@ class _StoragePageState extends State<StoragePage> {
           'Skin Analysis Results',
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: Color.fromRGBO(136, 14, 79, 1),
           ),
         ),
-        backgroundColor: const Color.fromRGBO(241, 104, 152, 1),
+        backgroundColor: const Color.fromRGBO(252, 228, 236, 1),
       ),
       body: Container(
         decoration: BoxDecoration(

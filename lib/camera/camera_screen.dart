@@ -432,8 +432,14 @@ class _CameraScreenState extends State<CameraScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Agingskin"),
-        backgroundColor: const Color.fromRGBO(248, 187, 208, 1),
+        title: Text("Agingskin",
+        style: TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+          color: Color.fromRGBO(136, 14, 79, 1)
+        )),
+        
+        backgroundColor: const Color.fromRGBO(252, 228, 236, 1),
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
@@ -562,7 +568,7 @@ class _CameraScreenState extends State<CameraScreen>
                   ),
                   child: Icon(
                     Icons.camera_alt,
-                    color: const Color.fromARGB(255, 241, 83, 139),
+                    color: Color.fromRGBO(136, 14, 79, 1),
                     size: 35,
                   ),
                 ),
@@ -573,7 +579,7 @@ class _CameraScreenState extends State<CameraScreen>
             bottom: 20,
             right: 20,
             child: IconButton(
-              icon: Icon(Icons.photo, color: Colors.white, size: 30),
+              icon: Icon(Icons.photo, color: Color.fromRGBO(136, 14, 79, 1), size: 30),
               onPressed: _openGallery,
             ),
           ),
