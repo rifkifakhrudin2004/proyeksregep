@@ -3,10 +3,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:proyeksregep/models/skincare_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'dart:io';
 
 class SkincareRoutineInputPage extends StatefulWidget {
   final SkincareRoutine? routine;
@@ -28,34 +25,53 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
   late bool _fridayMorning, _fridayNight, _saturdayMorning, _saturdayNight;
   late bool _sundayMorning, _sundayNight;
   late String _avatarUrl;
-  final ImagePicker _picker = ImagePicker();
   bool _isLoading = false;
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseStorage _storage = FirebaseStorage.instance;
+
+  // Map of category to predefined avatar images
+  final Map<String, String> _categoryAvatars = {
+    'Cleansing (Pembersih Wajah)': 'assets/cleansing.png',
+    'Toner (Penyegar)': 'assets/toner.png',
+    'Exfoliator (Pengelupasan)': 'assets/exfoliator.png',
+    'Serum': 'assets/serum.png',
+    'Moisturizer (Pelembap)': 'assets/moisturizer.png',
+    'Sunscreen (Tabir Surya)': 'assets/sunscreen.png',
+    'Face Mask (Masker Wajah)': 'assets/face_mask.png',
+    'Eye Cream (Krim Mata)': 'assets/eye_cream.png',
+    'Face Oil (Minyak Wajah)': 'assets/face_oil.png',
+    'Spot Treatment (Perawatan Titik)': 'assets/spot_treatment.png',
+    'Lip Care (Perawatan Bibir)': 'assets/lip_care.png',
+    'Neck Cream (Krim Leher)': 'assets/neck_cream.png',
+    'Toning Mist (Penyegar Semprot)': 'assets/toning_mist.png',
+  };
 
   final List<String> _categories = [
-    'Cleansing',
-    'Toner',
-    'Exfoliator',
+    'Cleansing (Pembersih Wajah)',
+    'Toner (Penyegar)',
+    'Exfoliator (Pengelupasan)',
     'Serum',
-    'Moisturizer',
-    'Sunscreen',
-    'Face Mask',
-    'Eye Cream',
-    'Face Oil',
-    'Spot Treatment',
-    'Lip Care',
-    'Neck Cream',
-    'Toning Mist',
+    'Moisturizer (Pelembap)',
+    'Sunscreen (Tabir Surya)',
+    'Face Mask (Masker Wajah)',
+    'Eye Cream (Krim Mata)',
+    'Face Oil (Minyak Wajah)',
+    'Spot Treatment (Perawatan Titik)',
+    'Lip Care (Perawatan Bibir)',
+    'Neck Cream (Krim Leher)',
+    'Toning Mist (Penyegar Semprot)',
   ];
 
   @override
   void initState() {
     super.initState();
     _noteController = TextEditingController(text: widget.routine?.note);
-    _selectedCategory =
-        widget.routine?.category ?? _categories[0]; // Default to first category
+    _selectedCategory = widget.routine?.category ?? _categories[0];
+    
+    // Set initial avatar based on category
+    _avatarUrl = widget.routine?.avatarUrl ?? _categoryAvatars[_selectedCategory]!;
+
+    // Initialize day selection states
     _mondayMorning = widget.routine?.mondayMorning ?? false;
     _mondayNight = widget.routine?.mondayNight ?? false;
     _tuesdayMorning = widget.routine?.tuesdayMorning ?? false;
@@ -70,7 +86,6 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
     _saturdayNight = widget.routine?.saturdayNight ?? false;
     _sundayMorning = widget.routine?.sundayMorning ?? false;
     _sundayNight = widget.routine?.sundayNight ?? false;
-    _avatarUrl = widget.routine?.avatarUrl ?? '';
   }
 
   @override
@@ -79,7 +94,9 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
       appBar: AppBar(
         title: Text(
           widget.routine == null ? 'Add Skincare Routine' : 'Edit Routine',
-          style: TextStyle(color: Color.fromRGBO(136, 14, 79, 1), fontWeight: FontWeight.bold),
+          style: TextStyle(
+              color: Color.fromRGBO(136, 14, 79, 1),
+              fontWeight: FontWeight.bold),
         ),
         backgroundColor: const Color.fromRGBO(252, 228, 236, 1),
         elevation: 0,
@@ -87,7 +104,7 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
       body: _isLoading
           ? Center(
               child: SpinKitCircle(
-                color: const Color.fromARGB(255, 247, 143, 177), 
+                color: const Color.fromARGB(255, 247, 143, 177),
                 size: 50.0,
               ),
             )
@@ -97,33 +114,14 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Avatar Selection
+                    // Avatar Display
                     Center(
-  child: GestureDetector(
-    onTap: () {
-      if (_avatarUrl != null && _avatarUrl.isNotEmpty) {
-        _showAvatarOptions(); // Menampilkan dialog opsi
-      } else {
-        _pickAvatar(); // Jika belum ada avatar, langsung pilih foto
-      }
-    },
-    child: CircleAvatar(
-      radius: 60,
-      backgroundImage: _avatarUrl != null && _avatarUrl.isNotEmpty
-          ? NetworkImage(_avatarUrl)
-          : null, // Tidak menggunakan gambar jika URL kosong
-      child: _avatarUrl == null || _avatarUrl.isEmpty
-          ? Icon(
-              Icons.camera_alt, // Ikon default kamera
-              size: 60,
-              color: Color.fromRGBO(136, 14, 79, 1),
-            )
-          : null,
-      backgroundColor: const Color.fromRGBO(252, 228, 236, 1), // Warna latar belakang
-    ),
-  ),
-),
-
+                      child: CircleAvatar(
+                        radius: 60,
+                        backgroundImage: AssetImage(_categoryAvatars[_selectedCategory]!),
+                        backgroundColor: const Color.fromRGBO(252, 228, 236, 1),
+                      ),
+                    ),
 
                     SizedBox(height: 20),
 
@@ -140,13 +138,17 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
                             value: _selectedCategory,
                             isExpanded: true,
                             hint: Text('Select Category'),
-                            style: TextStyle(color: Color.fromRGBO(136, 14, 79, 1), fontSize: 16),
+                            style: TextStyle(
+                                color: Color.fromRGBO(136, 14, 79, 1),
+                                fontSize: 16),
                             dropdownColor: Colors.white,
-                            icon:
-                                Icon(Icons.arrow_drop_down, color: Color.fromRGBO(136, 14, 79, 1)),
+                            icon: Icon(Icons.arrow_drop_down,
+                                color: Color.fromRGBO(136, 14, 79, 1)),
                             onChanged: (String? newValue) {
                               setState(() {
                                 _selectedCategory = newValue!;
+                                // Automatically update avatar when category changes
+                                _avatarUrl = _categoryAvatars[newValue]!;
                               });
                             },
                             items: _categories
@@ -200,7 +202,8 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
                       controller: _noteController,
                       decoration: InputDecoration(
                         labelText: 'Notes',
-                        labelStyle: TextStyle(color: Color.fromRGBO(136, 14, 79, 1)),
+                        labelStyle:
+                            TextStyle(color: Color.fromRGBO(136, 14, 79, 1)),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
                           borderSide: BorderSide(color: Colors.pink),
@@ -226,7 +229,8 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
                             style: ElevatedButton.styleFrom(
                               backgroundColor:
                                   const Color.fromRGBO(136, 14, 79, 1),
-                              foregroundColor: const Color.fromRGBO(252, 228, 236, 1),
+                              foregroundColor:
+                                  const Color.fromRGBO(252, 228, 236, 1),
                               padding: EdgeInsets.symmetric(vertical: 15),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
@@ -242,8 +246,10 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
                               Navigator.pop(context);
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color.fromRGBO(252, 228, 236, 1), 
-                              foregroundColor: const Color.fromRGBO(136, 14, 79, 1),
+                              backgroundColor:
+                                  const Color.fromRGBO(252, 228, 236, 1),
+                              foregroundColor:
+                                  const Color.fromRGBO(136, 14, 79, 1),
                               padding: EdgeInsets.symmetric(vertical: 15),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
@@ -261,6 +267,7 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
             ),
     );
   }
+
 
   Widget _buildDaySelection(String day) {
     return Padding(
@@ -282,7 +289,7 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
               children: [
                 Text("Morning", style: TextStyle(fontSize: 12)),
                 SizedBox(
-                  width: 30, 
+                  width: 30,
                   child: Checkbox(
                     value: _getMorningValue(day),
                     onChanged: (value) {
@@ -297,7 +304,7 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
                 SizedBox(width: 10),
                 Text("Night", style: TextStyle(fontSize: 12)),
                 SizedBox(
-                  width: 30, 
+                  width: 30,
                   child: Checkbox(
                     value: _getNightValue(day),
                     onChanged: (value) {
@@ -411,69 +418,6 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
     }
   }
 
-  void _pickAvatar() async {
-    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-
-    if (pickedFile != null) {
-      setState(() {
-        _avatarUrl = pickedFile.path; 
-      });
-
-      try {
-        final file = File(pickedFile.path);
-        final ref = _storage
-            .ref()
-            .child('avatars/${DateTime.now().millisecondsSinceEpoch}');
-        final uploadTask = await ref.putFile(file);
-        final downloadUrl = await ref.getDownloadURL();
-
-        setState(() {
-          _avatarUrl =
-              downloadUrl; 
-        });
-      } catch (e) {
-        AwesomeDialog(
-          context: context,
-          dialogType: DialogType.error,
-          title: 'Error',
-          desc: 'Failed to upload image: $e',
-          btnOkOnPress: () {},
-        ).show();
-      }
-    }
-  }
-
-  void _deleteAvatar() async {
-    if (_avatarUrl.isNotEmpty) {
-      try {
-        if (_avatarUrl.startsWith('http')) {
-          final ref = _storage.refFromURL(_avatarUrl);
-          await ref.delete();
-        }
-
-        setState(() {
-          _avatarUrl = ""; 
-        });
-
-        AwesomeDialog(
-          context: context,
-          dialogType: DialogType.success,
-          title: 'Success',
-          desc: 'Avatar berhasil dihapus!',
-          btnOkOnPress: () {},
-        ).show();
-      } catch (e) {
-        AwesomeDialog(
-          context: context,
-          dialogType: DialogType.error,
-          title: 'Error',
-          desc: 'Gagal menghapus avatar: $e',
-          btnOkOnPress: () {},
-        ).show();
-      }
-    }
-  }
-
   void _saveRoutine() async {
     User? currentUser = FirebaseAuth.instance.currentUser;
 
@@ -491,15 +435,10 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
     });
 
     try {
-      String imageUrl = _avatarUrl;
-      if (_avatarUrl.isNotEmpty && !_avatarUrl.startsWith('http')) {
-        imageUrl = await _uploadImage(_avatarUrl);
-      }
-
       final updatedRoutine = SkincareRoutine(
         id: widget.routine?.id,
         userId: currentUser.uid,
-        avatarUrl: imageUrl,
+        avatarUrl: _categoryAvatars[_selectedCategory]!, // Use predefined category avatar
         category: _selectedCategory,
         note: _noteController.text,
         mondayMorning: _mondayMorning,
@@ -517,20 +456,18 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
         sundayMorning: _sundayMorning,
         sundayNight: _sundayNight,
       );
+      
       if (widget.routine == null) {
-
         await _firestore
             .collection('skincare_routines')
             .add(updatedRoutine.toMap());
       } else {
-    
         await _firestore
             .collection('skincare_routines')
             .doc(widget.routine!.id)
             .update(updatedRoutine.toMap());
       }
 
-      
       _showSuccessDialog('Skincare Routine Saved Successfully');
     } catch (e) {
       _showErrorDialog('Failed to save routine: ${e.toString()}');
@@ -538,34 +475,6 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
       setState(() {
         _isLoading = false;
       });
-    }
-    Stream<QuerySnapshot> getUserRoutines() {
-      User? currentUser = FirebaseAuth.instance.currentUser;
-      return _firestore
-          .collection('skincare_routines')
-          .where('userId', isEqualTo: currentUser?.uid)
-          .snapshots();
-    }
-  }
-
-  Future<String> _uploadImage(String imagePath) async {
-    try {
-      final File imageFile = File(imagePath);
-      final String fileName =
-          'skincare_routine_${DateTime.now().millisecondsSinceEpoch}.jpg';
-
-      Reference reference =
-          _storage.ref().child('skincare_routine_images/$fileName');
-
-      UploadTask uploadTask = reference.putFile(imageFile);
-
-      TaskSnapshot taskSnapshot = await uploadTask;
-      String downloadUrl = await taskSnapshot.ref.getDownloadURL();
-
-      return downloadUrl;
-    } catch (e) {
-      print('Error uploading image: $e');
-      rethrow;
     }
   }
 
@@ -592,30 +501,4 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
       },
     )..show();
   }
-  void _showAvatarOptions() {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: Text("Edit Foto Profil"),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(); 
-              _pickAvatar(); 
-            },
-            child: Text("Ganti Foto"),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(); 
-              _deleteAvatar(); 
-            },
-            child: Text("Hapus Foto"),
-          ),
-        ],
-      );
-    },
-  );
-}
 }

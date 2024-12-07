@@ -85,6 +85,19 @@ flutter:
     - assets/perawatanKeriput.png
     - assets/Team sregep.png
     - assets/panduan.png
+    - assets/cleansing.png
+    - assets/toner.png
+    - assets/exfoliator.png
+    - assets/serum.png
+    - assets/moisturizer.png
+    - assets/sunscreen.png
+    - assets/face_mask.png
+    - assets/eye_cream.png
+    - assets/face_oil.png
+    - assets/spot_treatment.png
+    - assets/lip_care.png
+    - assets/neck_cream.png
+    - assets/toning_mist.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:

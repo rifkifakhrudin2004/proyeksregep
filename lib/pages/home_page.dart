@@ -36,6 +36,22 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
+  final Map<String, String> _categoryAvatars = {
+    'Cleansing (Pembersih Wajah)': 'assets/cleansing.png',
+    'Toner (Penyegar)': 'assets/toner.png',
+    'Exfoliator (Pengelupasan)': 'assets/exfoliator.png',
+    'Serum': 'assets/serum.png',
+    'Moisturizer (Pelembap)': 'assets/moisturizer.png',
+    'Sunscreen (Tabir Surya)': 'assets/sunscreen.png',
+    'Face Mask (Masker Wajah)': 'assets/face_mask.png',
+    'Eye Cream (Krim Mata)': 'assets/eye_cream.png',
+    'Face Oil (Minyak Wajah)': 'assets/face_oil.png',
+    'Spot Treatment (Perawatan Titik)': 'assets/spot_treatment.png',
+    'Lip Care (Perawatan Bibir)': 'assets/lip_care.png',
+    'Neck Cream (Krim Leher)': 'assets/neck_cream.png',
+    'Toning Mist (Penyegar Semprot)': 'assets/toning_mist.png',
+  };
+
   Future<void> _fetchRoutines() {
     User? currentUser = FirebaseAuth.instance.currentUser;
 
@@ -264,8 +280,8 @@ class _HomePageState extends State<HomePage> {
                                       const Color.fromRGBO(136, 14, 79, 1),
                                   child: Icon(Icons.person,
                                       size: 40,
-                                      color:
-                                          const Color.fromRGBO(252, 228, 236, 1)),
+                                      color: const Color.fromRGBO(
+                                          252, 228, 236, 1)),
                                 ),
                         ),
                         SizedBox(width: 10),
@@ -306,163 +322,141 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
       body: Column(
-        mainAxisSize: MainAxisSize
-            .min, // Menentukan agar column menggunakan ruang sekecil mungkin
+        mainAxisSize: MainAxisSize.min,
         children: [
           // Bagian Rutinitas
-          if (routines.isNotEmpty)
-            Expanded(
-              flex: 1, // Menyesuaikan flex agar lebih seimbang
-              child: Padding(
-                padding: const EdgeInsets.all(
-                    16.0), // Mengurangi padding untuk rutinitas
-                child: Column(
-                  crossAxisAlignment:
-                      CrossAxisAlignment.start, // Menyusun judul di kiri
-                  children: [
-                    Text(
-                      'Rutinitas Harian',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Color.fromRGBO(136, 14, 79, 1),
-                      ),
+          Expanded(
+            flex: 1,
+            child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                      height: 15), // Menambahkan jarak vertikal sebelum teks
+                  Text(
+                    'Rutinitas Harian',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: Color.fromRGBO(136, 14, 79, 1),
                     ),
-                    SizedBox(
-                        height: 8), // Jarak antara judul dan konten rutinitas
+                  ),
+                  SizedBox(height: 20),
+                  if (routines.isNotEmpty)
                     Expanded(
                       child: Stack(
                         children: [
-                          // PageView untuk rutinitas
                           PageView.builder(
                             controller: _pageController,
                             itemCount: routines.length,
                             itemBuilder: (context, index) {
-                              return _buildRoutineCard(routines[index]);
+                              return AnimatedContainer(
+                                duration: Duration(milliseconds: 300),
+                                curve: Curves.easeInOut,
+                                margin: EdgeInsets.symmetric(horizontal: 2),
+                                child: _buildRoutineCard(routines[index]),
+                              );
                             },
-                          ),
-                          // Indikator titik di bawah
-                          Align(
-                            alignment: Alignment.bottomCenter,
-                            child: Padding(
-                              padding: const EdgeInsets.only(bottom: 8.0),
-                              child: SmoothPageIndicator(
-                                controller: _pageController,
-                                count: routines.length,
-                                effect: ExpandingDotsEffect(
-                                  dotHeight: 8.0,
-                                  dotWidth: 8.0,
-                                  spacing: 4.0,
-                                  activeDotColor:
-                                      Color.fromRGBO(136, 14, 79, 1),
-                                ),
-                              ),
-                            ),
                           ),
                         ],
                       ),
+                    )
+                  else
+                    Expanded(
+                      child: _buildEmptyState(),
                     ),
-                  ],
-                ),
+                ],
               ),
             ),
-          // Jika routines kosong, tampilkan empty state
-          if (routines.isEmpty)
-            Expanded(
-              flex: 1,
-              child: _buildEmptyState(),
-            ),
+          ),
 
           // Bagian Artikel
-    Expanded(
-      flex: 1, // Menyesuaikan flex agar lebih seimbang
-      child: Padding(
-        padding: const EdgeInsets.all(16.0), // Mengurangi padding pada artikel
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Artikel Skincare',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Color.fromRGBO(136, 14, 79, 1),
+          Expanded(
+            flex: 1,
+            child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Artikel Skincare',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: Color.fromRGBO(136, 14, 79, 1),
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Expanded(
+                    child: GridView.builder(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                        childAspectRatio: 0.75,
+                      ),
+                      itemCount: articles.length,
+                      itemBuilder: (context, index) {
+                        return GestureDetector(
+                          onTap: () {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return Dialog(
+                                  backgroundColor: Colors.transparent,
+                                  child: InteractiveViewer(
+                                    child: Center(
+                                      child: Image.asset(
+                                        articles[index].imageUrl,
+                                        fit: BoxFit.contain,
+                                        height:
+                                            MediaQuery.of(context).size.height *
+                                                0.8,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                          child: Card(
+                            elevation: 6,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(15),
+                              child: Image.asset(
+                                articles[index].imageUrl,
+                                height: 120,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ),
             ),
-            SizedBox(height: 5), // Mengurangi jarak antar teks dan artikel
-            Expanded(
-              child: GridView.builder(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2, // Jumlah kolom
-                  crossAxisSpacing: 8, // Jarak antar kolom
-                  mainAxisSpacing: 8, // Jarak antar baris
-                  childAspectRatio: 0.8, // Menyesuaikan rasio aspek item
-                ),
-                itemCount: articles.length,
-                itemBuilder: (context, index) {
-                  return _buildArticleCard(articles[index]);
-                },
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
-    ),
-  ],
-),
       floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 1.0),
+        padding: const EdgeInsets.only(bottom: 2.0),
         child: FloatingActionButton(
           onPressed: _showCameraGuide,
           backgroundColor: const Color.fromRGBO(136, 14, 79, 1),
-          child: Icon(Icons.camera_alt, color: Colors.white, size: 30),
+          child: Icon(Icons.camera_alt, color: Colors.white, size: 28),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: CustomBottomNavigation(initialIndex: 0),
-    );
-  }
-
-  Widget _buildArticleCard(Article article) {
-    return GestureDetector(
-      onTap: () {
-        // Menampilkan gambar dalam ukuran besar saat diklik
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return Dialog(
-              backgroundColor: Colors.transparent,
-              child: Center(
-                child: Image.asset(
-                  article.imageUrl,
-                  fit: BoxFit.contain,
-                  height: MediaQuery.of(context).size.height *
-                      0.8, // Membuat gambar lebih besar
-                ),
-              ),
-            );
-          },
-        );
-      },
-      child: Container(
-        width: 200,
-        margin: EdgeInsets.only(right: 2),
-        child: Card(
-          elevation: 4,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(15),
-            child: Image.asset(
-              article.imageUrl,
-              height: 120,
-              width: double.infinity,
-              fit: BoxFit.cover,
-            ),
-          ),
-        ),
-      ),
     );
   }
 
@@ -471,7 +465,7 @@ class _HomePageState extends State<HomePage> {
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Container(
-          margin: const EdgeInsets.only(bottom: 200),
+          margin: const EdgeInsets.only(bottom: 1),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(15),
@@ -520,7 +514,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildAvatar(String avatarUrl) {
+  Widget _buildAvatar(String category) {
     return Container(
       decoration: BoxDecoration(
         shape: BoxShape.circle,
@@ -531,20 +525,16 @@ class _HomePageState extends State<HomePage> {
       ),
       child: CircleAvatar(
         radius: 30,
-        backgroundImage: avatarUrl.isNotEmpty
-            ? NetworkImage(avatarUrl)
-            : AssetImage('assets/default_avatar.png') as ImageProvider,
-        backgroundColor: Colors.pink[50],
-        onBackgroundImageError: (_, __) {
-          // Fallback to default image if network image fails
-        },
+        backgroundImage: AssetImage(
+            _categoryAvatars[category] ?? 'assets/default_avatar.png'),
+        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       ),
     );
   }
 
   Widget _buildRoutineCard(SkincareRoutine routine) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 25),
+      margin: const EdgeInsets.only(bottom: 20),
       decoration: BoxDecoration(
         color: const Color.fromRGBO(252, 228, 236, 1),
         borderRadius: BorderRadius.circular(15),
@@ -567,7 +557,7 @@ class _HomePageState extends State<HomePage> {
               children: [
                 Row(
                   children: [
-                    _buildAvatar(routine.avatarUrl),
+                    _buildAvatar(routine.category),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
@@ -607,10 +597,18 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
           ),
-          Divider(
-            height: 1,
-            color: Colors.pink[100],
-            thickness: 0.5,
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: SmoothPageIndicator(
+              controller: _pageController,
+              count: routines.length,
+              effect: ExpandingDotsEffect(
+                dotHeight: 4.0,
+                dotWidth: 4.0,
+                spacing: 4.0,
+                activeDotColor: Color.fromRGBO(136, 14, 79, 1),
+              ),
+            ),
           ),
         ],
       ),
@@ -662,7 +660,7 @@ Widget _buildScheduleTable(SkincareRoutine routine) {
             routine.sundayNight),
       ],
       border: TableBorder.all(
-        color: Colors.transparent,
+        color: const Color.fromARGB(27, 0, 0, 0),
         width: 0,
       ),
     ),
@@ -720,7 +718,7 @@ TableRow _buildMorningNightRow(
     decoration: BoxDecoration(
       color: timeOfDay == 'Morning'
           ? Colors.white.withOpacity(0.7)
-          : Colors.pink[50]?.withOpacity(0.3),
+          : Colors.white.withOpacity(0.7),
     ),
     children: [
       _buildTimeCell(timeOfDay),
