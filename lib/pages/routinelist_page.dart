@@ -277,6 +277,70 @@ Widget _buildCheckboxCell(bool isChecked) {
       ),
     );
   }
+  void _showCameraGuide() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          contentPadding: EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Panduan Pemakaian Kamera',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color.fromRGBO(136, 14, 79, 1),
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 20),
+              GestureDetector(
+                onTap: () {
+                  Navigator.pop(context);
+                },
+                child: InteractiveViewer(
+                  maxScale: 4.0,
+                  minScale: 1.0,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(15),
+                    child: Image.asset(
+                      'assets/panduan.png',
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/camera');
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromRGBO(252, 228, 236, 1),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  'Mulai Kamera',
+                  style: TextStyle(
+                    color: Color.fromRGBO(136, 14, 79, 1),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   @override
 Widget build(BuildContext context) {
@@ -293,7 +357,6 @@ Widget build(BuildContext context) {
       ),
       backgroundColor: const Color.fromRGBO(252, 228, 236, 1), // Soft hot pink
       elevation: 0,
-      centerTitle: true,
       actions: [
         IconButton(
           onPressed: () async {
@@ -334,9 +397,7 @@ Widget build(BuildContext context) {
             ),
           ),
     floatingActionButton: FloatingActionButton(
-      onPressed: () {
-        Navigator.pushNamed(context, '/camera'); // Navigation for camera action
-      },
+      onPressed: _showCameraGuide,
       backgroundColor: const Color.fromRGBO(136, 14, 79, 1), // Slightly darker pink
       child: Icon(Icons.camera_alt, color: Colors.white, size: 30),
     ),

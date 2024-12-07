@@ -97,14 +97,80 @@ class _StoragePageState extends State<StoragePage> {
       _saveResults();
     });
   }
+  void _showCameraGuide() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          contentPadding: EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Panduan Pemakaian Kamera',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color.fromRGBO(136, 14, 79, 1),
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 20),
+              GestureDetector(
+                onTap: () {
+                  Navigator.pop(context);
+                },
+                child: InteractiveViewer(
+                  maxScale: 4.0,
+                  minScale: 1.0,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(15),
+                    child: Image.asset(
+                      'assets/panduan.png',
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/camera');
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromRGBO(252, 228, 236, 1),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  'Mulai Kamera',
+                  style: TextStyle(
+                    color: Color.fromRGBO(136, 14, 79, 1),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text(
           'Skin Analysis Results',
           style: TextStyle(
+            fontFamily: 'Montserrat',
             fontWeight: FontWeight.bold,
             color: Color.fromRGBO(136, 14, 79, 1),
           ),
@@ -112,83 +178,76 @@ class _StoragePageState extends State<StoragePage> {
         backgroundColor: const Color.fromRGBO(252, 228, 236, 1),
       ),
       body: Container(
+  color: Colors.white, // Menjadikan latar belakang putih
+  child: ListView.builder(
+    padding: const EdgeInsets.all(16),
+    itemCount: storedResults.length,
+    itemBuilder: (context, index) {
+      final result = storedResults[index];
+      return Container(
+        margin: const EdgeInsets.only(bottom: 16),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              const Color.fromRGBO(248, 187, 208, 0.3),
-              const Color.fromRGBO(241, 104, 152, 0.1),
-            ],
-          ),
+          color: const Color.fromRGBO(255, 255, 255, 1),
+          borderRadius: BorderRadius.circular(15),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.2),
+              spreadRadius: 1,
+              blurRadius: 5,
+              offset: const Offset(0, 3),
+            ),
+          ],
         ),
-        child: ListView.builder(
-          padding: const EdgeInsets.all(16),
-          itemCount: storedResults.length,
-          itemBuilder: (context, index) {
-            final result = storedResults[index];
-            return Container(
-              margin: const EdgeInsets.only(bottom: 16),
+        child: Row(
+          children: [
+            // Image
+            Container(
+              width: 100,
+              height: 100,
+              margin: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(15),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.2),
-                    spreadRadius: 1,
-                    blurRadius: 5,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
+                borderRadius: BorderRadius.circular(10),
+                image: result['image'] != null
+                    ? DecorationImage(
+                        image: FileImage(File(result['image'].path)),
+                        fit: BoxFit.cover,
+                      )
+                    : null,
               ),
-              child: Row(
-                children: [
-                  // Image
-                  Container(
-                    width: 100,
-                    height: 100,
-                    margin: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      image: result['image'] != null
-                          ? DecorationImage(
-                              image: FileImage(File(result['image'].path)),
-                              fit: BoxFit.cover,
-                            )
-                          : null,
-                    ),
-                    child: result['image'] == null
-                        ? const Icon(Icons.image, color: Colors.grey)
-                        : null,
-                  ),
+              child: result['image'] == null
+                  ? const Icon(Icons.image, color: Colors.grey)
+                  : null,
+            ),
 
-                  // Content
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            result['prediction'],
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                              color: Color.fromRGBO(241, 104, 152, 1),
-                            ),
-                          ),
-                          const SizedBox(height: 5),
-                          Text(
-                            result['timestamp'].toString().substring(0, 16),
-                            style: const TextStyle(
-                              color: Colors.grey,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
+            // Content
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      result['prediction'],
+                      style: const TextStyle(
+                        fontFamily: 'Montserrat',
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: Color.fromRGBO(136, 14, 79, 1),
                       ),
                     ),
-                  ),
+                    const SizedBox(height: 5),
+                    Text(
+                      result['timestamp'].toString().substring(0, 16),
+                      style: const TextStyle(
+                        color: Colors.grey,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          
 
                   // Action Buttons
                   Padding(
@@ -207,7 +266,7 @@ class _StoragePageState extends State<StoragePage> {
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor:
-                                const Color.fromRGBO(241, 104, 152, 1),
+                                const Color.fromRGBO(136, 14, 79, 1),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
@@ -217,7 +276,7 @@ class _StoragePageState extends State<StoragePage> {
                           child: const Text(
                             'Detail',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: Color.fromRGBO(255, 255, 255, 1),
                               fontSize: 12,
                             ),
                           ),
@@ -227,7 +286,7 @@ class _StoragePageState extends State<StoragePage> {
                           onPressed: () => _deleteResult(index),
                           style: ElevatedButton.styleFrom(
                             backgroundColor:
-                                const Color.fromRGBO(241, 104, 152, 1),
+                                const Color.fromRGBO(252, 228, 236, 1),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
@@ -237,7 +296,7 @@ class _StoragePageState extends State<StoragePage> {
                           child: const Text(
                             'Hapus',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: Color.fromRGBO(136, 14, 79, 1),
                               fontSize: 12,
                             ),
                           ),
@@ -255,10 +314,7 @@ class _StoragePageState extends State<StoragePage> {
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 1.0),
         child: FloatingActionButton(
-          onPressed: () {
-            // Camera guide or navigation logic
-            Navigator.pushNamed(context, '/camera');
-          },
+          onPressed: _showCameraGuide,
           backgroundColor: const Color.fromRGBO(136, 14, 79, 1),
           child: Icon(Icons.camera_alt, color: Colors.white, size: 30),
         ),

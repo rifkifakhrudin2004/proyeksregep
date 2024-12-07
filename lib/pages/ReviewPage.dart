@@ -4,15 +4,12 @@ import 'package:image_picker/image_picker.dart';
 import 'package:proyeksregep/pages/storage_page.dart';
 import 'package:shimmer/shimmer.dart';
 
-
 class ReviewPage extends StatefulWidget {
   final XFile imageFile;
   final String? predictedClass;
   final String? persentase;
   final String? handling;
   final String? skincare;
-  
- 
 
   const ReviewPage({
     Key? key,
@@ -35,10 +32,11 @@ class _ReviewPageState extends State<ReviewPage> {
     super.initState();
     _checkDataReadiness();
   }
+
   Future<void> _checkDataReadiness() async {
     // Tambahkan pengecekan tambahan jika diperlukan
     await Future.delayed(Duration(seconds: 1));
-    
+
     if (mounted) {
       setState(() {
         isLoading = false;
@@ -49,48 +47,36 @@ class _ReviewPageState extends State<ReviewPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Skin Analysis Result',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: const Color.fromRGBO(252, 228, 236, 1),
+        appBar: AppBar(
+          title: const Text(
+            'Skin Analysis Result',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: const Color.fromRGBO(136, 14, 79, 1),
+            ),
           ),
+          backgroundColor: Color.fromRGBO(252, 228, 236, 1),
+          elevation: 0,
         ),
-        backgroundColor: Color.fromRGBO(136, 14, 79, 1),
-        centerTitle: true,
-        elevation: 0,
-      ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              const Color.fromRGBO(248, 187, 208, 0.3),
-              const Color.fromRGBO(241, 104, 152, 0.1),
-            ],
-          ),
-        ),
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
-            child: Card(
-              elevation: 10,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: isLoading
-                    ? _buildLoadingSkeleton(context)
-                    : _buildContent(context),
+        body: Container(
+          color: Colors.white,
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: Card(
+                elevation: 10,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20)),
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: isLoading
+                      ? _buildLoadingSkeleton(context)
+                      : _buildContent(context),
+                ),
               ),
             ),
           ),
-        ),
-      ),
-    );
+        ));
   }
 
   Widget _buildLoadingSkeleton(BuildContext context) {
@@ -178,7 +164,7 @@ class _ReviewPageState extends State<ReviewPage> {
           context,
           'Prediction',
           widget.predictedClass ?? 'N/A',
-          color: const Color.fromRGBO(241, 104, 152, 1),
+          color: const Color.fromRGBO(136, 14, 79, 1),
         ),
         const SizedBox(height: 15),
         _buildHiddenDetailSection(
@@ -197,18 +183,23 @@ class _ReviewPageState extends State<ReviewPage> {
               MaterialPageRoute(
                 builder: (context) => StoragePage(
                   imageFile: widget.imageFile,
-                  predictedClass: widget.predictedClass ??'Unknown', 
-                  persentase : widget.persentase ?? '%',
+                  predictedClass: widget.predictedClass ?? 'Unknown',
+                  persentase: widget.persentase ?? '%',
                   handling: widget.handling ?? 'No handling information',
                   skincare: widget.skincare ?? 'No skincare recommendation',
                 ),
               ),
             );
           },
-          icon: const Icon(Icons.save_rounded),
-          label: const Text('Save Data'),
+          label: const Text(
+            'Save Data',
+            style: TextStyle(
+              color: Color.fromRGBO(136, 14, 79, 1),
+              fontSize: 16,
+            ),
+          ),
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color.fromRGBO(241, 104, 152, 1),
+            backgroundColor: const Color.fromRGBO(252, 228, 236, 1),
             padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(15),
@@ -298,7 +289,7 @@ class _ReviewPageState extends State<ReviewPage> {
             ),
             const Icon(
               Icons.remove_red_eye,
-              color: Colors.grey,
+              color: Color.fromRGBO(136, 14, 79, 1),
             ),
           ],
         ),
@@ -316,7 +307,7 @@ class _ReviewPageState extends State<ReviewPage> {
             title,
             style: const TextStyle(
               fontWeight: FontWeight.bold,
-              color: Color.fromRGBO(241, 104, 152, 1),
+              color: Color.fromRGBO(136, 14, 79, 1),
             ),
           ),
           content: SingleChildScrollView(
@@ -334,6 +325,16 @@ class _ReviewPageState extends State<ReviewPage> {
               onPressed: () {
                 Navigator.of(dialogContext).pop();
               },
+              style: TextButton.styleFrom(
+                foregroundColor: const Color.fromRGBO(136, 14, 79, 1), 
+                backgroundColor: const Color.fromRGBO(252, 228, 236, 1), 
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 16, vertical: 8), // Opsional
+                shape: RoundedRectangleBorder(
+                  borderRadius:
+                      BorderRadius.circular(8), // Opsional: Sudut tombol
+                ),
+              ),
             ),
           ],
         );

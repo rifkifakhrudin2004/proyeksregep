@@ -544,7 +544,7 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildRoutineCard(SkincareRoutine routine) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 50),
+      margin: const EdgeInsets.only(bottom: 25),
       decoration: BoxDecoration(
         color: const Color.fromRGBO(252, 228, 236, 1),
         borderRadius: BorderRadius.circular(15),

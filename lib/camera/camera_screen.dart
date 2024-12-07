@@ -434,9 +434,9 @@ class _CameraScreenState extends State<CameraScreen>
       appBar: AppBar(
         title: Text("Agingskin",
         style: TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-          color: Color.fromRGBO(136, 14, 79, 1)
+            fontFamily: 'Montserrat',
+            fontWeight: FontWeight.bold,
+            color: Color.fromRGBO(136, 14, 79, 1),
         )),
         
         backgroundColor: const Color.fromRGBO(252, 228, 236, 1),
@@ -538,7 +538,7 @@ class _CameraScreenState extends State<CameraScreen>
             bottom: 20,
             left: 20,
             child: IconButton(
-              icon: Icon(Icons.switch_camera, color: Colors.white, size: 30),
+              icon: Icon(Icons.switch_camera, color: const Color.fromRGBO(136, 14, 79, 1), size: 30),
               onPressed: _switchCamera,
             ),
           ),

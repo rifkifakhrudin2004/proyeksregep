@@ -35,19 +35,19 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
   final FirebaseStorage _storage = FirebaseStorage.instance;
 
   final List<String> _categories = [
-    'Cleansing (Pembersih Wajah)',
-    'Toner (Penyegar)',
-    'Exfoliator (Pengelupasan)',
+    'Cleansing',
+    'Toner',
+    'Exfoliator',
     'Serum',
-    'Moisturizer (Pelembap)',
-    'Sunscreen (Tabir Surya)',
-    'Face Mask (Masker Wajah)',
-    'Eye Cream (Krim Mata)',
-    'Face Oil (Minyak Wajah)',
-    'Spot Treatment (Perawatan Titik)',
-    'Lip Care (Perawatan Bibir)',
-    'Neck Cream (Krim Leher)',
-    'Toning Mist (Penyegar Semprot)',
+    'Moisturizer',
+    'Sunscreen',
+    'Face Mask',
+    'Eye Cream',
+    'Face Oil',
+    'Spot Treatment',
+    'Lip Care',
+    'Neck Cream',
+    'Toning Mist',
   ];
 
   @override
