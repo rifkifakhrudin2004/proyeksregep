@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:proyeksregep/widgets/custom_bottom_navigation.dart';
+import 'about_us_page.dart'; // Add this import at the top of your file
+
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -95,7 +97,7 @@ class _ProfilePageState extends State<ProfilePage> {
         title: "Konfirmasi Logout",
         desc: "Apakah Anda yakin ingin keluar dari akun?",
         btnCancelOnPress: () {},
-        btnOkText: "Ya, Logout",
+        btnOkText: "Logout",
         btnOkColor: Colors.pink[700],
         btnOkOnPress: () async {
           // Perform logout
@@ -110,19 +112,13 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  void _showAboutUs() {
-    AwesomeDialog(
-      context: context,
-      dialogType: DialogType.info,
-      animType: AnimType.scale,
-      title: "Tentang Kami",
-      desc:
-          "Aplikasi ini dikembangkan untuk membantu pengguna dalam aktivitas sehari-hari. "
-          "Kami berkomitmen untuk memberikan pengalaman terbaik dan solusi yang inovatif.",
-      btnOkOnPress: () {},
-      btnOkText: "Tutup",
-    ).show();
-  }
+ void _showAboutUs() {
+  Navigator.push(
+    context,
+    MaterialPageRoute(builder: (context) => AboutUsPage()), 
+  );
+}
+
 
   Future<void> _saveProfile(BuildContext context) async {
     if (nameController.text.trim().isEmpty ||

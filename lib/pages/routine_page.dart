@@ -4,6 +4,7 @@ import 'package:proyeksregep/models/skincare_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:proyeksregep/pages/routinelist_page.dart';
 
 class SkincareRoutineInputPage extends StatefulWidget {
   final SkincareRoutine? routine;
@@ -31,45 +32,46 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
 
   // Map of category to predefined avatar images
   final Map<String, String> _categoryAvatars = {
-    'Cleansing (Pembersih Wajah)': 'assets/cleansing.png',
-    'Toner (Penyegar)': 'assets/toner.png',
-    'Exfoliator (Pengelupasan)': 'assets/exfoliator.png',
+    'Cleansing': 'assets/cleansing.png',
+    'Toner': 'assets/toner.png',
+    'Exfoliator': 'assets/exfoliator.png',
     'Serum': 'assets/serum.png',
-    'Moisturizer (Pelembap)': 'assets/moisturizer.png',
-    'Sunscreen (Tabir Surya)': 'assets/sunscreen.png',
-    'Face Mask (Masker Wajah)': 'assets/face_mask.png',
-    'Eye Cream (Krim Mata)': 'assets/eye_cream.png',
-    'Face Oil (Minyak Wajah)': 'assets/face_oil.png',
-    'Spot Treatment (Perawatan Titik)': 'assets/spot_treatment.png',
-    'Lip Care (Perawatan Bibir)': 'assets/lip_care.png',
-    'Neck Cream (Krim Leher)': 'assets/neck_cream.png',
-    'Toning Mist (Penyegar Semprot)': 'assets/toning_mist.png',
+    'Moisturizer': 'assets/moisturizer.png',
+    'Sunscreen': 'assets/sunscreen.png',
+    'Face Mask': 'assets/face_mask.png',
+    'Eye Cream': 'assets/eye_cream.png',
+    'Face Oil': 'assets/face_oil.png',
+    'Spot Treatment': 'assets/spot_treatment.png',
+    'Lip Care': 'assets/lip_care.png',
+    'Neck Cream': 'assets/neck_cream.png',
+    'Toning Mist': 'assets/toning_mist.png',
   };
 
   final List<String> _categories = [
-    'Cleansing (Pembersih Wajah)',
-    'Toner (Penyegar)',
-    'Exfoliator (Pengelupasan)',
+    'Cleansing',
+    'Toner',
+    'Exfoliator',
     'Serum',
-    'Moisturizer (Pelembap)',
-    'Sunscreen (Tabir Surya)',
-    'Face Mask (Masker Wajah)',
-    'Eye Cream (Krim Mata)',
-    'Face Oil (Minyak Wajah)',
-    'Spot Treatment (Perawatan Titik)',
-    'Lip Care (Perawatan Bibir)',
-    'Neck Cream (Krim Leher)',
-    'Toning Mist (Penyegar Semprot)',
+    'Moisturizer',
+    'Sunscreen',
+    'Face Mask',
+    'Eye Cream',
+    'Face Oil',
+    'Spot Treatment',
+    'Lip Care',
+    'Neck Cream',
+    'Toning Mist',
   ];
 
   @override
   void initState() {
     super.initState();
     _noteController = TextEditingController(text: widget.routine?.note);
-    _selectedCategory = widget.routine?.category ?? _categories[0];
-    
+    _selectedCategory = widget.routine?.category ?? '';
+    _categories.insert(0, 'Select Category');
+
     // Set initial avatar based on category
-    _avatarUrl = widget.routine?.avatarUrl ?? _categoryAvatars[_selectedCategory]!;
+    _avatarUrl = widget.routine?.avatarUrl ?? '';
 
     // Initialize day selection states
     _mondayMorning = widget.routine?.mondayMorning ?? false;
@@ -118,8 +120,16 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
                     Center(
                       child: CircleAvatar(
                         radius: 60,
-                        backgroundImage: AssetImage(_categoryAvatars[_selectedCategory]!),
-                        backgroundColor: const Color.fromRGBO(252, 228, 236, 1),
+                        backgroundImage: _selectedCategory != null &&
+                                _categoryAvatars[_selectedCategory] != null
+                            ? AssetImage(_categoryAvatars[_selectedCategory]!)
+                            : null,
+                        child: _selectedCategory == null
+                            ? Icon(
+                                Icons.person,
+                                size: 60,
+                              )
+                            : null,
                       ),
                     ),
 
@@ -135,7 +145,9 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
                         padding: const EdgeInsets.symmetric(horizontal: 12.0),
                         child: DropdownButtonHideUnderline(
                           child: DropdownButton<String>(
-                            value: _selectedCategory,
+                            value: _selectedCategory.isEmpty
+                                ? 'Select Category'
+                                : _selectedCategory,
                             isExpanded: true,
                             hint: Text('Select Category'),
                             style: TextStyle(
@@ -147,8 +159,9 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
                             onChanged: (String? newValue) {
                               setState(() {
                                 _selectedCategory = newValue!;
-                                // Automatically update avatar when category changes
-                                _avatarUrl = _categoryAvatars[newValue]!;
+                                _avatarUrl = newValue != 'Select Category'
+                                    ? _categoryAvatars[newValue] ?? ''
+                                    : '';
                               });
                             },
                             items: _categories
@@ -267,7 +280,6 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
             ),
     );
   }
-
 
   Widget _buildDaySelection(String day) {
     return Padding(
@@ -422,11 +434,11 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
     User? currentUser = FirebaseAuth.instance.currentUser;
 
     if (currentUser == null) {
-      _showErrorDialog('Please log in to save a routine');
+      _showErrorDialog('Silakan login terlebih dahulu untuk menyimpan rutinitas');
       return;
     }
-    if (_selectedCategory.isEmpty) {
-      _showErrorDialog('Please select a category');
+    if (_selectedCategory.isEmpty || _selectedCategory == 'Select Category') {
+      _showErrorDialog('Please select a valid category');
       return;
     }
 
@@ -438,7 +450,8 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
       final updatedRoutine = SkincareRoutine(
         id: widget.routine?.id,
         userId: currentUser.uid,
-        avatarUrl: _categoryAvatars[_selectedCategory]!, // Use predefined category avatar
+        avatarUrl: _categoryAvatars[
+            _selectedCategory]!, // Use predefined category avatar
         category: _selectedCategory,
         note: _noteController.text,
         mondayMorning: _mondayMorning,
@@ -456,28 +469,27 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
         sundayMorning: _sundayMorning,
         sundayNight: _sundayNight,
       );
-      
-      if (widget.routine == null) {
-        await _firestore
-            .collection('skincare_routines')
-            .add(updatedRoutine.toMap());
-      } else {
-        await _firestore
-            .collection('skincare_routines')
-            .doc(widget.routine!.id)
-            .update(updatedRoutine.toMap());
-      }
 
-      _showSuccessDialog('Skincare Routine Saved Successfully');
-    } catch (e) {
-      _showErrorDialog('Failed to save routine: ${e.toString()}');
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      final routinesRef = _firestore.collection('skincare_routines');
+
+    if (widget.routine == null) {
+      // Tambah routine baru
+      DocumentReference docRef = await routinesRef.add(updatedRoutine.toMap());
+      updatedRoutine.id = docRef.id; // Update ID routine dengan ID dokumen Firebase
+    } else {
+      // Update routine yang sudah ada
+      await routinesRef.doc(widget.routine!.id).update(updatedRoutine.toMap());
     }
-  }
 
+    _showSuccessDialog('Rutinitas Skincare Berhasil Disimpan');
+  } catch (e) {
+    _showErrorDialog('Gagal menyimpan rutinitas: ${e.toString()}');
+  } finally {
+    setState(() {
+      _isLoading = false;
+    });
+  }
+}
   void _showErrorDialog(String message) {
     AwesomeDialog(
       context: context,
@@ -497,7 +509,10 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
       title: 'Success',
       desc: message,
       btnOkOnPress: () {
-        Navigator.pop(context);
+        // Ganti halaman saat ini dengan halaman utama
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => SkincareRoutineListPage()),
+        );
       },
     )..show();
   }

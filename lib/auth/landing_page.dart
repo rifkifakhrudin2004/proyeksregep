@@ -139,7 +139,7 @@ class _LandingPageState extends State<LandingPage> {
                 SizedBox(height: 24),
                 Center(
                   child: Text(
-                    "Smart AgeDefying",
+                    "Skinalyze",
                     style: GoogleFonts.montserrat(
                       textStyle: TextStyle(
                           color: Colors.white,

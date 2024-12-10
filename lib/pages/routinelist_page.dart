@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:proyeksregep/models/skincare_model.dart';
 import 'routine_page.dart';
 import 'package:proyeksregep/widgets/custom_bottom_navigation.dart';
+import 'package:awesome_dialog/awesome_dialog.dart';
 
 class SkincareRoutineListPage extends StatefulWidget {
   @override
@@ -41,22 +42,22 @@ class _SkincareRoutineListPageState extends State<SkincareRoutineListPage> {
             id: doc.id,
             userId: currentUser.uid,
             avatarUrl: doc['avatarUrl'] ?? '',
-            category: doc['category'],
-            note: doc['note'],
-            mondayMorning: doc['mondayMorning'],
-            mondayNight: doc['mondayNight'],
-            tuesdayMorning: doc['tuesdayMorning'],
-            tuesdayNight: doc['tuesdayNight'],
-            wednesdayMorning: doc['wednesdayMorning'],
-            wednesdayNight: doc['wednesdayNight'],
-            thursdayMorning: doc['thursdayMorning'],
-            thursdayNight: doc['thursdayNight'],
-            fridayMorning: doc['fridayMorning'],
-            fridayNight: doc['fridayNight'],
-            saturdayMorning: doc['saturdayMorning'],
-            saturdayNight: doc['saturdayNight'],
-            sundayMorning: doc['sundayMorning'],
-            sundayNight: doc['sundayNight'],
+            category: doc['category'] ?? '',
+            note: doc['note'] ?? '',
+            mondayMorning: doc['mondayMorning'] ?? '',
+            mondayNight: doc['mondayNight'] ?? '',
+            tuesdayMorning: doc['tuesdayMorning'] ?? '',
+            tuesdayNight: doc['tuesdayNight'] ?? '',
+            wednesdayMorning: doc['wednesdayMorning'] ?? '',
+            wednesdayNight: doc['wednesdayNight'] ?? '',
+            thursdayMorning: doc['thursdayMorning'] ?? '',
+            thursdayNight: doc['thursdayNight'] ?? '',
+            fridayMorning: doc['fridayMorning'] ?? '',
+            fridayNight: doc['fridayNight'] ?? '',
+            saturdayMorning: doc['saturdayMorning'] ?? '',
+            saturdayNight: doc['saturdayNight'] ?? '',
+            sundayMorning: doc['sundayMorning'] ?? '',
+            sundayNight: doc['sundayNight'] ?? '',
           );
         }).toList();
       });
@@ -64,34 +65,43 @@ class _SkincareRoutineListPageState extends State<SkincareRoutineListPage> {
   }
 
   final Map<String, String> _categoryAvatars = {
-    'Cleansing (Pembersih Wajah)': 'assets/cleansing.png',
-    'Toner (Penyegar)': 'assets/toner.png',
-    'Exfoliator (Pengelupasan)': 'assets/exfoliator.png',
+    'Cleansing': 'assets/cleansing.png',
+    'Toner': 'assets/toner.png',
+    'Exfoliator': 'assets/exfoliator.png',
     'Serum': 'assets/serum.png',
-    'Moisturizer (Pelembap)': 'assets/moisturizer.png',
-    'Sunscreen (Tabir Surya)': 'assets/sunscreen.png',
-    'Face Mask (Masker Wajah)': 'assets/face_mask.png',
-    'Eye Cream (Krim Mata)': 'assets/eye_cream.png',
-    'Face Oil (Minyak Wajah)': 'assets/face_oil.png',
-    'Spot Treatment (Perawatan Titik)': 'assets/spot_treatment.png',
-    'Lip Care (Perawatan Bibir)': 'assets/lip_care.png',
-    'Neck Cream (Krim Leher)': 'assets/neck_cream.png',
-    'Toning Mist (Penyegar Semprot)': 'assets/toning_mist.png',
+    'Moisturizer': 'assets/moisturizer.png',
+    'Sunscreen': 'assets/sunscreen.png',
+    'Face Mask': 'assets/face_mask.png',
+    'Eye Cream': 'assets/eye_cream.png',
+    'Face Oil': 'assets/face_oil.png',
+    'Spot Treatment': 'assets/spot_treatment.png',
+    'Lip Care': 'assets/lip_care.png',
+    'Neck Cream': 'assets/neck_cream.png',
+    'Toning Mist': 'assets/toning_mist.png',
   };
 
   void _deleteRoutine(String routineId) async {
-    try {
-      await FirebaseFirestore.instance
-          .collection('skincare_routines')
-          .doc(routineId)
-          .delete();
-      setState(() {
-        routines.removeWhere((routine) => routine.id == routineId);
-      });
-    } catch (e) {
-      print("Error deleting routine: $e");
+  try {
+    User? currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null) {
+      _showErrorDialog('Silakan login terlebih dahulu');
+      return;
     }
+
+    await FirebaseFirestore.instance
+        .collection('skincare_routines')
+        .doc(routineId)
+        .delete();
+
+    setState(() {
+      routines.removeWhere((routine) => routine.id == routineId);
+    });
+
+    _showSuccessDialog('Rutinitas berhasil dihapus');
+  } catch (e) {
+    _showErrorDialog('Gagal menghapus rutinitas: ${e.toString()}');
   }
+}
 
   // Show dialog when login is required
   void _showLoginRequiredDialog() {
@@ -111,6 +121,41 @@ class _SkincareRoutineListPageState extends State<SkincareRoutineListPage> {
       ),
     );
   }
+  void _showSuccessDialog(String message) {
+  AwesomeDialog(
+    context: context,
+    dialogType: DialogType.success,
+    animType: AnimType.rightSlide,
+    title: 'Sukses',
+    desc: message,
+    btnOkOnPress: () {
+      // Optional: Add any additional actions you want to perform after dismissing the dialog
+      // If you want to navigate to another page, you can do it here
+      // Navigator.of(context).pushReplacement(
+      //   MaterialPageRoute(builder: (context) => SomeOtherPage()),
+      // );
+    },
+  )..show();
+}
+  void _showErrorDialog(String message) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Error'),
+        content: Text(message),
+        actions: <Widget>[
+          TextButton(
+            child: Text('OK'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
 
 // Build the schedule table for the routine
   Widget _buildScheduleTable(SkincareRoutine routine) {
@@ -287,6 +332,7 @@ class _SkincareRoutineListPageState extends State<SkincareRoutineListPage> {
       ),
     );
   }
+
   void _showCameraGuide() {
     showDialog(
       context: context,
@@ -369,7 +415,6 @@ class _SkincareRoutineListPageState extends State<SkincareRoutineListPage> {
         backgroundColor:
             const Color.fromRGBO(252, 228, 236, 1), // Soft hot pink
         elevation: 0,
-        centerTitle: true,
         actions: [
           IconButton(
             onPressed: () async {
@@ -378,69 +423,76 @@ class _SkincareRoutineListPageState extends State<SkincareRoutineListPage> {
                 _showLoginRequiredDialog();
                 return;
               }
-Widget build(BuildContext context) {
-  return Scaffold(
-    backgroundColor: Color.fromRGBO(255, 255, 255, 1), // Soft pastel pink background
-    appBar: AppBar(
-      automaticallyImplyLeading: false,
-      title: Text(
-        'My Skincare Routines',
-        style: TextStyle(
-          fontWeight: FontWeight.w600,
-          color: Color.fromRGBO(136, 14, 79, 1),
-        ),
-      ),
-      backgroundColor: const Color.fromRGBO(252, 228, 236, 1), // Soft hot pink
-      elevation: 0,
-      actions: [
-        IconButton(
-          onPressed: () async {
-            User? currentUser = FirebaseAuth.instance.currentUser;
-            if (currentUser == null) {
-              _showLoginRequiredDialog();
-              return;
-            }
+              Widget build(BuildContext context) {
+                return Scaffold(
+                  backgroundColor: Color.fromRGBO(
+                      255, 255, 255, 1), // Soft pastel pink background
+                  appBar: AppBar(
+                    automaticallyImplyLeading: false,
+                    title: Text(
+                      'My Skincare Routines',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: Color.fromRGBO(136, 14, 79, 1),
+                      ),
+                    ),
+                    backgroundColor:
+                        const Color.fromRGBO(252, 228, 236, 1), // Soft hot pink
+                    elevation: 0,
+                    actions: [
+                      IconButton(
+                        onPressed: () async {
+                          User? currentUser = FirebaseAuth.instance.currentUser;
+                          if (currentUser == null) {
+                            _showLoginRequiredDialog();
+                            return;
+                          }
 
-            final newRoutine = await Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => SkincareRoutineInputPage(),
-              ),
-            );
-            if (newRoutine != null) {
-              setState(() {
-                routines.add(newRoutine);
-              });
-            }
-          },
-          icon: Icon(Icons.add, color: Color.fromRGBO(136, 14, 79, 1)),
-          tooltip: 'Add Routine',
-        ),
-      ],
-    ),
-    body: routines.isEmpty
-        ? _buildEmptyState()
-        : Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            child: ListView.builder(
-              itemCount: routines.length,
-              itemBuilder: (context, index) {
-                final routine = routines[index];
-                return _buildRoutineCard(routine);
-              },
-              physics: const BouncingScrollPhysics(), // Smooth scrolling
-            ),
-          ),
-    floatingActionButton: FloatingActionButton(
-      onPressed: _showCameraGuide,
-      backgroundColor: const Color.fromRGBO(136, 14, 79, 1), // Slightly darker pink
-      child: Icon(Icons.camera_alt, color: Colors.white, size: 30),
-    ),
-    floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-    bottomNavigationBar: CustomBottomNavigation(initialIndex: 2),
-  );
-}
-
+                          final newRoutine = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => SkincareRoutineInputPage(),
+                            ),
+                          );
+                          if (newRoutine != null) {
+                            setState(() {
+                              routines.add(newRoutine);
+                            });
+                          }
+                        },
+                        icon: Icon(Icons.add,
+                            color: Color.fromRGBO(136, 14, 79, 1)),
+                        tooltip: 'Add Routine',
+                      ),
+                    ],
+                  ),
+                  body: routines.isEmpty
+                      ? _buildEmptyState()
+                      : Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16.0, vertical: 8.0),
+                          child: ListView.builder(
+                            itemCount: routines.length,
+                            itemBuilder: (context, index) {
+                              final routine = routines[index];
+                              return _buildRoutineCard(routine);
+                            },
+                            physics:
+                                const BouncingScrollPhysics(), // Smooth scrolling
+                          ),
+                        ),
+                  floatingActionButton: FloatingActionButton(
+                    onPressed: _showCameraGuide,
+                    backgroundColor: const Color.fromRGBO(
+                        136, 14, 79, 1), // Slightly darker pink
+                    child:
+                        Icon(Icons.camera_alt, color: Colors.white, size: 30),
+                  ),
+                  floatingActionButtonLocation:
+                      FloatingActionButtonLocation.centerDocked,
+                  bottomNavigationBar: CustomBottomNavigation(initialIndex: 2),
+                );
+              }
 
               final newRoutine = await Navigator.push(
                 context,
@@ -597,7 +649,8 @@ Widget build(BuildContext context) {
               children: [
                 IconButton(
                   tooltip: 'Edit Routine',
-                  icon: Icon(Icons.edit, color: Colors.pink[600]),
+                  icon: Icon(Icons.edit,
+                      color: const Color.fromRGBO(136, 14, 79, 1)),
                   onPressed: () async {
                     final updatedRoutine = await Navigator.push(
                       context,
@@ -622,7 +675,8 @@ Widget build(BuildContext context) {
                 ),
                 IconButton(
                   tooltip: 'Delete Routine',
-                  icon: Icon(Icons.delete, color: Colors.pink[600]),
+                  icon: Icon(Icons.delete,
+                      color: const Color.fromRGBO(136, 14, 79, 1)),
                   onPressed: () {
                     // Show a confirmation dialog before deleting
                     showDialog(

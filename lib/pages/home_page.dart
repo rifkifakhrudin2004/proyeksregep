@@ -37,19 +37,19 @@ class _HomePageState extends State<HomePage> {
   }
 
   final Map<String, String> _categoryAvatars = {
-    'Cleansing (Pembersih Wajah)': 'assets/cleansing.png',
-    'Toner (Penyegar)': 'assets/toner.png',
-    'Exfoliator (Pengelupasan)': 'assets/exfoliator.png',
+    'Cleansing': 'assets/cleansing.png',
+    'Toner': 'assets/toner.png',
+    'Exfoliator': 'assets/exfoliator.png',
     'Serum': 'assets/serum.png',
-    'Moisturizer (Pelembap)': 'assets/moisturizer.png',
-    'Sunscreen (Tabir Surya)': 'assets/sunscreen.png',
-    'Face Mask (Masker Wajah)': 'assets/face_mask.png',
-    'Eye Cream (Krim Mata)': 'assets/eye_cream.png',
-    'Face Oil (Minyak Wajah)': 'assets/face_oil.png',
-    'Spot Treatment (Perawatan Titik)': 'assets/spot_treatment.png',
-    'Lip Care (Perawatan Bibir)': 'assets/lip_care.png',
-    'Neck Cream (Krim Leher)': 'assets/neck_cream.png',
-    'Toning Mist (Penyegar Semprot)': 'assets/toning_mist.png',
+    'Moisturizer': 'assets/moisturizer.png',
+    'Sunscreen': 'assets/sunscreen.png',
+    'Face Mask': 'assets/face_mask.png',
+    'Eye Cream': 'assets/eye_cream.png',
+    'Face Oil': 'assets/face_oil.png',
+    'Spot Treatment': 'assets/spot_treatment.png',
+    'Lip Care': 'assets/lip_care.png',
+    'Neck Cream': 'assets/neck_cream.png',
+    'Toning Mist': 'assets/toning_mist.png',
   };
 
   Future<void> _fetchRoutines() {
@@ -480,33 +480,41 @@ class _HomePageState extends State<HomePage> {
           ),
           child: Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.face,
-                  size: 120,
-                  color: Colors.pink[300],
-                ),
-                const SizedBox(height: 20),
-                Text(
-                  'No Skincare Routines Yet',
-                  style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.pink[800]),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  'Create your first routine and start tracking\nyour skincare journey',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.pink[600],
-                      fontWeight: FontWeight.w300),
-                ),
-              ],
+            child: Container(
+              width: double.infinity, // Menjadikan lebar penuh
+              decoration: BoxDecoration(
+                color: const Color.fromRGBO(255, 255, 255, 1), // Warna background (opsional)
+                borderRadius:
+                    BorderRadius.circular(12), // Sudut melengkung (opsional)
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.face,
+                    size: 120,
+                    color: Colors.pink[300],
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'No Skincare Routines Yet',
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.pink[800]),
+                  ),
+                  const SizedBox(height: 10),
+                  // Text(
+                  //   'Create your first routine and start tracking\nyour skincare journey',
+                  //   textAlign: TextAlign.center,
+                  //   style: TextStyle(
+                  //       fontSize: 16,
+                  //       color: Colors.pink[600],
+                  //       fontWeight: FontWeight.w300),
+                  // ),
+                ],
+              ),
             ),
           ),
         ),
@@ -629,7 +637,7 @@ Widget _buildScheduleTable(SkincareRoutine routine) {
     padding: const EdgeInsets.all(8.0),
     child: Table(
       columnWidths: {
-        0: FlexColumnWidth(1.5), // Time column wider
+        0: FlexColumnWidth(1.6), // Time column wider
         1: FlexColumnWidth(1), // Day columns equal
         2: FlexColumnWidth(1),
         3: FlexColumnWidth(1),

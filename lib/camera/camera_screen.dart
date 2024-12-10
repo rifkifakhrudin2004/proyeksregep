@@ -211,7 +211,7 @@ class _CameraScreenState extends State<CameraScreen>
   Future<void> sendImageData(String userId, String imageFilename) async {
     try {
       final fileName = imageFilename.split('/').last;
-      final url = Uri.parse('http://192.168.30.125:5000/upload');
+      final url = Uri.parse('http://192.168.30.129:5000/upload');
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
@@ -283,7 +283,7 @@ class _CameraScreenState extends State<CameraScreen>
         print('Error body: ${response.body}');
       }
     } catch (e) {
-      print('Error lengkap: $e');
+      print('Error lengkap: $e');
     }
   }
 
@@ -433,12 +433,11 @@ class _CameraScreenState extends State<CameraScreen>
     return Scaffold(
       appBar: AppBar(
         title: Text("Agingskin",
-        style: TextStyle(
-            fontFamily: 'Montserrat',
-            fontWeight: FontWeight.bold,
-            color: Color.fromRGBO(136, 14, 79, 1),
-        )),
-        
+            style: TextStyle(
+              fontFamily: 'Montserrat',
+              fontWeight: FontWeight.bold,
+              color: Color.fromRGBO(136, 14, 79, 1),
+            )),
         backgroundColor: const Color.fromRGBO(252, 228, 236, 1),
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
@@ -538,7 +537,8 @@ class _CameraScreenState extends State<CameraScreen>
             bottom: 20,
             left: 20,
             child: IconButton(
-              icon: Icon(Icons.switch_camera, color: const Color.fromRGBO(136, 14, 79, 1), size: 30),
+              icon: Icon(Icons.switch_camera,
+                  color: const Color.fromRGBO(136, 14, 79, 1), size: 30),
               onPressed: _switchCamera,
             ),
           ),
@@ -579,7 +579,8 @@ class _CameraScreenState extends State<CameraScreen>
             bottom: 20,
             right: 20,
             child: IconButton(
-              icon: Icon(Icons.photo, color: Color.fromRGBO(136, 14, 79, 1), size: 30),
+              icon: Icon(Icons.photo,
+                  color: Color.fromRGBO(136, 14, 79, 1), size: 30),
               onPressed: _openGallery,
             ),
           ),

@@ -42,6 +42,7 @@ class SkincareRoutine {
   });
   Map<String, dynamic> toMap() {
     return {
+      'id': id,
       'userId': userId,
       'avatarUrl': avatarUrl,
       'category': category,
