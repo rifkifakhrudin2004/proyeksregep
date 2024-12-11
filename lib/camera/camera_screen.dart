@@ -26,6 +26,7 @@ class _CameraScreenState extends State<CameraScreen>
   XFile? imageFile;
   bool isDetectingFaces = false;
   bool isFaceDetected = false;
+  bool _showMultipleFacesWarning = false;
   String? predictedClass;
   String? persentase;
 
@@ -47,21 +48,33 @@ class _CameraScreenState extends State<CameraScreen>
     _initializeCamera();
   }
 
-  Future<void> _initializeCamera() async {
-    try {
-      cameras = await availableCameras();
-      _controller = CameraController(
-        cameras![isFrontCamera ? 1 : 0],
-        ResolutionPreset.ultraHigh,
-        imageFormatGroup: ImageFormatGroup.bgra8888,
-        enableAudio: false,
-      );
+ Future<void> _initializeCamera() async {
+  try {
+    cameras = await availableCameras();
+    
+    // Validate camera list
+    if (cameras == null || cameras!.isEmpty) {
+      _showAlertDialog('Camera Error', 'No cameras available');
+      return;
+    }
 
-      // Tunggu hingga kamera berhasil diinisialisasi
-      await _controller?.initialize();
-      if (!mounted) return;
+    // Safely select camera index
+    int cameraIndex = isFrontCamera 
+        ? (cameras!.length > 1 ? 1 : 0) 
+        : 0;
 
-      // Mulai streaming gambar untuk deteksi wajah
+    _controller = CameraController(
+      cameras![cameraIndex],
+      ResolutionPreset.veryHigh,
+      imageFormatGroup: ImageFormatGroup.bgra8888,
+      enableAudio: false,
+    );
+
+    await _controller?.initialize();
+    
+    if (!mounted) return;
+
+    if (_controller != null) {
       _controller?.startImageStream((CameraImage image) async {
         if (!isDetectingFaces) {
           isDetectingFaces = true;
@@ -69,58 +82,119 @@ class _CameraScreenState extends State<CameraScreen>
           isDetectingFaces = false;
         }
       });
-
-      setState(() {}); // Memperbarui UI setelah kamera siap
-    } catch (e) {
-      print('Error initializing camera: $e');
     }
+
+    setState(() {}); // Update UI
+  } catch (e) {
+    print('Comprehensive camera initialization error: $e');
+    _showAlertDialog('Camera Initialization Error', 
+      'Failed to initialize camera. Please check permissions and try again.');
   }
+}
 
   void _switchCamera() async {
-    // Pastikan tidak ada proses di _controller yang masih berjalan
+  try {
+    // Safely stop image stream if it's active
+    if (_controller != null && _controller!.value.isStreamingImages) {
+      await _controller?.stopImageStream();
+    }
+
+    // Add a small delay to ensure stream is completely stopped
+    await Future.delayed(Duration(milliseconds: 200));
+
+    // Dispose controller safely with null check
     if (_controller != null) {
       await _controller?.dispose();
-      _controller = null;
     }
 
     setState(() {
-      // Ganti kamera
+      // Toggle camera
       isFrontCamera = !isFrontCamera;
       faces = []; // Reset detected faces
-      isFaceDetected = false; // Reset face detection status
+      isFaceDetected = false;
+      _showMultipleFacesWarning = false;
+      _controller = null;
     });
 
-    // Tutup dan buat ulang layanan deteksi wajah
+    // Close previous face detection service
     _faceDetectorService.close();
+
+    // Recreate face detection service
     _faceDetectorService = FaceDetectorService(isFrontCamera: isFrontCamera);
 
-    // Inisialisasi ulang kamera
+    // Reinitialize camera
+    await _initializeCamera();
+  } catch (e) {
+    print('Comprehensive error during camera switch: $e');
+    _showAlertDialog('Camera Switch Error', 
+      'Failed to switch camera. Please try again or restart the app.');
+    
+    // Optional: Reset to a known good state
+    setState(() {
+      _controller = null;
+      isFrontCamera = !isFrontCamera; // Toggle back
+    });
+    
+    // Attempt to reinitialize
     await _initializeCamera();
   }
+}
 
   Future<void> _processCameraImage(CameraImage image) async {
     try {
       final List<Face> detectedFaces =
           await _faceDetectorService.detectFaces(image);
+
       if (mounted) {
         setState(() {
           faces = detectedFaces;
-          // Update face detection status based on current camera and detection quality
+
+          // Update face detection logic
           if (isFrontCamera) {
-            // Untuk kamera depan, cek apakah ada wajah yang terdeteksi
-            isFaceDetected = detectedFaces.isNotEmpty;
+            // Tetap lakukan deteksi wajah tanpa menghentikan kamera
+            _showMultipleFacesWarning = (detectedFaces.length > 1);
+            isFaceDetected = detectedFaces.length == 1;
           } else {
-            // Untuk kamera belakang, tambahan validasi kualitas deteksi
-            isFaceDetected = detectedFaces
-                .any((face) => _faceDetectorService.isGoodDetection(face));
+            // Untuk kamera belakang, tambahkan validasi kualitas deteksi
+            _showMultipleFacesWarning = (detectedFaces.length > 1);
+            isFaceDetected = detectedFaces.length == 1 &&
+                detectedFaces
+                    .any((face) => _faceDetectorService.isGoodDetection(face));
           }
         });
       }
     } catch (e) {
       print('Error processing image: $e');
-      setState(() {
-        isFaceDetected = false; // Reset ke false jika terjadi error
-      });
+      if (mounted) {
+        setState(() {
+          isFaceDetected = false;
+          _showMultipleFacesWarning = false;
+        });
+      }
+    }
+  }
+
+// Tambahkan method baru untuk menampilkan alert
+  void _showMultipleFacesAlert() {
+    // Pastikan tidak menampilkan alert berulang kali
+    if (mounted) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Peringatan'),
+            content: Text('Terdeteksi 2 wajah dalam kamera'),
+            actions: <Widget>[
+              TextButton(
+                child: Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
     }
   }
 
@@ -464,12 +538,14 @@ class _CameraScreenState extends State<CameraScreen>
               height: 300,
               decoration: BoxDecoration(
                 color: Colors.transparent,
-                shape: BoxShape.rectangle, // Change the shape to rectangle
+                shape: BoxShape.rectangle,
                 border: Border.all(
-                  color: isFaceDetected ? Colors.green : Colors.redAccent,
+                  color: _showMultipleFacesWarning
+                      ? Colors.yellow
+                      : (isFaceDetected ? Colors.green : Colors.redAccent),
                   width: 2,
                 ),
-                borderRadius: BorderRadius.circular(15), // Use a smaller radius
+                borderRadius: BorderRadius.circular(15),
               ),
             ),
           ),
@@ -483,15 +559,79 @@ class _CameraScreenState extends State<CameraScreen>
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
-                  color: isFaceDetected ? Colors.green : Colors.redAccent,
+                  color: _showMultipleFacesWarning
+                      ? Colors.yellow
+                      : (isFaceDetected ? Colors.green : Colors.redAccent),
                   borderRadius: BorderRadius.circular(30),
                 ),
                 child: Text(
-                  isFaceDetected ? "Wajah Terdeteksi" : "Posisikan Wajah Anda",
+                  _showMultipleFacesWarning
+                      ? "Terdeteksi Lebih dari 1 Wajah"
+                      : (isFaceDetected
+                          ? "Wajah Terdeteksi"
+                          : "Posisikan Wajah Anda"),
                   style: TextStyle(
-                    color: Colors.white,
+                    color:
+                        _showMultipleFacesWarning ? Colors.black : Colors.white,
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+// Update center rectangle
+          Center(
+            child: Container(
+              width: 250,
+              height: 300,
+              decoration: BoxDecoration(
+                color: Colors.transparent,
+                shape: BoxShape.rectangle,
+                border: Border.all(
+                  color: _showMultipleFacesWarning
+                      ? Colors.yellow
+                      : (isFaceDetected ? Colors.green : Colors.redAccent),
+                  width: 2,
+                ),
+                borderRadius: BorderRadius.circular(15),
+              ),
+            ),
+          ),
+
+// Tombol capture
+          Positioned(
+            bottom: 20,
+            left: MediaQuery.of(context).size.width / 2 - 40,
+            child: ScaleTransition(
+              scale: _animation,
+              child: GestureDetector(
+                onTapDown: (_) {
+                  _animationController.forward();
+                },
+                onTapUp: (_) async {
+                  _animationController.reverse();
+                  // Hanya izinkan capture jika hanya 1 wajah yang terdeteksi
+                  if (isFaceDetected && !_showMultipleFacesWarning) {
+                    await _captureImage();
+                  }
+                },
+                child: ElevatedButton(
+                  onPressed: null,
+                  style: ElevatedButton.styleFrom(
+                    shape: CircleBorder(),
+                    padding: EdgeInsets.all(20),
+                    // Nonaktifkan tombol jika lebih dari 1 wajah
+                    backgroundColor:
+                        (isFaceDetected && !_showMultipleFacesWarning)
+                            ? Colors.blue
+                            : Colors.grey,
+                  ),
+                  child: Icon(
+                    Icons.camera_alt,
+                    color: Color.fromRGBO(136, 14, 79, 1),
+                    size: 35,
                   ),
                 ),
               ),
