@@ -100,22 +100,22 @@ class _HomePageState extends State<HomePage> {
       articles = [
         Article(
           title: 'Artikel 1',
-          imageUrl: 'assets/PenyebabKeriput.png',
+          imageUrl: 'assets/TipsMerawatKulit.png',
           content: 'Konten artikel 2',
         ),
         Article(
           title: 'Artikel 2',
-          imageUrl: 'assets/JenisKeriput.png',
+          imageUrl: 'assets/manfaatKulit.png',
           content: 'Konten artikel 3',
         ),
         Article(
           title: 'Artikel 3',
-          imageUrl: 'assets/CegahKeriput.png',
+          imageUrl: 'assets/TipeKulit.png',
           content: 'Konten artikel 4',
         ),
         Article(
           title: 'Artikel 4',
-          imageUrl: 'assets/perawatanKeriput.png',
+          imageUrl: 'assets/JenisSkincare.png',
           content: 'Konten artikel 5',
         ),
       ];
@@ -483,7 +483,8 @@ class _HomePageState extends State<HomePage> {
             child: Container(
               width: double.infinity, // Menjadikan lebar penuh
               decoration: BoxDecoration(
-                color: const Color.fromRGBO(255, 255, 255, 1), // Warna background (opsional)
+                color: const Color.fromRGBO(
+                    255, 255, 255, 1), // Warna background (opsional)
                 borderRadius:
                     BorderRadius.circular(12), // Sudut melengkung (opsional)
               ),
