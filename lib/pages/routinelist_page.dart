@@ -75,7 +75,7 @@ class _SkincareRoutineListPageState extends State<SkincareRoutineListPage> {
     'Eye Cream': 'assets/eye_cream.png',
     'Face Oil': 'assets/face_oil.png',
     'Spot Treatment': 'assets/spot_treatment.png',
-    'Lip Care': 'assets/lip_care.png',
+    // 'Lip Care': 'assets/lip_care.png',
     'Neck Cream': 'assets/neck_cream.png',
     'Toning Mist': 'assets/toning_mist.png',
   };
