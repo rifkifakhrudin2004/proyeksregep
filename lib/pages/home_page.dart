@@ -238,7 +238,7 @@ class _HomePageState extends State<HomePage> {
                                   return Dialog(
                                     backgroundColor: Colors.transparent,
                                     child: GestureDetector(
-                                      onTap: () => Navigator.pop(context),
+                                      onTap: () => Navigator.of(context).pop(),
                                       child: Container(
                                         width: double.infinity,
                                         height: double.infinity,
