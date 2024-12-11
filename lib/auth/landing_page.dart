@@ -117,7 +117,7 @@ class _LandingPageState extends State<LandingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromRGBO(248, 187, 208, 1),
+      backgroundColor: const Color.fromRGBO(252, 228, 236, 1),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -142,7 +142,7 @@ class _LandingPageState extends State<LandingPage> {
                     "Skinalyze",
                     style: GoogleFonts.montserrat(
                       textStyle: TextStyle(
-                          color: Colors.white,
+                          color: Color.fromRGBO(136, 14, 79, 1),
                           fontSize: 25,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 2),
@@ -230,7 +230,7 @@ class _LandingPageState extends State<LandingPage> {
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor:
-                                const Color.fromRGBO(216, 27, 96, 1),
+                                Color.fromRGBO(136, 14, 79, 1),
                             padding: EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
