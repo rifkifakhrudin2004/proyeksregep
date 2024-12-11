@@ -79,10 +79,10 @@ flutter:
   assets:
     - assets/logo.jpg
     - assets/Olivia.png
-    - assets/PenyebabKeriput.png
-    - assets/JenisKeriput.png
-    - assets/CegahKeriput.png
-    - assets/perawatanKeriput.png
+    - assets/TipsMerawatKulit.png
+    - assets/manfaatKulit.png
+    - assets/TipeKulit.png
+    - assets/JenisSkincare.png
     - assets/Teamsregep.png
     - assets/panduan.png
     - assets/cleansing.png
