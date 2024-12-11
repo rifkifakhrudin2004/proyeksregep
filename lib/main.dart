@@ -64,14 +64,14 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromRGBO(248, 187, 208, 1), 
+      backgroundColor: const Color.fromRGBO(255, 255, 255, 1), 
       body: Center(
         child: AnimatedOpacity(
           opacity: _opacity,
           duration: Duration(seconds: 2), // Durasi animasi fade-in
           child: ClipOval(
             child: Image.asset(
-              'assets/Olivia.png',
+              'assets/login.jpg',
               width: 150,
               height: 150,
               fit: BoxFit.cover, // Agar gambar memenuhi bentuk bulat

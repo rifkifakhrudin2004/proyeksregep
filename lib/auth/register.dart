@@ -113,17 +113,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final specificColor = const Color.fromRGBO(216, 27, 96, 1);
+   final specificColor = const Color.fromRGBO(252, 228, 236, 1);
 
     return Scaffold(
       body: Container(
         width: double.infinity,
         decoration: BoxDecoration(
-            gradient: LinearGradient(begin: Alignment.topCenter, colors: [
-          specificColor.withOpacity(0.9),
-          specificColor.withOpacity(0.7),
-          specificColor.withOpacity(0.5)
-        ])),
+          color: specificColor,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
@@ -140,7 +137,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         "Register",
                         style: GoogleFonts.montserrat(
                           textStyle: TextStyle(
-                            color: Colors.white, 
+                            color: const Color.fromRGBO(136, 14, 79, 1), 
                             fontSize: 40,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 2
@@ -154,7 +151,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         "Create Your Account",
                         style: GoogleFonts.lato(
                           textStyle: TextStyle(
-                            color: Colors.white, 
+                            color: const Color.fromRGBO(136, 14, 79, 1), 
                             fontSize: 18,
                             fontWeight: FontWeight.normal,
                             letterSpacing: 1.5,
@@ -182,7 +179,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             duration: Duration(milliseconds: 1400),
                             child: Container(
                               decoration: BoxDecoration(
-                                  color: Colors.white,
+                                  color: const Color.fromRGBO(255, 255, 255, 1),
                                   borderRadius: BorderRadius.circular(10),
                                   boxShadow: [
                                     BoxShadow(
@@ -230,7 +227,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                             _obscurePassword
                                                 ? Icons.visibility_off
                                                 : Icons.visibility,
-                                            color: const Color.fromRGBO(216, 27, 96, 1),
+                                            color: const Color.fromRGBO(136, 14, 79, 1),
                                           ),
                                           onPressed: () {
                                             setState(() {
@@ -258,7 +255,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                             _obscureConfirmPassword
                                                 ? Icons.visibility_off
                                                 : Icons.visibility,
-                                            color: const Color.fromRGBO(216, 27, 96, 1),
+                                            color: const Color.fromRGBO(136, 14, 79, 1),
                                           ),
                                           onPressed: () {
                                             setState(() {
@@ -285,7 +282,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               margin: EdgeInsets.symmetric(horizontal: 50),
                               decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(50),
-                                  color: const Color.fromRGBO(216, 27, 96, 1)),
+                                  color: const Color.fromRGBO(136, 14, 79, 1)),
                               child: Center(
                                 child: Text(
                                   "Sign Up",
