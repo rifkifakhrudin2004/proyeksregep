@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:proyeksregep/pages/home_page.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:animate_do/animate_do.dart';
 
 class LandingPage extends StatefulWidget {
   @override
@@ -14,6 +15,7 @@ class _LandingPageState extends State<LandingPage> {
   final TextEditingController passwordController = TextEditingController();
 
   bool _obscurePassword = true;
+  bool _isLoading = false;
 
   Future<void> _login(BuildContext context) async {
     if (emailController.text.isEmpty || passwordController.text.isEmpty) {
@@ -28,6 +30,10 @@ class _LandingPageState extends State<LandingPage> {
       return;
     }
 
+    setState(() {
+      _isLoading = true;
+    });
+
     try {
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: emailController.text,
@@ -39,19 +45,18 @@ class _LandingPageState extends State<LandingPage> {
         PageRouteBuilder(
           pageBuilder: (context, animation, secondaryAnimation) => HomePage(),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            const begin = Offset(1.0, 0.0);
-            const end = Offset.zero;
-            const curve = Curves.easeInOut;
-
-            var tween =
-                Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-            var offsetAnimation = animation.drive(tween);
-
             return SlideTransition(
-              position: offsetAnimation,
+              position: Tween<Offset>(
+                begin: Offset(1.0, 0.0),
+                end: Offset.zero,
+              ).animate(CurvedAnimation(
+                parent: animation,
+                curve: Curves.easeInOutQuart,
+              )),
               child: child,
             );
           },
+          transitionDuration: Duration(milliseconds: 800),
         ),
       );
     } catch (e) {
@@ -64,229 +69,226 @@ class _LandingPageState extends State<LandingPage> {
         btnOkOnPress: () {},
         btnOkColor: Colors.red,
       ).show();
-    }
-  }
-
-  Future<void> _resetPassword(BuildContext context) async {
-    if (emailController.text.isEmpty) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text("Error"),
-          content: Text("Please enter your email address."),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text("OK"),
-            ),
-          ],
-        ),
-      );
-      return;
-    }
-
-    try {
-      await FirebaseAuth.instance
-          .sendPasswordResetEmail(email: emailController.text);
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text("Success"),
-          content: Text("Password reset email sent! Please check your inbox."),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text("OK"),
-            ),
-          ],
-        ),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content:
-                Text('Failed to send password reset email: ${e.toString()}')),
-      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromRGBO(252, 228, 236, 1),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(height: 40),
-                Center(
-                  child: ClipOval(
-                    child: Image.asset(
-                      'assets/Olivia.png',
-                      height: 185,
-                      width: 185,
-                      fit: BoxFit.cover,
-                    ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color.fromRGBO(248, 187, 208, 1),
+              Color.fromRGBO(255, 205, 210, 1),
+            ],
+          ),
+        ),
+        child: Stack(
+          children: [
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: Container(
+                height: MediaQuery.of(context).size.height / 2.2,
+                decoration: BoxDecoration(
+                  color: const Color.fromRGBO(252, 228, 236, 1),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(65),
+                    topRight: Radius.circular(65),
                   ),
                 ),
-                SizedBox(height: 24),
-                Center(
-                  child: Text(
-                    "Skinalyze",
-                    style: GoogleFonts.montserrat(
-                      textStyle: TextStyle(
-                          color: Color.fromRGBO(136, 14, 79, 1),
-                          fontSize: 25,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 2),
-                    ),
-                  ),
-                ),
-                SizedBox(height: 32),
-                Container(
-                  padding: EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Colors.white, Colors.grey.shade200],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.shade300,
-                        blurRadius: 12,
-                        offset: Offset(0, 6),
+                child: FadeInDown(
+                  duration: Duration(milliseconds: 800),
+                  child: Hero(
+                    tag: 'logo',
+                    child: Container(
+                      width: double.infinity,
+                      height: double.infinity,
+                      decoration: BoxDecoration(
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black26,
+                            blurRadius: 20,
+                            offset: Offset(0, 15),
+                          ),
+                        ],
                       ),
-                    ],
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(30),
+                        child: Image.asset(
+                          'assets/login.jpg',
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
                   ),
+                ),
+              ),
+            ),
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Container(
+                height: MediaQuery.of(context).size.height / 1.7,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(50),
+                    topRight: Radius.circular(50),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.shade300,
+                      blurRadius: 30,
+                      offset: Offset(0, -10),
+                    ),
+                  ],
+                ),
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.symmetric(horizontal: 32, vertical: 24),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      TextField(
-                        controller: emailController,
-                        decoration: InputDecoration(
-                          hintText: "Email/Username",
-                          hintStyle: TextStyle(
-                            color: const Color.fromRGBO(136, 14, 79,
-                                1), // Ganti dengan warna yang Anda inginkan
-                          ),
-                          prefixIcon: Icon(Icons.email_outlined,
-                              color: const Color.fromRGBO(136, 14, 79, 1)),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: Colors.grey.shade300),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: Colors.grey.shade300),
+                      FadeInLeft(
+                        child: Text(
+                          "Welcome Back",
+                          style: GoogleFonts.montserrat(
+                            textStyle: TextStyle(
+                              color: const Color.fromRGBO(136, 14, 79, 1),
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
-                      SizedBox(height: 12),
-                      TextField(
-                        controller: passwordController,
-                        obscureText: _obscurePassword,
-                        decoration: InputDecoration(
-                          hintText: "Password",
-                          hintStyle: TextStyle(
-                            color: const Color.fromRGBO(136, 14, 79, 1), // Ganti dengan warna yang Anda inginkan
+                      SizedBox(height: 8),
+                      FadeInLeft(
+                        delay: Duration(milliseconds: 200),
+                        child: Text(
+                          "Sign in to continue",
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 18,
                           ),
-                          prefixIcon: Icon(Icons.lock_outline,
-                              color: const Color.fromRGBO(136, 14, 79, 1)),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _obscurePassword
-                                  ? Icons.visibility_off
-                                  : Icons.visibility,
+                        ),
+                      ),
+                      SizedBox(height: 24),
+                      FadeInUp(
+                        child: TextField(
+                          controller: emailController,
+                          decoration: InputDecoration(
+                            labelText: "Email/Username",
+                            prefixIcon: Icon(
+                              Icons.email_outlined,
                               color: const Color.fromRGBO(136, 14, 79, 1),
                             ),
-                            onPressed: () {
-                              setState(() {
-                                _obscurePassword = !_obscurePassword;
-                              });
-                            },
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: Colors.grey.shade300),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: Colors.grey.shade300),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
                         ),
                       ),
                       SizedBox(height: 16),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                Color.fromRGBO(136, 14, 79, 1),
-                            padding: EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(
+                      FadeInUp(
+                        delay: Duration(milliseconds: 200),
+                        child: TextField(
+                          controller: passwordController,
+                          obscureText: _obscurePassword,
+                          decoration: InputDecoration(
+                            labelText: "Password",
+                            prefixIcon: Icon(
+                              Icons.lock_outline,
+                              color: const Color.fromRGBO(136, 14, 79, 1),
+                            ),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscurePassword
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                                color: const Color.fromRGBO(136, 14, 79, 1),
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _obscurePassword = !_obscurePassword;
+                                });
+                              },
+                            ),
+                            border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          onPressed: () => _login(context),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                "sign up",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.normal,
-                                  color: const Color.fromRGBO(255, 255, 255, 1),
-                                  letterSpacing: 1
-                                ),
+                        ),
+                      ),
+                      SizedBox(height: 24),
+                      FadeInUp(
+                        delay: Duration(milliseconds: 400),
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color.fromRGBO(136, 14, 79, 1),
+                              padding: EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
                               ),
-                              SizedBox(width: 6),
-                              Icon(Icons.arrow_forward, color: Colors.white),
-                            ],
+                            ),
+                            onPressed: _isLoading ? null : () => _login(context),
+                            child: _isLoading
+                                ? CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                  )
+                                : Text(
+                                    "Login",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                      letterSpacing: 1,
+                                    ),
+                                  ),
                           ),
                         ),
                       ),
-                      SizedBox(height: 18),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            "Don't have an account?",
-                            style: TextStyle(
-                              color: Colors.grey[600],
-                              fontSize: 14,
+                      SizedBox(height: 24),
+                      FadeInUp(
+                        delay: Duration(milliseconds: 600),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "Don't have an account?",
+                              style: TextStyle(color: Colors.grey[600]),
                             ),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.pushNamed(context, '/register');
-                            },
-                            child: Text(
-                              "Sign up",
-                              style: TextStyle(
-                                color: const Color.fromRGBO(136, 14, 79, 1),
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pushNamed(context, '/register');
+                              },
+                              child: Text(
+                                "Sign up",
+                                style: TextStyle(
+                                  color: const Color.fromRGBO(136, 14, 79, 1),
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ],
                   ),
                 ),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
