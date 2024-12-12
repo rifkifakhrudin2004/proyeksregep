@@ -32,19 +32,18 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
 
   // Map of category to predefined avatar images
   final Map<String, String> _categoryAvatars = {
-    'Cleansing': 'assets/cleansing.png',
-    'Toner': 'assets/toner.png',
-    'Exfoliator': 'assets/exfoliator.png',
-    'Serum': 'assets/serum.png',
-    'Moisturizer': 'assets/moisturizer.png',
-    'Sunscreen': 'assets/sunscreen.png',
-    'Face Mask': 'assets/face_mask.png',
-    'Eye Cream': 'assets/eye_cream.png',
-    'Face Oil': 'assets/face_oil.png',
-    'Spot Treatment': 'assets/spot_treatment.png',
-    // 'Lip Care': 'assets/lip_care.png',
-    'Neck Cream': 'assets/neck_cream.png',
-    'Toning Mist': 'assets/toning_mist.png',
+    'Cleansing': 'assets/cleansing.jpg',
+    'Toner': 'assets/toner.jpg',
+    'Exfoliator': 'assets/exfoliator.jpg',
+    'Serum': 'assets/serum.jpg',
+    'Moisturizer': 'assets/moisturizer.jpg',
+    'Sunscreen': 'assets/sunscreen.jpg',
+    'Face Mask': 'assets/face mask.jpg',
+    'Eye Cream': 'assets/eye cream.jpg',
+    'Face Oil': 'assets/face oil.jpg',
+    'Spot Treatment': 'assets/spot treatment.jpg',
+    'Neck Cream': 'assets/neck cream.jpg',
+    'Toning Mist': 'assets/toning mist.jpg',
   };
 
   final List<String> _categories = [
@@ -58,7 +57,6 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
     'Eye Cream',
     'Face Oil',
     'Spot Treatment',
-    // 'Lip Care',
     'Neck Cream',
     'Toning Mist',
   ];

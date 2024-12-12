@@ -37,19 +37,19 @@ class _HomePageState extends State<HomePage> {
   }
 
   final Map<String, String> _categoryAvatars = {
-    'Cleansing': 'assets/cleansing.png',
-    'Toner': 'assets/toner.png',
-    'Exfoliator': 'assets/exfoliator.png',
-    'Serum': 'assets/serum.png',
-    'Moisturizer': 'assets/moisturizer.png',
-    'Sunscreen': 'assets/sunscreen.png',
-    'Face Mask': 'assets/face_mask.png',
-    'Eye Cream': 'assets/eye_cream.png',
-    'Face Oil': 'assets/face_oil.png',
-    'Spot Treatment': 'assets/spot_treatment.png',
+    'Cleansing': 'assets/cleansing.jpg',
+    'Toner': 'assets/toner.jpg',
+    'Exfoliator': 'assets/exfoliator.jpg',
+    'Serum': 'assets/serum.jpg',
+    'Moisturizer': 'assets/moisturizer.jpg',
+    'Sunscreen': 'assets/sunscreen.jpg',
+    'Face Mask': 'assets/face mask.jpg',
+    'Eye Cream': 'assets/eye cream.jpg',
+    'Face Oil': 'assets/face oil.jpg',
+    'Spot Treatment': 'assets/spot treatment.jpg',
     // 'Lip Care': 'assets/lip_care.png',
-    'Neck Cream': 'assets/neck_cream.png',
-    'Toning Mist': 'assets/toning_mist.png',
+    'Neck Cream': 'assets/neck cream.jpg',
+    'Toning Mist': 'assets/toning mist.jpg',
   };
 
   Future<void> _fetchRoutines() {
