@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:proyeksregep/models/article.dart';
-import 'profile_page.dart';
-import 'package:proyeksregep/widgets/article_widget.dart';
-import 'storage_page.dart';
 import 'package:proyeksregep/models/skincare_model.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:proyeksregep/widgets/custom_bottom_navigation.dart';
+import 'package:proyeksregep/services/article_service.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -21,7 +20,8 @@ class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
   final PageController _pageController = PageController();
   List<Article> articles = [];
-  bool isLoading = true;
+  final ArticleService _articleService = ArticleService();
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -96,30 +96,20 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _fetchArticles() async {
-    setState(() {
-      articles = [
-        Article(
-          title: 'Artikel 1',
-          imageUrl: 'assets/TipsMerawatKulit.png',
-          content: 'Konten artikel 2',
-        ),
-        Article(
-          title: 'Artikel 2',
-          imageUrl: 'assets/manfaatKulit.png',
-          content: 'Konten artikel 3',
-        ),
-        Article(
-          title: 'Artikel 3',
-          imageUrl: 'assets/TipeKulit.png',
-          content: 'Konten artikel 4',
-        ),
-        Article(
-          title: 'Artikel 4',
-          imageUrl: 'assets/JenisSkincare.png',
-          content: 'Konten artikel 5',
-        ),
-      ];
-    });
+    try {
+      final fetchedArticles = await _articleService.fetchArticles();
+      setState(() {
+        articles = fetchedArticles;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to load articles: $e')),
+      );
+    }
   }
 
   void _showCameraGuide() {
@@ -187,279 +177,293 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    var screenWidth = MediaQuery.of(context).size.width;
+ @override
+Widget build(BuildContext context) {
+  double screenWidth = MediaQuery.of(context).size.width; // Define screenWidth
 
-    return Scaffold(
-      backgroundColor: const Color.fromRGBO(252, 255, 255, 1),
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(90),
-        child: AppBar(
-          automaticallyImplyLeading: false,
-          backgroundColor: const Color.fromRGBO(252, 228, 236, 1),
-          elevation: 0,
-          flexibleSpace: StreamBuilder<DocumentSnapshot>(
-            stream: FirebaseFirestore.instance
-                .collection('profiles')
-                .doc(FirebaseAuth.instance.currentUser?.uid)
-                .snapshots(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(child: CircularProgressIndicator());
+  return Scaffold(
+    backgroundColor: const Color.fromRGBO(252, 255, 255, 1),
+    appBar: PreferredSize(
+      preferredSize: Size.fromHeight(90),
+      child: AppBar(
+        automaticallyImplyLeading: false,
+        backgroundColor: const Color.fromRGBO(252, 228, 236, 1),
+        elevation: 0,
+        flexibleSpace: StreamBuilder<DocumentSnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection('profiles')
+              .doc(FirebaseAuth.instance.currentUser?.uid)
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            }
+            if (snapshot.hasData && snapshot.data != null) {
+              Map<String, dynamic>? data =
+                  snapshot.data!.data() as Map<String, dynamic>?;
+              userName = data != null && data.containsKey('name')
+                  ? data['name']
+                  : null;
+              List<dynamic> photoUrls =
+                  data != null && data.containsKey('photoUrl')
+                      ? data['photoUrl']
+                      : [];
+              if (photoUrls.isNotEmpty) {
+                lastPhotoUrl = photoUrls.last;
               }
-              if (snapshot.hasData && snapshot.data != null) {
-                Map<String, dynamic>? data =
-                    snapshot.data!.data() as Map<String, dynamic>?;
-                userName = data != null && data.containsKey('name')
-                    ? data['name']
-                    : null;
-                List<dynamic> photoUrls =
-                    data != null && data.containsKey('photoUrl')
-                        ? data['photoUrl']
-                        : [];
-                if (photoUrls.isNotEmpty) {
-                  lastPhotoUrl = photoUrls.last;
-                }
 
-                return Align(
-                  alignment: Alignment.bottomLeft,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16.0, 40.0, 8.0, 9.0),
-                    child: Row(
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            if (lastPhotoUrl != null) {
-                              showDialog(
-                                context: context,
-                                barrierDismissible: true,
-                                builder: (BuildContext context) {
-                                  return Dialog(
-                                    backgroundColor: Colors.transparent,
-                                    child: GestureDetector(
-                                      onTap: () => Navigator.of(context).pop(),
-                                      child: Container(
-                                        width: double.infinity,
-                                        height: double.infinity,
-                                        alignment: Alignment.center,
-                                        child: Container(
-                                          width: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              0.8,
-                                          height: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              0.8,
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            image: DecorationImage(
-                                              image:
-                                                  NetworkImage(lastPhotoUrl!),
-                                              fit: BoxFit.cover,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              );
-                            }
-                          },
-                          child: lastPhotoUrl != null
-                              ? CircleAvatar(
-                                  radius: 40,
-                                  backgroundImage: NetworkImage(lastPhotoUrl!),
-                                  foregroundColor: Colors.transparent,
-                                )
-                              : CircleAvatar(
-                                  radius: 40,
-                                  backgroundColor:
-                                      const Color.fromRGBO(136, 14, 79, 1),
-                                  child: Icon(Icons.person,
-                                      size: 40,
-                                      color: const Color.fromRGBO(
-                                          252, 228, 236, 1)),
-                                ),
-                        ),
-                        SizedBox(width: 10),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.only(top: 8.0),
-                              child: Text(
-                                userName != null && userName!.isNotEmpty
-                                    ? 'Halo, $userName!'
-                                    : 'Halo!',
-                                style: TextStyle(
-                                  fontSize: screenWidth * 0.05,
-                                  fontWeight: FontWeight.bold,
-                                  color: const Color.fromRGBO(136, 14, 79, 1),
-                                ),
-                              ),
-                            ),
-                            SizedBox(height: 4),
-                            Text(
-                              'Sudah cek kulitmu hari ini?',
-                              style: TextStyle(
-                                fontSize: screenWidth * 0.035,
-                                color: const Color.fromRGBO(136, 14, 79, 1),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              }
-              return Container();
-            },
-          ),
-        ),
-      ),
-      body: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Bagian Rutinitas
-          Expanded(
-            flex: 1,
-            child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(
-                      height: 15), // Menambahkan jarak vertikal sebelum teks
-                  Text(
-                    'Rutinitas Harian',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color: Color.fromRGBO(136, 14, 79, 1),
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  if (routines.isNotEmpty)
-                    Expanded(
-                      child: Stack(
-                        children: [
-                          PageView.builder(
-                            controller: _pageController,
-                            itemCount: routines.length,
-                            itemBuilder: (context, index) {
-                              return AnimatedContainer(
-                                duration: Duration(milliseconds: 300),
-                                curve: Curves.easeInOut,
-                                margin: EdgeInsets.symmetric(horizontal: 2),
-                                child: _buildRoutineCard(routines[index]),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    )
-                  else
-                    Expanded(
-                      child: _buildEmptyState(),
-                    ),
-                ],
-              ),
-            ),
-          ),
-
-          // Bagian Artikel
-          Expanded(
-            flex: 1,
-            child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Artikel Skincare',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color: Color.fromRGBO(136, 14, 79, 1),
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  Expanded(
-                    child: GridView.builder(
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 12,
-                        mainAxisSpacing: 12,
-                        childAspectRatio: 0.75,
-                      ),
-                      itemCount: articles.length,
-                      itemBuilder: (context, index) {
-                        return GestureDetector(
-                          onTap: () {
+              return Align(
+                alignment: Alignment.bottomLeft,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16.0, 40.0, 8.0, 9.0),
+                  child: Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          if (lastPhotoUrl != null) {
                             showDialog(
                               context: context,
+                              barrierDismissible: true,
                               builder: (BuildContext context) {
                                 return Dialog(
                                   backgroundColor: Colors.transparent,
-                                  child: InteractiveViewer(
-                                    child: Center(
-                                      child: Image.asset(
-                                        articles[index].imageUrl,
-                                        fit: BoxFit.contain,
-                                        height:
-                                            MediaQuery.of(context).size.height *
-                                                0.8,
+                                  child: GestureDetector(
+                                    onTap: () => Navigator.of(context).pop(),
+                                    child: Container(
+                                      width: double.infinity,
+                                      height: double.infinity,
+                                      alignment: Alignment.center,
+                                      child: Container(
+                                        width: MediaQuery.of(context)
+                                                .size
+                                                .width *
+                                            0.8,
+                                        height: MediaQuery.of(context)
+                                                .size
+                                                .width *
+                                            0.8,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          image: DecorationImage(
+                                            image: NetworkImage(lastPhotoUrl!),
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
                                       ),
                                     ),
                                   ),
                                 );
                               },
                             );
-                          },
-                          child: Card(
-                            elevation: 6,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15),
-                            ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(15),
-                              child: Image.asset(
-                                articles[index].imageUrl,
-                                height: 120,
-                                width: double.infinity,
-                                fit: BoxFit.cover,
+                          }
+                        },
+                        child: lastPhotoUrl != null
+                            ? CircleAvatar(
+                                radius: 40,
+                                backgroundImage: NetworkImage(lastPhotoUrl!),
+                                foregroundColor: Colors.transparent,
+                              )
+                            : CircleAvatar(
+                                radius: 40,
+                                backgroundColor:
+                                    const Color.fromRGBO(136, 14, 79, 1),
+                                child: Icon(Icons.person,
+                                    size: 40,
+                                    color: const Color.fromRGBO(
+                                        252, 228, 236, 1)),
+                              ),
+                      ),
+                      SizedBox(width: 10),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: Text(
+                              userName != null && userName!.isNotEmpty
+                                  ? 'Halo, $userName!'
+                                  : 'Halo!',
+                              style: TextStyle(
+                                fontSize: screenWidth * 0.05,
+                                fontWeight: FontWeight.bold,
+                                color: const Color.fromRGBO(136, 14, 79, 1),
                               ),
                             ),
                           ),
-                        );
-                      },
-                    ),
+                          SizedBox(height: 4),
+                          Text(
+                            'Sudah cek kulitmu hari ini?',
+                            style: TextStyle(
+                              fontSize: screenWidth * 0.035,
+                              color: const Color.fromRGBO(136, 14, 79, 1),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 2.0),
-        child: FloatingActionButton(
-          onPressed: _showCameraGuide,
-          backgroundColor: const Color.fromRGBO(136, 14, 79, 1),
-          child: Icon(Icons.camera_alt, color: Colors.white, size: 28),
+                ),
+              );
+            }
+            return Container();
+          },
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: CustomBottomNavigation(initialIndex: 0),
-    );
-  }
+    ),
+    body: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Bagian Rutinitas
+        Expanded(
+          flex: 1,
+          child: Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                    height: 15), // Menambahkan jarak vertikal sebelum teks
+                Text(
+                  'Rutinitas Harian',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: Color.fromRGBO(136, 14, 79, 1),
+                  ),
+                ),
+                SizedBox(height: 20),
+                if (routines.isNotEmpty)
+                  Expanded(
+                    child: Stack(
+                      children: [
+                        PageView.builder(
+                          controller: _pageController,
+                          itemCount: routines.length,
+                          itemBuilder: (context, index) {
+                            return AnimatedContainer(
+                              duration: Duration(milliseconds: 300),
+                              curve: Curves.easeInOut,
+                              margin: EdgeInsets.symmetric(horizontal: 2),
+                              child: _buildRoutineCard(routines[index]),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  )
+                else
+                  Expanded(
+                    child: _buildEmptyState(),
+                  ),
+              ],
+            ),
+          ),
+        ),
 
+        // Bagian Artikel
+        Expanded(
+          flex: 1,
+          child: Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Artikel Skincare',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: Color.fromRGBO(136, 14, 79, 1),
+                  ),
+                ),
+                SizedBox(height: 8),
+                _isLoading
+                    ? Center(child: CircularProgressIndicator())
+                    : Expanded(
+                        child: articles.isEmpty
+                            ? Center(child: Text('No articles found'))
+                            : GridView.builder(
+                                gridDelegate:
+                                    SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2,
+                                  crossAxisSpacing: 12,
+                                  mainAxisSpacing: 12,
+                                  childAspectRatio: 0.75,
+                                ),
+                                itemCount: articles.length,
+                                itemBuilder: (context, index) {
+                                  return GestureDetector(
+                                    onTap: () {
+                                      _showArticleDialog(articles[index]);
+                                    },
+                                    child: Card(
+                                      elevation: 6,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(15),
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(15),
+                                        child: CachedNetworkImage(
+                                          imageUrl: articles[index].imageUrl,
+                                          height: 120,
+                                          width: double.infinity,
+                                          fit: BoxFit.cover,
+                                          placeholder: (context, url) =>
+                                              Center(
+                                                  child:
+                                                      CircularProgressIndicator()),
+                                          errorWidget: (context, url, error) =>
+                                              Icon(Icons.error),
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                      ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    ),
+    floatingActionButton: Padding(
+      padding: const EdgeInsets.only(bottom: 2.0),
+      child: FloatingActionButton(
+        onPressed: _showCameraGuide,
+        backgroundColor: const Color.fromRGBO(136, 14, 79, 1),
+        child: Icon(Icons.camera_alt, color: Colors.white, size: 28),
+      ),
+    ),
+    floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+    bottomNavigationBar: CustomBottomNavigation(initialIndex: 0),
+  );
+}
+
+void _showArticleDialog(Article article) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return Dialog(
+        backgroundColor: Colors.transparent,
+        child: InteractiveViewer(
+          child: Center(
+            child: CachedNetworkImage(
+              imageUrl: article.imageUrl,
+              fit: BoxFit.contain,
+              height: MediaQuery.of(context).size.height * 0.8,
+              placeholder: (context, url) =>
+                  Center(child: CircularProgressIndicator()),
+              errorWidget: (context, url, error) => Icon(Icons.error),
+            ),
+          ),
+        ),
+      );
+    },
+  );
+}
   Widget _buildEmptyState() {
     return Center(
       child: Padding(

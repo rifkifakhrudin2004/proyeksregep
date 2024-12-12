@@ -81,27 +81,27 @@ class _SkincareRoutineListPageState extends State<SkincareRoutineListPage> {
   };
 
   void _deleteRoutine(String routineId) async {
-  try {
-    User? currentUser = FirebaseAuth.instance.currentUser;
-    if (currentUser == null) {
-      _showErrorDialog('Silakan login terlebih dahulu');
-      return;
+    try {
+      User? currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser == null) {
+        _showErrorDialog('Silakan login terlebih dahulu');
+        return;
+      }
+
+      await FirebaseFirestore.instance
+          .collection('skincare_routines')
+          .doc(routineId)
+          .delete();
+
+      setState(() {
+        routines.removeWhere((routine) => routine.id == routineId);
+      });
+
+      _showSuccessDialog('Rutinitas berhasil dihapus');
+    } catch (e) {
+      _showErrorDialog('Gagal menghapus rutinitas: ${e.toString()}');
     }
-
-    await FirebaseFirestore.instance
-        .collection('skincare_routines')
-        .doc(routineId)
-        .delete();
-
-    setState(() {
-      routines.removeWhere((routine) => routine.id == routineId);
-    });
-
-    _showSuccessDialog('Rutinitas berhasil dihapus');
-  } catch (e) {
-    _showErrorDialog('Gagal menghapus rutinitas: ${e.toString()}');
   }
-}
 
   // Show dialog when login is required
   void _showLoginRequiredDialog() {
@@ -121,41 +121,43 @@ class _SkincareRoutineListPageState extends State<SkincareRoutineListPage> {
       ),
     );
   }
+
   void _showSuccessDialog(String message) {
-  AwesomeDialog(
-    context: context,
-    dialogType: DialogType.success,
-    animType: AnimType.rightSlide,
-    title: 'Sukses',
-    desc: message,
-    btnOkOnPress: () {
-      // Optional: Add any additional actions you want to perform after dismissing the dialog
-      // If you want to navigate to another page, you can do it here
-      // Navigator.of(context).pushReplacement(
-      //   MaterialPageRoute(builder: (context) => SomeOtherPage()),
-      // );
-    },
-  )..show();
-}
+    AwesomeDialog(
+      context: context,
+      dialogType: DialogType.success,
+      animType: AnimType.rightSlide,
+      title: 'Sukses',
+      desc: message,
+      btnOkOnPress: () {
+        // Optional: Add any additional actions you want to perform after dismissing the dialog
+        // If you want to navigate to another page, you can do it here
+        // Navigator.of(context).pushReplacement(
+        //   MaterialPageRoute(builder: (context) => SomeOtherPage()),
+        // );
+      },
+    )..show();
+  }
+
   void _showErrorDialog(String message) {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: Text('Error'),
-        content: Text(message),
-        actions: <Widget>[
-          TextButton(
-            child: Text('OK'),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-        ],
-      );
-    },
-  );
-}
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Error'),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
 // Build the schedule table for the routine
   Widget _buildScheduleTable(SkincareRoutine routine) {
@@ -481,16 +483,18 @@ class _SkincareRoutineListPageState extends State<SkincareRoutineListPage> {
                                 const BouncingScrollPhysics(), // Smooth scrolling
                           ),
                         ),
-                  floatingActionButton: FloatingActionButton(
-                    onPressed: _showCameraGuide,
-                    backgroundColor: const Color.fromRGBO(
-                        136, 14, 79, 1), // Slightly darker pink
-                    child:
-                        Icon(Icons.camera_alt, color: Colors.white, size: 30),
+                  floatingActionButton: Padding(
+                    padding: const EdgeInsets.only(bottom: 2.0),
+                    child: FloatingActionButton(
+                      onPressed: _showCameraGuide,
+                      backgroundColor: const Color.fromRGBO(136, 14, 79, 1),
+                      child:
+                          Icon(Icons.camera_alt, color: Colors.white, size: 28),
+                    ),
                   ),
                   floatingActionButtonLocation:
                       FloatingActionButtonLocation.centerDocked,
-                  bottomNavigationBar: CustomBottomNavigation(initialIndex: 2),
+                  bottomNavigationBar: CustomBottomNavigation(initialIndex: 0),
                 );
               }
 
