@@ -130,11 +130,7 @@ class _SkincareRoutineListPageState extends State<SkincareRoutineListPage> {
       title: 'Sukses',
       desc: message,
       btnOkOnPress: () {
-        // Optional: Add any additional actions you want to perform after dismissing the dialog
-        // If you want to navigate to another page, you can do it here
-        // Navigator.of(context).pushReplacement(
-        //   MaterialPageRoute(builder: (context) => SomeOtherPage()),
-        // );
+        
       },
     )..show();
   }

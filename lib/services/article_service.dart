@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:proyeksregep/models/article.dart';
 
 class ArticleService {
-final String baseUrl = 'http://192.168.0.102:8000/api/articles';
+final String baseUrl = 'http://192.168.77.137:8000/api/articles';
 
   Future<List<Article>> fetchArticles() async {
     try {

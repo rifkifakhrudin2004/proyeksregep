@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:proyeksregep/models/skincare_model.dart';
+import 'package:proyeksregep/models/categories_skincare.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:proyeksregep/pages/routinelist_page.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class SkincareRoutineInputPage extends StatefulWidget {
   final SkincareRoutine? routine;
@@ -27,53 +30,18 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
   late bool _sundayMorning, _sundayNight;
   late String _avatarUrl;
   bool _isLoading = false;
-
+  List<SkincareCategory> _categories = [];
+  bool _isLoadingCategories = true;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
-  // Map of category to predefined avatar images
-  final Map<String, String> _categoryAvatars = {
-    'Cleansing': 'assets/cleansing.png',
-    'Toner': 'assets/toner.png',
-    'Exfoliator': 'assets/exfoliator.png',
-    'Serum': 'assets/serum.png',
-    'Moisturizer': 'assets/moisturizer.png',
-    'Sunscreen': 'assets/sunscreen.png',
-    'Face Mask': 'assets/face_mask.png',
-    'Eye Cream': 'assets/eye_cream.png',
-    'Face Oil': 'assets/face_oil.png',
-    'Spot Treatment': 'assets/spot_treatment.png',
-    'Lip Care': 'assets/lip_care.png',
-    'Neck Cream': 'assets/neck_cream.png',
-    'Toning Mist': 'assets/toning_mist.png',
-  };
-
-  final List<String> _categories = [
-    'Cleansing',
-    'Toner',
-    'Exfoliator',
-    'Serum',
-    'Moisturizer',
-    'Sunscreen',
-    'Face Mask',
-    'Eye Cream',
-    'Face Oil',
-    'Spot Treatment',
-    'Lip Care',
-    'Neck Cream',
-    'Toning Mist',
-  ];
+  Map<String, String> _categoryAvatars = {};
 
   @override
   void initState() {
     super.initState();
     _noteController = TextEditingController(text: widget.routine?.note);
     _selectedCategory = widget.routine?.category ?? '';
-    _categories.insert(0, 'Select Category');
 
-    // Set initial avatar based on category
-    _avatarUrl = widget.routine?.avatarUrl ?? '';
-
-    // Initialize day selection states
+    // Inisialisasi variabel boolean
     _mondayMorning = widget.routine?.mondayMorning ?? false;
     _mondayNight = widget.routine?.mondayNight ?? false;
     _tuesdayMorning = widget.routine?.tuesdayMorning ?? false;
@@ -88,7 +56,48 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
     _saturdayNight = widget.routine?.saturdayNight ?? false;
     _sundayMorning = widget.routine?.sundayMorning ?? false;
     _sundayNight = widget.routine?.sundayNight ?? false;
+
+    _fetchCategories();
   }
+
+  Future<void> _fetchCategories() async {
+  try {
+    final response = await http.get(Uri.parse('http://192.168.77.137:8000/api/routine'));
+
+    if (response.statusCode == 200) {
+      final List<dynamic> categoryJson = json.decode(response.body);
+      setState(() {
+        _categories = categoryJson
+            .map((json) => SkincareCategory.fromJson(json))
+            .toList();
+
+        _categories.insert(
+            0,
+            SkincareCategory(
+                id: 0, 
+                categoryName: 'Select Category', 
+                avatarUrl: ''));
+
+        _categoryAvatars = Map.fromIterable(_categories,
+            key: (cat) => cat.categoryName, 
+            value: (cat) => cat.avatarUrl
+            );
+
+        _isLoadingCategories = false;
+      });
+    } else {
+      setState(() {
+        _isLoadingCategories = false;
+      });
+      _showErrorDialog('Failed to load categories');
+    }
+  } catch (e) {
+    setState(() {
+      _isLoadingCategories = false;
+    });
+    _showErrorDialog('Error: ${e.toString()}');
+  }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -103,7 +112,7 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
         backgroundColor: const Color.fromRGBO(252, 228, 236, 1),
         elevation: 0,
       ),
-      body: _isLoading
+      body: _isLoading || _isLoadingCategories
           ? Center(
               child: SpinKitCircle(
                 color: const Color.fromARGB(255, 247, 143, 177),
@@ -122,7 +131,7 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
                         radius: 60,
                         backgroundImage: _selectedCategory != null &&
                                 _categoryAvatars[_selectedCategory] != null
-                            ? AssetImage(_categoryAvatars[_selectedCategory]!)
+                            ? NetworkImage(_categoryAvatars[_selectedCategory]!)
                             : null,
                         child: _selectedCategory == null
                             ? Icon(
@@ -164,11 +173,11 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
                                     : '';
                               });
                             },
-                            items: _categories
-                                .map<DropdownMenuItem<String>>((String value) {
+                            items: _categories.map<DropdownMenuItem<String>>(
+                                (SkincareCategory category) {
                               return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(value,
+                                value: category.categoryName,
+                                child: Text(category.categoryName,
                                     overflow: TextOverflow.ellipsis),
                               );
                             }).toList(),
@@ -434,7 +443,8 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
     User? currentUser = FirebaseAuth.instance.currentUser;
 
     if (currentUser == null) {
-      _showErrorDialog('Silakan login terlebih dahulu untuk menyimpan rutinitas');
+      _showErrorDialog(
+          'Silakan login terlebih dahulu untuk menyimpan rutinitas');
       return;
     }
     if (_selectedCategory.isEmpty || _selectedCategory == 'Select Category') {
@@ -472,24 +482,29 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
 
       final routinesRef = _firestore.collection('skincare_routines');
 
-    if (widget.routine == null) {
-      // Tambah routine baru
-      DocumentReference docRef = await routinesRef.add(updatedRoutine.toMap());
-      updatedRoutine.id = docRef.id; // Update ID routine dengan ID dokumen Firebase
-    } else {
-      // Update routine yang sudah ada
-      await routinesRef.doc(widget.routine!.id).update(updatedRoutine.toMap());
-    }
+      if (widget.routine == null) {
+        // Tambah routine baru
+        DocumentReference docRef =
+            await routinesRef.add(updatedRoutine.toMap());
+        updatedRoutine.id =
+            docRef.id; // Update ID routine dengan ID dokumen Firebase
+      } else {
+        // Update routine yang sudah ada
+        await routinesRef
+            .doc(widget.routine!.id)
+            .update(updatedRoutine.toMap());
+      }
 
-    _showSuccessDialog('Rutinitas Skincare Berhasil Disimpan');
-  } catch (e) {
-    _showErrorDialog('Gagal menyimpan rutinitas: ${e.toString()}');
-  } finally {
-    setState(() {
-      _isLoading = false;
-    });
+      _showSuccessDialog('Rutinitas Skincare Berhasil Disimpan');
+    } catch (e) {
+      _showErrorDialog('Gagal menyimpan rutinitas: ${e.toString()}');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
-}
+
   void _showErrorDialog(String message) {
     AwesomeDialog(
       context: context,
