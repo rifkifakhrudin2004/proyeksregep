@@ -530,5 +530,5 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
         );
       },
     )..show();
-  }
+}
 }

@@ -75,6 +75,7 @@ class _LandingPageState extends State<LandingPage> {
       });
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -109,8 +110,8 @@ class _LandingPageState extends State<LandingPage> {
                   child: Hero(
                     tag: 'logo',
                     child: Container(
-                      width: double.infinity, 
-                      height: double.infinity, 
+                      width: double.infinity,
+                      height: double.infinity,
                       decoration: BoxDecoration(
                         boxShadow: [
                           BoxShadow(
@@ -124,7 +125,7 @@ class _LandingPageState extends State<LandingPage> {
                         borderRadius: BorderRadius.circular(30),
                         child: Image.asset(
                           'assets/login.jpg',
-                          fit: BoxFit.cover, // Pastikan gambar menutupi seluruh container
+                          fit: BoxFit.cover,
                         ),
                       ),
                     ),
