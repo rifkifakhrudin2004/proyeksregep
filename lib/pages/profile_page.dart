@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:proyeksregep/widgets/custom_bottom_navigation.dart';
-import 'about_us_page.dart'; // Add this import at the top of your file
-
+import 'about_us_page.dart';
+import 'package:proyeksregep/widgets/panduan.dart';
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -112,13 +112,12 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
- void _showAboutUs() {
-  Navigator.push(
-    context,
-    MaterialPageRoute(builder: (context) => AboutUsPage()), 
-  );
-}
-
+  void _showAboutUs() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => AboutUsPage()),
+    );
+  }
 
   Future<void> _saveProfile(BuildContext context) async {
     if (nameController.text.trim().isEmpty ||
@@ -142,42 +141,39 @@ class _ProfilePageState extends State<ProfilePage> {
         DocumentReference docRef =
             FirebaseFirestore.instance.collection('profiles').doc(user.uid);
 
-        DocumentSnapshot docSnapshot = await docRef.get();
         Map<String, dynamic> profileData = {
           'name': nameController.text.trim(),
           'age': int.tryParse(ageController.text.trim()),
           'dateOfBirth': dobController.text.trim(),
           'phoneNumber': phoneNumberController.text.trim(),
+          if (_photoUrl.isNotEmpty) 'photoUrl': _photoUrl,
         };
 
         profileData.removeWhere((key, value) => value == null || value == '');
 
-        if (docSnapshot.exists) {
-          await docRef.update(profileData);
-        } else {
-          await docRef.set(profileData);
-        }
+        // Gunakan metode set dengan opsi merge
+      await docRef.set(profileData, SetOptions(merge: true));
 
-        AwesomeDialog(
-          context: context,
-          dialogType: DialogType.success,
-          animType: AnimType.scale,
-          title: "Profil Tersimpan",
-          desc: "Profil Anda berhasil disimpan.",
-          btnOkOnPress: () {},
-        ).show();
-      }
-    } catch (e) {
       AwesomeDialog(
         context: context,
-        dialogType: DialogType.error,
+        dialogType: DialogType.success,
         animType: AnimType.scale,
-        title: "Simpan Gagal",
-        desc: "Gagal menyimpan profil: ${e.toString()}",
+        title: "Profil Tersimpan",
+        desc: "Profil Anda berhasil disimpan.",
         btnOkOnPress: () {},
       ).show();
     }
+  } catch (e) {
+    AwesomeDialog(
+      context: context,
+      dialogType: DialogType.error,
+      animType: AnimType.scale,
+      title: "Simpan Gagal",
+      desc: "Gagal menyimpan profil: ${e.toString()}",
+      btnOkOnPress: () {},
+    ).show();
   }
+}
 
   void _showAlert(String title, String message) {
     showDialog(
@@ -205,47 +201,60 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   void _editField(TextEditingController controller, String fieldKey) async {
-    String newValue =
-        controller.text.trim(); // Pastikan data tidak kosong atau berisi spasi
-    if (newValue.isEmpty) {
-      AwesomeDialog(
-        context: context,
-        dialogType: DialogType.error,
-        animType: AnimType.rightSlide,
-        title: "Edit Gagal",
-        desc: "$fieldKey tidak boleh kosong.",
-        btnOkOnPress: () {},
-      ).show();
-      return;
-    }
-
-    try {
-      User? user = _auth.currentUser;
-      if (user != null) {
-        await FirebaseFirestore.instance
-            .collection('profiles')
-            .doc(user.uid)
-            .update({fieldKey: newValue}); // Update field di Firestore
-        AwesomeDialog(
-          context: context,
-          dialogType: DialogType.success,
-          animType: AnimType.rightSlide,
-          title: "Edit Berhasil",
-          desc: "$fieldKey berhasil diperbarui.",
-          btnOkOnPress: () {},
-        ).show();
-      }
-    } catch (e) {
-      AwesomeDialog(
-        context: context,
-        dialogType: DialogType.error,
-        animType: AnimType.rightSlide,
-        title: "Edit Gagal",
-        desc: "Gagal memperbarui $fieldKey: $e",
-        btnOkOnPress: () {},
-      ).show();
-    }
+  String newValue = controller.text.trim();
+  if (newValue.isEmpty) {
+    AwesomeDialog(
+      context: context,
+      dialogType: DialogType.error,
+      animType: AnimType.rightSlide,
+      title: "Edit Gagal",
+      desc: "$fieldKey tidak boleh kosong.",
+      btnOkOnPress: () {},
+    ).show();
+    return;
   }
+
+  try {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      DocumentReference docRef = FirebaseFirestore.instance
+          .collection('profiles')
+          .doc(user.uid);
+
+      // Cek apakah dokumen sudah ada
+      DocumentSnapshot docSnapshot = await docRef.get();
+      
+      if (docSnapshot.exists) {
+        // Dokumen ada, lakukan update
+        await docRef.update({fieldKey: newValue});
+      } else {
+        // Dokumen tidak ada, buat dokumen baru
+        await docRef.set({fieldKey: newValue});
+      }
+
+      AwesomeDialog(
+        context: context,
+        dialogType: DialogType.success,
+        animType: AnimType.rightSlide,
+        title: "Edit Berhasil",
+        desc: "$fieldKey berhasil diperbarui.",
+        btnOkOnPress: () {
+          // Muat ulang profil setelah berhasil
+          _loadProfile();
+        },
+      ).show();
+    }
+  } catch (e) {
+    AwesomeDialog(
+      context: context,
+      dialogType: DialogType.error,
+      animType: AnimType.rightSlide,
+      title: "Edit Gagal",
+      desc: "Gagal memperbarui $fieldKey: $e",
+      btnOkOnPress: () {},
+    ).show();
+  }
+}
 
   void _showPhotoOptionsDialog() {
     showDialog(
@@ -330,181 +339,117 @@ class _ProfilePageState extends State<ProfilePage> {
       ).show();
     }
   }
-
-  void _showCameraGuide() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+  Widget _buildProfileCard({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    required String fieldKey,
+  }) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.pink.withOpacity(0.1),
+            spreadRadius: 2,
+            blurRadius: 5,
+            offset: Offset(0, 3),
           ),
-          contentPadding: EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Panduan Pemakaian Kamera',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Color.fromRGBO(136, 14, 79, 1),
-                ),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 20),
-              GestureDetector(
-                onTap: () {
-                  Navigator.pop(context);
-                },
-                child: InteractiveViewer(
-                  maxScale: 4.0,
-                  minScale: 1.0,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(15),
-                    child: Image.asset(
-                      'assets/panduan.png',
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  Navigator.pushNamed(context, '/camera');
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromRGBO(252, 228, 236, 1),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Text(
-                  'Mulai Kamera',
-                  style: TextStyle(
-                    color: Color.fromRGBO(136, 14, 79, 1),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
- Widget _buildProfileCard({
-  required TextEditingController controller,
-  required String label,
-  required IconData icon,
-  required String fieldKey,
-}) {
-  return Container(
-    margin: const EdgeInsets.symmetric(vertical: 8.0),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(15),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.pink.withOpacity(0.1),
-          spreadRadius: 2,
-          blurRadius: 5,
-          offset: Offset(0, 3),
-        ),
-      ],
-    ),
-    child: ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      leading: CircleAvatar(
-        backgroundColor: Color.fromRGBO(252, 228, 236, 1),
-        child: Icon(icon, color: Color.fromRGBO(136, 14, 79, 1)),
+        ],
       ),
-      title: fieldKey == 'dateOfBirth'
-          ? _editingFields[fieldKey] == true
-              ? TextField(
-                  controller: controller,
-                  decoration: InputDecoration(
-                    border: UnderlineInputBorder(),
-                    labelText: label,
-                  ),
-                  onTap: () async {
-                    DateTime? pickedDate = await showDatePicker(
-                      context: context,
-                      initialDate: DateTime.now(),
-                      firstDate: DateTime(1900),
-                      lastDate: DateTime.now(),
-                      builder: (context, child) {
-                        return Theme(
-                          data: ThemeData.light().copyWith(
-                            colorScheme: ColorScheme.light(
-                              primary: Color.fromRGBO(136, 14, 79, 1),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        leading: CircleAvatar(
+          backgroundColor: Color.fromRGBO(252, 228, 236, 1),
+          child: Icon(icon, color: Color.fromRGBO(136, 14, 79, 1)),
+        ),
+        title: fieldKey == 'dateOfBirth'
+            ? _editingFields[fieldKey] == true
+                ? TextField(
+                    controller: controller,
+                    decoration: InputDecoration(
+                      border: UnderlineInputBorder(),
+                      labelText: label,
+                    ),
+                    onTap: () async {
+                      DateTime? pickedDate = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime(1900),
+                        lastDate: DateTime.now(),
+                        builder: (context, child) {
+                          return Theme(
+                            data: ThemeData.light().copyWith(
+                              colorScheme: ColorScheme.light(
+                                primary: Color.fromRGBO(136, 14, 79, 1),
+                              ),
                             ),
-                          ),
-                          child: child!,
-                        );
-                      },
-                    );
+                            child: child!,
+                          );
+                        },
+                      );
 
-                    if (pickedDate != null) {
-                      setState(() {
-                        controller.text = "${pickedDate.day.toString().padLeft(2, '0')}/"
-                            "${pickedDate.month.toString().padLeft(2, '0')}/"
-                            "${pickedDate.year}";
-                      });
-                    }
-                  },
-                )
-              : GestureDetector(
-                  onTap: () {}, // Tetap bisa di-tap meskipun tidak dalam mode edit
-                  child: Text(
-                    controller.text.isEmpty 
-                        ? 'Pilih Tanggal Lahir' 
-                        : controller.text,
+                      if (pickedDate != null) {
+                        setState(() {
+                          controller.text =
+                              "${pickedDate.day.toString().padLeft(2, '0')}/"
+                              "${pickedDate.month.toString().padLeft(2, '0')}/"
+                              "${pickedDate.year}";
+                        });
+                      }
+                    },
+                  )
+                : GestureDetector(
+                    onTap:
+                        () {}, // Tetap bisa di-tap meskipun tidak dalam mode edit
+                    child: Text(
+                      controller.text.isEmpty
+                          ? 'Pilih Tanggal Lahir'
+                          : controller.text,
+                      style: TextStyle(
+                        fontFamily: 'Montserrat',
+                        fontWeight: FontWeight.bold,
+                        color: Color.fromRGBO(136, 14, 79, 1),
+                      ),
+                    ),
+                  )
+            : _editingFields[fieldKey] == true
+                ? TextField(
+                    controller: controller,
+                    autofocus: true,
+                    decoration: InputDecoration(
+                      border: UnderlineInputBorder(),
+                      labelText: label,
+                    ),
+                  )
+                : Text(
+                    controller.text,
                     style: TextStyle(
                       fontFamily: 'Montserrat',
                       fontWeight: FontWeight.bold,
                       color: Color.fromRGBO(136, 14, 79, 1),
                     ),
                   ),
-                )
-          : _editingFields[fieldKey] == true
-              ? TextField(
-                  controller: controller,
-                  autofocus: true,
-                  decoration: InputDecoration(
-                    border: UnderlineInputBorder(),
-                    labelText: label,
-                  ),
-                )
-              : Text(
-                  controller.text,
-                  style: TextStyle(
-                    fontFamily: 'Montserrat',
-                    fontWeight: FontWeight.bold,
-                    color: Color.fromRGBO(136, 14, 79, 1),
-                  ),
-                ),
-      trailing: IconButton(
-        icon: Icon(
-          _editingFields[fieldKey] == true ? Icons.check : Icons.edit,
-          color: Color.fromRGBO(136, 14, 79, 1),
+        trailing: IconButton(
+          icon: Icon(
+            _editingFields[fieldKey] == true ? Icons.check : Icons.edit,
+            color: Color.fromRGBO(136, 14, 79, 1),
+          ),
+          onPressed: () {
+            setState(() {
+              _editingFields[fieldKey] = !_editingFields[fieldKey]!;
+            });
+            if (!_editingFields[fieldKey]!) {
+              // Simpan perubahan jika diperlukan
+              controller.text = controller.text;
+            }
+          },
         ),
-        onPressed: () {
-          setState(() {
-            _editingFields[fieldKey] = !_editingFields[fieldKey]!;
-          });
-          if (!_editingFields[fieldKey]!) {
-            // Simpan perubahan jika diperlukan
-            controller.text = controller.text;
-          }
-        },
       ),
-    ),
-  );
-}
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -653,7 +598,9 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
       bottomNavigationBar: CustomBottomNavigation(initialIndex: 3),
       floatingActionButton: FloatingActionButton(
-        onPressed: _showCameraGuide,
+        onPressed: () {
+          CameraGuideHelper(context).showCameraGuide();
+        },
         backgroundColor: const Color.fromRGBO(136, 14, 79, 1),
         child: const Icon(Icons.camera_alt, color: Colors.white, size: 30),
       ),

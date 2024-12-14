@@ -17,7 +17,6 @@ class SkincareRoutineInputPage extends StatefulWidget {
   _SkincareRoutineInputPageState createState() =>
       _SkincareRoutineInputPageState();
 }
-
 class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
   late TextEditingController _noteController;
   late String _selectedCategory;
@@ -62,7 +61,7 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
 
   Future<void> _fetchCategories() async {
   try {
-    final response = await http.get(Uri.parse('http://192.168.77.137:8000/api/routine'));
+    final response = await http.get(Uri.parse('http://192.168.0.102:8000/api/routine'));
 
     if (response.statusCode == 200) {
       final List<dynamic> categoryJson = json.decode(response.body);

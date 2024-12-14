@@ -285,7 +285,7 @@ class _CameraScreenState extends State<CameraScreen>
   Future<void> sendImageData(String userId, String imageFilename) async {
     try {
       final fileName = imageFilename.split('/').last;
-      final url = Uri.parse('http://192.168.30.129:5000/upload');
+      final url = Uri.parse('http://192.168.0.102:5000/upload');
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
