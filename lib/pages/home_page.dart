@@ -144,10 +144,10 @@ class _HomePageState extends State<HomePage> {
                                 curve: Curves.easeInOut,
                                 margin: EdgeInsets.symmetric(horizontal: 2),
                                 child: RoutineCard(
-                                    routine: routines[index],
-                                    pageController: _pageController,
-                                    totalPages: routines.length,
-                                    ),
+                                  routine: routines[index],
+                                  pageController: _pageController,
+                                  totalPages: routines.length,
+                                ),
                               );
                             },
                           ),
@@ -180,10 +180,17 @@ class _HomePageState extends State<HomePage> {
                   ),
                   SizedBox(height: 8),
                   _isLoading
-                      ? Center(child: CircularProgressIndicator())
+                      ? Center()
                       : Expanded(
                           child: articles.isEmpty
-                              ? Center(child: Text('No articles found'))
+                              ? Center(
+                                  child: Text(
+                                    'No articles found',
+                                    style: TextStyle(
+                                      color: Color.fromRGBO(136, 14, 79, 1),
+                                    ),
+                                  ),
+                                )
                               : GridView.builder(
                                   gridDelegate:
                                       SliverGridDelegateWithFixedCrossAxisCount(
@@ -212,9 +219,8 @@ class _HomePageState extends State<HomePage> {
                                             height: 120,
                                             width: double.infinity,
                                             fit: BoxFit.cover,
-                                            placeholder: (context, url) => Center(
-                                                child:
-                                                    CircularProgressIndicator()),
+                                            placeholder: (context, url) =>
+                                                Container(), // Empty container instead of CircularProgressIndicator
                                             errorWidget:
                                                 (context, url, error) =>
                                                     Icon(Icons.error),

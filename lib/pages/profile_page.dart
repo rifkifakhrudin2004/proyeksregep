@@ -37,55 +37,61 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _loadProfile() async {
-    try {
-      User? user = _auth.currentUser;
-      if (user != null) {
-        DocumentSnapshot doc = await FirebaseFirestore.instance
-            .collection('profiles')
-            .doc(user.uid)
-            .get();
+  try {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      DocumentSnapshot doc = await FirebaseFirestore.instance
+          .collection('profiles')
+          .doc(user.uid)
+          .get();
 
-        if (doc.exists) {
-          final data = doc.data() as Map<String, dynamic>;
+      if (doc.exists) {
+        final data = doc.data() as Map<String, dynamic>;
 
-          setState(() {
-            nameController.text = data['name'] ?? '';
-            ageController.text = (data['age'] ?? '').toString();
-            dobController.text = data['dateOfBirth'] ?? '';
-            phoneNumberController.text = data['phoneNumber'] ?? '';
-            _photoUrl = List<String>.from(data['photoUrl'] ?? []);
-          });
-        } else {
-          _showProfileNotFoundAlert();
-        }
+        setState(() {
+          nameController.text = data['name'] ?? '';
+          ageController.text = (data['age'] ?? '').toString();
+          dobController.text = data['dateOfBirth'] ?? '';
+          phoneNumberController.text = data['phoneNumber'] ?? '';
+          
+          // Ensure photoUrl is a list and not null
+          _photoUrl = data['photoUrl'] is List 
+              ? List<String>.from(data['photoUrl'] ?? []) 
+              : [];
+        });
+      } else {
+        _showProfileNotFoundAlert();
       }
-    } catch (e) {
-      _showAlert('Error', 'Gagal memuat profil: $e');
     }
+  } catch (e) {
+    _showAlert('Error', 'Gagal memuat profil: $e');
   }
+}
 
   Future<void> _pickAndUploadImage(ImageSource source) async {
-    final XFile? image = await _picker.pickImage(source: source);
-    if (image != null) {
-      String fileName =
-          'profile_photos/${_auth.currentUser!.uid}${DateTime.now().millisecondsSinceEpoch}.jpg';
-      Reference storageRef = FirebaseStorage.instance.ref().child(fileName);
+  final XFile? image = await _picker.pickImage(source: source);
+  if (image != null) {
+    String fileName =
+        'profile_photos/${_auth.currentUser!.uid}${DateTime.now().millisecondsSinceEpoch}.jpg';
+    Reference storageRef = FirebaseStorage.instance.ref().child(fileName);
 
-      await storageRef.putFile(File(image.path));
-      String photoUrl = await storageRef.getDownloadURL();
+    await storageRef.putFile(File(image.path));
+    String photoUrl = await storageRef.getDownloadURL();
 
-      await FirebaseFirestore.instance
-          .collection('profiles')
-          .doc(_auth.currentUser!.uid)
-          .update({
-        'photoUrl': [photoUrl]
-      });
+    DocumentReference docRef = FirebaseFirestore.instance
+        .collection('profiles')
+        .doc(_auth.currentUser!.uid);
 
-      setState(() {
-        _photoUrl = [photoUrl];
-      });
-    }
+    // Use set with merge to create the document if it doesn't exist
+    await docRef.set({
+      'photoUrl': [photoUrl]
+    }, SetOptions(merge: true));
+
+    setState(() {
+      _photoUrl = [photoUrl];
+    });
   }
+}
 
   Future<void> _logout() async {
     try {
@@ -309,36 +315,58 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _deleteProfilePhoto() async {
-    try {
-      User? user = _auth.currentUser;
-      if (user != null) {
-        await FirebaseFirestore.instance
-            .collection('profiles')
-            .doc(user.uid)
-            .update({'photoUrl': []});
-
-        setState(() {
-          _photoUrl = [];
-        });
-
-        AwesomeDialog(
-          context: context,
-          dialogType: DialogType.success,
-          title: "Foto Profil Dihapus",
-          desc: "Foto profil Anda berhasil dihapus.",
-          btnOkOnPress: () {},
-        ).show();
+  try {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      // Hapus file foto dari Firebase Storage jika ada
+      if (_photoUrl.isNotEmpty) {
+        try {
+          // Ekstrak path file dari URL foto
+          String fileName = _photoUrl.first.split('%2F').last.split('?').first;
+          Reference storageRef = FirebaseStorage.instance
+              .ref()
+              .child('profile_photos/$fileName');
+          
+          await storageRef.delete();
+        } catch (storageError) {
+          print('Error menghapus file dari storage: $storageError');
+        }
       }
-    } catch (e) {
+
+      DocumentReference docRef = FirebaseFirestore.instance
+          .collection('profiles')
+          .doc(user.uid);
+
+      // Cek apakah dokumen ada
+      DocumentSnapshot docSnapshot = await docRef.get();
+      
+      if (docSnapshot.exists) {
+        // Hapus field photoUrl
+        await docRef.update({'photoUrl': FieldValue.delete()});
+      }
+
+      setState(() {
+        _photoUrl = [];
+      });
+
       AwesomeDialog(
         context: context,
-        dialogType: DialogType.error,
-        title: "Gagal Menghapus Foto",
-        desc: "Terjadi kesalahan: $e",
+        dialogType: DialogType.success,
+        title: "Foto Profil Dihapus",
+        desc: "Foto profil Anda berhasil dihapus.",
         btnOkOnPress: () {},
       ).show();
     }
+  } catch (e) {
+    AwesomeDialog(
+      context: context,
+      dialogType: DialogType.error,
+      title: "Gagal Menghapus Foto",
+      desc: "Terjadi kesalahan: $e",
+      btnOkOnPress: () {},
+    ).show();
   }
+}
   Widget _buildProfileCard({
     required TextEditingController controller,
     required String label,

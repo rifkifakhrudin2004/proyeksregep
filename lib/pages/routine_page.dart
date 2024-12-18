@@ -8,6 +8,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:proyeksregep/pages/routinelist_page.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:proyeksregep/services/categories_service.dart';
 
 class SkincareRoutineInputPage extends StatefulWidget {
   final SkincareRoutine? routine;
@@ -58,45 +59,23 @@ class _SkincareRoutineInputPageState extends State<SkincareRoutineInputPage> {
 
     _fetchCategories();
   }
-
   Future<void> _fetchCategories() async {
-  try {
-    final response = await http.get(Uri.parse('http://192.168.0.102:8000/api/routine'));
-
-    if (response.statusCode == 200) {
-      final List<dynamic> categoryJson = json.decode(response.body);
+    try {
+      // Use the new CategoryService to fetch categories
+      final categories = await CategoryService.fetchCategories();
+      
       setState(() {
-        _categories = categoryJson
-            .map((json) => SkincareCategory.fromJson(json))
-            .toList();
-
-        _categories.insert(
-            0,
-            SkincareCategory(
-                id: 0, 
-                categoryName: 'Select Category', 
-                avatarUrl: ''));
-
-        _categoryAvatars = Map.fromIterable(_categories,
-            key: (cat) => cat.categoryName, 
-            value: (cat) => cat.avatarUrl
-            );
-
+        _categories = categories;
+        _categoryAvatars = CategoryService.extractCategoryAvatars(categories);
         _isLoadingCategories = false;
       });
-    } else {
+    } catch (e) {
       setState(() {
         _isLoadingCategories = false;
       });
-      _showErrorDialog('Failed to load categories');
+      _showErrorDialog('Error: ${e.toString()}');
     }
-  } catch (e) {
-    setState(() {
-      _isLoadingCategories = false;
-    });
-    _showErrorDialog('Error: ${e.toString()}');
   }
-}
 
   @override
   Widget build(BuildContext context) {
